@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roamtty 隐私政策 · Privacy Policy</title>
+<meta name="description" content="Roamtty 隐私政策 / Roamtty Privacy Policy">
+<style>
+:root { color-scheme: light dark; --bg: #faf9f7; --fg: #24221f; --muted: #6b665f; --rule: #e4e0da;
+  --accent: #b5562f; --code: #f0ece6; }
+@media (prefers-color-scheme: dark) { :root { --bg: #1f1e1c; --fg: #ece8e2; --muted: #a39d94; --rule: #3a3733;
+  --accent: #f0a27e; --code: #2c2a27; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.7;
+  font: 16px/1.7 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+nav { display: flex; gap: 16px; font-size: 14px; margin-bottom: 24px; }
+a { color: var(--accent); }
+h1 { font-size: 28px; line-height: 1.3; margin: 8px 0 4px; }
+h2 { font-size: 20px; margin-top: 32px; padding-bottom: 4px; border-bottom: 1px solid var(--rule); }
+section + section { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--rule); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; display: block; overflow-x: auto; }
+th, td { text-align: left; padding: 8px 10px; border: 1px solid var(--rule); vertical-align: top; }
+code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+.anchor { display: none; }
+footer { margin-top: 48px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+
+<nav><a href="/">Roamtty</a><a href="#zh">中文</a><a href="#en">English</a></nav>
+<section id="zh" lang="zh-CN">
+<div class="markdown-heading"><h1 class="heading-element">Roamtty 隐私政策</h1><a id="user-content-roamtty-隐私政策" class="anchor" aria-label="Permalink: Roamtty 隐私政策" href="#roamtty-隐私政策"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>生效日期：2026-10-04</p>
+<p>Roamtty 是一款开源的 SSH 终端客户端。我们（Roamtty 开发者）不运营任何服务器，不收集、不上传、不出售、也不与任何第三方共享你的个人数据。</p>
+<div class="markdown-heading"><h2 class="heading-element">应用在设备上保存的数据</h2><a id="user-content-应用在设备上保存的数据" class="anchor" aria-label="Permalink: 应用在设备上保存的数据" href="#应用在设备上保存的数据"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>以下数据只保存在你的设备中，仅供应用自身功能使用：</p>
+<ul>
+<li>
+<strong>主机信息</strong>：名称、地址、端口、用户名、认证方式、会话模式、检测到的远端系统类型与已安装的 tmux / mosh 状态。</li>
+<li>
+<strong>凭据</strong>：只有在你选择保存时，密码或私钥才会使用 Android Keystore 中不可导出的密钥以 AES-256-GCM 加密后保存。私钥口令从不保存。</li>
+<li>
+<strong>主机指纹</strong>：你确认信任的服务器公钥指纹，用于防止中间人攻击。</li>
+<li>
+<strong>会话记录</strong>：最多 8 条会话的 ID、对应主机、模式与标题，用于应用重启后恢复会话列表。不包含终端内容。</li>
+<li>
+<strong>偏好设置</strong>：语言、字体、字号、操作栏和下载目录等设置。</li>
+</ul>
+<p>终端输出、输入内容、编辑草稿和全屏程序的输出记录只存在于内存中，不写入磁盘。应用已关闭系统备份与设备迁移，上述数据不会进入 Google 云端备份。卸载应用或在应用中删除主机即可删除相应数据。</p>
+<div class="markdown-heading"><h2 class="heading-element">网络连接</h2><a id="user-content-网络连接" class="anchor" aria-label="Permalink: 网络连接" href="#网络连接"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<ul>
+<li>应用只会连接到你自己添加的服务器：SSH（TCP）、mosh（UDP）以及用于显示在线状态和延迟的 TCP 连通性检测。</li>
+<li>SSH 与 mosh 连接均加密传输；应用禁止明文 HTTP 流量。</li>
+<li>连接时，应用会在远端执行只读操作：识别远端系统、检查 tmux / mosh 是否可用（结果保存在本机的主机信息中），以及读取远端 shell 历史文件作为“常用命令”（只保存在内存中，断开即丢弃）。其他远端操作只在你主动发起时执行，例如安装 tmux / mosh，或通过 SFTP 上传、下载文件。</li>
+<li>应用不包含广告、统计分析、崩溃上报或任何第三方 SDK，不会向开发者或第三方发送任何数据。</li>
+</ul>
+<div class="markdown-heading"><h2 class="heading-element">权限</h2><a id="user-content-权限" class="anchor" aria-label="Permalink: 权限" href="#权限"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<table>
+<thead>
+<tr>
+<th>权限</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网络访问、网络状态</td>
+<td>连接你添加的服务器，检测网络变化</td>
+</tr>
+<tr>
+<td>前台服务、唤醒锁</td>
+<td>在后台保持你主动打开的终端连接；最后一个连接断开即释放</td>
+</tr>
+<tr>
+<td>通知</td>
+<td>显示进行中的连接，并提供“全部断开”操作</td>
+</tr>
+</tbody>
+</table>
+<p>文件上传和下载通过 Android 系统文件选择器完成，应用只能访问你选择的文件；通过系统分享发送给应用的图片仅用于上传到你指定的服务器。</p>
+<div class="markdown-heading"><h2 class="heading-element">第三方服务</h2><a id="user-content-第三方服务" class="anchor" aria-label="Permalink: 第三方服务" href="#第三方服务"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>应用本身不使用第三方服务。如果你从 Google Play 安装，Google 会依照其自身的隐私政策处理安装和商店相关数据，这不在本政策范围内。你连接的服务器由你或服务器管理员控制，其数据处理方式由对方负责。</p>
+<div class="markdown-heading"><h2 class="heading-element">儿童</h2><a id="user-content-儿童" class="anchor" aria-label="Permalink: 儿童" href="#儿童"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>本应用面向开发者与技术用户，不面向 13 岁以下儿童，也不会有意收集儿童的任何信息。</p>
+<div class="markdown-heading"><h2 class="heading-element">政策变更</h2><a id="user-content-政策变更" class="anchor" aria-label="Permalink: 政策变更" href="#政策变更"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>本政策如有变更，会在本页面更新并修改生效日期。</p>
+<div class="markdown-heading"><h2 class="heading-element">联系方式</h2><a id="user-content-联系方式" class="anchor" aria-label="Permalink: 联系方式" href="#联系方式"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>如对本政策有任何疑问，请通过 Google Play 商店页面列出的开发者邮箱联系我们。</p>
+</section>
+<section id="en" lang="en">
+<div class="markdown-heading"><h1 class="heading-element">Roamtty Privacy Policy</h1><a id="user-content-roamtty-privacy-policy" class="anchor" aria-label="Permalink: Roamtty Privacy Policy" href="#roamtty-privacy-policy"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>Effective date: 2026-10-04</p>
+<p>Roamtty is an open-source SSH terminal client. We, the Roamtty developers, run no servers and do not collect, upload, sell or share any of your personal data with anyone.</p>
+<div class="markdown-heading"><h2 class="heading-element">Data stored on your device</h2><a id="user-content-data-stored-on-your-device" class="anchor" aria-label="Permalink: Data stored on your device" href="#data-stored-on-your-device"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>The following data stays on your device and is used only by the app itself:</p>
+<ul>
+<li>
+<strong>Hosts</strong>: name, address, port, username, authentication method, session mode, the detected remote system and whether tmux / mosh are installed.</li>
+<li>
+<strong>Credentials</strong>: only when you choose to save them, passwords and private keys are encrypted with AES-256-GCM using a non-exportable Android Keystore key. Key passphrases are never saved.</li>
+<li>
+<strong>Host fingerprints</strong>: the server key fingerprints you chose to trust, used to detect man-in-the-middle attacks.</li>
+<li>
+<strong>Session list</strong>: the ID, host, mode and title of up to 8 sessions, used to restore the session list after the app restarts. It contains no terminal content.</li>
+<li>
+<strong>Preferences</strong>: language, font, font size, control bar and download folder settings.</li>
+</ul>
+<p>Terminal output, input, text drafts and full-screen program output records are kept in memory only and never written to disk. System backup and device transfer are disabled, so none of this data goes into Google cloud backups. Uninstalling the app, or deleting a host in the app, deletes the corresponding data.</p>
+<div class="markdown-heading"><h2 class="heading-element">Network connections</h2><a id="user-content-network-connections" class="anchor" aria-label="Permalink: Network connections" href="#network-connections"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<ul>
+<li>The app connects only to servers you add: SSH (TCP), mosh (UDP), and TCP reachability checks that show whether a host is online and its latency.</li>
+<li>SSH and mosh connections are encrypted; the app blocks cleartext HTTP traffic.</li>
+<li>When connecting, the app performs read-only operations on the server: it identifies the system, checks whether tmux / mosh are available (stored in the host entry on your device), and reads the remote shell history file to suggest common commands (kept in memory only and discarded on disconnect). Everything else happens only when you ask for it, such as installing tmux / mosh or uploading and downloading files over SFTP.</li>
+<li>The app contains no ads, analytics, crash reporting or third-party SDKs, and sends no data to the developers or any third party.</li>
+</ul>
+<div class="markdown-heading"><h2 class="heading-element">Permissions</h2><a id="user-content-permissions" class="anchor" aria-label="Permalink: Permissions" href="#permissions"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<table>
+<thead>
+<tr>
+<th>Permission</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internet, network state</td>
+<td>Connect to the servers you add and notice network changes</td>
+</tr>
+<tr>
+<td>Foreground service, wake lock</td>
+<td>Keep the terminal connections you opened alive in the background; released when the last one disconnects</td>
+</tr>
+<tr>
+<td>Notifications</td>
+<td>Show ongoing connections and offer a “Disconnect all” action</td>
+</tr>
+</tbody>
+</table>
+<p>Uploads and downloads go through the Android system file picker, so the app can access only the files you pick. Images shared to the app from other apps are only uploaded to the server you choose.</p>
+<div class="markdown-heading"><h2 class="heading-element">Third-party services</h2><a id="user-content-third-party-services" class="anchor" aria-label="Permalink: Third-party services" href="#third-party-services"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>The app itself uses no third-party services. If you install it from Google Play, Google handles installation and store data under its own privacy policy, which this policy does not cover. The servers you connect to are controlled by you or their administrators, who are responsible for how they handle data.</p>
+<div class="markdown-heading"><h2 class="heading-element">Children</h2><a id="user-content-children" class="anchor" aria-label="Permalink: Children" href="#children"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>The app is intended for developers and technical users. It is not directed at children under 13 and does not knowingly collect any information from children.</p>
+<div class="markdown-heading"><h2 class="heading-element">Changes</h2><a id="user-content-changes" class="anchor" aria-label="Permalink: Changes" href="#changes"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>If this policy changes, this page will be updated along with its effective date.</p>
+<div class="markdown-heading"><h2 class="heading-element">Contact</h2><a id="user-content-contact" class="anchor" aria-label="Permalink: Contact" href="#contact"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
+<p>If you have questions about this policy, contact us at the developer email listed on the app's Google Play page.</p>
+</section>
+<footer>© 2026 Roamtty contributors</footer>
+</main>
+</body>
+</html>

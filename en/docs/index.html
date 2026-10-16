@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Documentation · Roamtty</title>
-<meta name="description" content="Roamtty documentation: preparing a server, adding hosts, AI agent sessions, terminal gestures, files and monitoring, and reaching your servers from any network with Tailscale, a self-hosted Headscale and DERP relays.">
+<meta name="description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures, files and monitoring, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
 <meta name="theme-color" content="#262728">
 <link rel="canonical" href="https://roamtty.com/en/docs/">
 <link rel="alternate" hreflang="en" href="https://roamtty.com/en/docs/">
@@ -15,7 +15,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Roamtty">
 <meta property="og:title" content="Documentation · Roamtty">
-<meta property="og:description" content="Roamtty documentation: preparing a server, adding hosts, AI agent sessions, terminal gestures, files and monitoring, and reaching your servers from any network with Tailscale, a self-hosted Headscale and DERP relays.">
+<meta property="og:description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures, files and monitoring, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
 <meta property="og:url" content="https://roamtty.com/en/docs/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -32,355 +32,193 @@
 <p class="toc-title">Contents</p>
 <ol>
 <li><a href="#quickstart">Quick start</a></li>
-<li><a href="#server">Prepare the server</a></li>
+<li><a href="#server">Prepare a server</a></li>
 <li><a href="#hosts">Add a host</a></li>
-<li><a href="#sessions">Sessions &amp; AI agents</a></li>
-<li><a href="#terminal">Using the terminal</a></li>
-<li><a href="#files">Files</a></li>
-<li><a href="#monitor">Host monitor</a></li>
-<li><a href="#background">Background &amp; lock screen</a></li>
-<li><a href="#tailscale">Remote access: Tailscale</a>
-<ol>
-<li><a href="#ts-choose">Choosing a setup</a></li>
-<li><a href="#ts-official">Tailscale's service</a></li>
-<li><a href="#headscale">Self-hosted Headscale</a></li>
-<li><a href="#derp">Self-hosted DERP</a></li>
-<li><a href="#ts-roamtty">Using it in Roamtty</a></li>
-<li><a href="#ts-debug">Diagnosing the tailnet</a></li>
-</ol></li>
+<li><a href="#agent">Start an AI agent</a></li>
+<li><a href="#sessions">Sessions</a></li>
+<li><a href="#terminal">Terminal</a></li>
+<li><a href="#files">Files and monitoring</a></li>
+<li><a href="#background">Background and lock screen</a></li>
+<li><a href="#tailscale">Connecting from anywhere</a></li>
 <li><a href="#troubleshooting">Common errors</a></li>
 </ol>
 </nav>
 
 <div class="docs-body">
 <h1>Documentation</h1>
-<p class="meta">For Roamtty on Android and iOS. Can't find an answer? See <a href="/en/support/">Support</a> or email <a href="mailto:support@roamtty.com">support@roamtty.com</a>.</p>
+<p class="meta">For Roamtty on Android and iOS. Something missing? See the <a href="/en/support/">support page</a> or email <a href="mailto:support@roamtty.com">support@roamtty.com</a>.</p>
 
-<p>Roamtty is an SSH client. AI coding tools such as Claude Code, Codex and Grok run on your own server; Roamtty starts them from your phone, shows what they are doing and makes the terminal comfortable to use by touch. The app has no model and no backend server, and it connects only to the hosts you add.</p>
+<p>Roamtty is an SSH client. AI coding tools (Claude Code, Codex, Grok and others) run on your own server; Roamtty starts them from your phone, shows what they are doing and makes the terminal easy to use by touch. There is no Roamtty backend: connections go only to the hosts you add.</p>
 
 <h2 id="quickstart">Quick start</h2>
 <ol class="steps">
-<li><strong>Have a server you can SSH into</strong>, with the AI command-line tools you want installed and signed in. See <a href="#server">Prepare the server</a>.</li>
-<li><strong>Make it reachable from your phone.</strong> On the same Wi-Fi you can use its LAN address. Away from home, we recommend a <a href="#tailscale">Tailscale</a> network, so the server never has to be exposed to the internet.</li>
-<li><strong>Tap + on the Hosts page to add it.</strong> Verify the fingerprint on first connection, then choose Install plugins in the host menu to add tmux and mosh.</li>
-<li><strong>Tap AI Agent</strong>, pick the agent, host and starting folder, and get going. If you lock the phone, lose the network or close the app, the task keeps running in tmux on the server and Roamtty reattaches when you come back.</li>
+<li>Enable SSH on your server, then install the AI command-line tool and sign in to it.</li>
+<li>In Roamtty, tap <strong>+</strong> on the Hosts page to add the server, then choose <strong>Install plugins</strong> from its menu to get tmux and mosh.</li>
+<li>Tap <strong>AI Agent</strong>, pick a folder and start working. Locking the phone or losing signal doesn't stop the task; Roamtty reattaches when you come back.</li>
 </ol>
+<p>Away from the server's network? Use <a href="#tailscale">Tailscale</a> instead of exposing SSH to the internet.</p>
 
-<h2 id="server">Prepare the server</h2>
-<p>Any Linux, macOS, BSD or Windows machine you can log in to over SSH will do: a desktop at home, a workstation at the office, a cloud VM or a Mac.</p>
-
-<h3>Turn on SSH</h3>
-<table>
-<tr><th>System</th><th>How</th></tr>
-<tr><td>Ubuntu / Debian</td><td><code>sudo apt install openssh-server</code>, then <code>sudo systemctl enable --now ssh</code></td></tr>
-<tr><td>Fedora / RHEL</td><td><code>sudo dnf install openssh-server</code>, then <code>sudo systemctl enable --now sshd</code></td></tr>
-<tr><td>macOS</td><td>System Settings → General → Sharing → turn on Remote Login</td></tr>
-<tr><td>Windows 10/11</td><td>Settings → System → Optional features → add OpenSSH Server; then in an administrator PowerShell run <code>Start-Service sshd; Set-Service sshd -StartupType Automatic</code></td></tr>
-</table>
-
-<h3>Install the AI command-line tools</h3>
-<p>Install the command-line version of Claude Code, Codex or Grok on the server following each tool's own instructions, and <strong>sign in once on the server</strong> (account or API key). Roamtty only starts them in the folder you pick; it never signs in for you and never handles your API keys. If <code>claude</code>, <code>codex</code> or <code>grok</code> starts in a plain SSH terminal, you are ready.</p>
-
-<h3>tmux and mosh (recommended)</h3>
+<h2 id="server">Prepare a server</h2>
+<div class="pair"><div>
+<p>Any Linux, macOS, BSD or Windows machine you can SSH into will do.</p>
 <ul>
-<li><strong>tmux</strong> keeps sessions running after a disconnect. Without it, a plain SSH session ends when the connection drops, taking any running agent with it.</li>
-<li><strong>mosh</strong> runs over UDP, so the terminal survives switching between Wi-Fi and cellular or a change of IP address, and typing stays responsive on poor networks.</li>
+<li><strong>Ubuntu / Debian</strong>: <code>sudo apt install openssh-server</code></li>
+<li><strong>macOS</strong>: System Settings → General → Sharing → turn on Remote Login</li>
+<li><strong>Windows</strong>: add “OpenSSH Server” under Optional features, then run <code>Start-Service sshd</code> in an administrator PowerShell</li>
 </ul>
-<p>You don't need to install them by hand: choose <strong>Install plugins</strong> in the host menu and Roamtty detects them and installs them with the host's package manager (on Linux apt, dnf, yum, pacman, zypper, apk or pkg, which needs root or sudo; on macOS Homebrew or MacPorts, no sudo; on Windows psmux via winget as the tmux equivalent, no administrator rights). A sudo password is used for that install only and is never saved.</p>
-<p>mosh uses UDP ports 60000–61000 on the server. Over the public internet, open that range in the server's firewall and your cloud provider's security group. Over Tailscale this is usually unnecessary; see <a href="#ts-roamtty">Using it in Roamtty</a>.</p>
-
-<h2 id="hosts">Add a host</h2>
-<p>Tap <strong>+</strong> on the Hosts page and fill in:</p>
-<table>
-<tr><th>Field</th><th>Notes</th></tr>
-<tr><td>Name</td><td>For display, such as “Home desktop”</td></tr>
-<tr><td>Address / IP</td><td>A domain name, a LAN IP, or the server's Tailscale <code>100.x.y.z</code> address or MagicDNS name. No <code>ssh://</code>, path or spaces</td></tr>
-<tr><td>Username, Port</td><td>The account on the server; the port defaults to 22</td></tr>
-<tr><td>Authentication method</td><td><strong>Password</strong>; <strong>Interactive authentication</strong> (shows the server's prompts when connecting, including one-time codes and multi-step logins); or <strong>Private key</strong> (Ed25519 or RSA in OpenSSH or PEM format, encrypted keys supported, up to 256 KiB)</td></tr>
-</table>
-<p>A password is saved only if you turn on “Encrypt and save password on this device”; otherwise you enter it each time. An imported private key is stored encrypted on the device; its passphrase is never saved. When you save the host, Roamtty logs in once to detect the remote system and show its icon.</p>
-
-<h3>Verify the host fingerprint</h3>
-<p>The first time you connect to an address, Roamtty shows the server's SHA-256 fingerprint. Compare it with the server's real fingerprint before trusting it. On the server itself (or from a terminal you already trust), run:</p>
-<pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
-<p>On Windows the keys live in <code>C:\ProgramData\ssh\</code>; in PowerShell run <code>ssh-keygen -lf C:\ProgramData\ssh\ssh_host_ed25519_key.pub</code>.</p>
-<p>If the fingerprint changes later, the connection is blocked. After reinstalling the server or replacing its keys, confirm the new fingerprint and choose Verify again… in the host menu.</p>
-
-<h3>Host cards and menu</h3>
-<p>A host card shows the system icon, whether it is online and its connect latency: the time from starting DNS resolution to the TCP connection being established in the last successful check, without the SSH login. It measures connection setup, not the round-trip time of a running session, and checks pause while a session is active. Tap the card for live monitoring; the ⋮ menu on the right offers AI Agent, Open terminal, View files, Install plugins, Edit and Delete host. Deleting a host removes its settings and credentials and leaves tmux tasks on the server alone.</p>
-
-<h2 id="sessions">Sessions &amp; AI agents</h2>
-<h3>Start an AI agent</h3>
-<ol>
-<li>Tap <strong>AI Agent</strong> and choose Claude Code, Codex or Grok.</li>
-<li>Pick the host and the starting folder the agent works in.</li>
-<li>Pick a permission mode; Roamtty remembers your last choice:
-<ul>
-<li><strong>Read-only</strong>: Claude Code starts in Plan mode, analysing first and changing files only after you approve the plan; Codex and Grok start in a read-only sandbox (Grok can still write its state in <code>~/.grok/</code> and temporary directories).</li>
-<li><strong>Standard</strong>: asks before editing files or running commands.</li>
-<li><strong>YOLO</strong>: skips every confirmation. Use it only when you trust the task and the environment.</li>
-</ul></li>
-</ol>
-<p>You can still change permissions inside the agent afterwards (for example Shift+Tab in Claude Code, available on the ghost's shortcut ring). <strong>Open terminal</strong> opens a plain shell and can also start in a chosen folder.</p>
-
-<h3>Session cards</h3>
-<p>The home page lists every session, up to 8 per host. A card is titled with the agent's current task (or the agent and folder) and shows its state: <strong>Running</strong> (with the command being run), <strong>Needs approval</strong> (the agent needs an answer) or <strong>Idle</strong> (with how long the last turn took). Sessions are grouped into needs you, running and done, with filters at the top. A card waiting for approval has an <strong>Allow</strong> button that approves the agent's step without opening the terminal; a finished card shows a summary of the answer, and <strong>Reply</strong> lets you type the next instruction on the card. To report these states the app writes a few small files under <code>~/.roamtty</code> on the server, which you can delete at any time.</p>
-
-<h3>Persistent tmux sessions</h3>
-<p>With tmux on the server, each session has its own remote tmux session. Lock the phone, lose the network, switch networks or close the app and the task keeps running; the disconnected card stays, and tapping it logs in again and reattaches.</p>
-<ul>
-<li><strong>Close</strong> in the card menu ends the remote tmux session and everything in it, logging in first if needed.</li>
-<li>If the server can't be reached, long-press the card to <strong>force delete</strong> it: only the card on your phone is removed and the remote tmux session is kept.</li>
-<li>In a terminal, <code>tmux ls</code> lists the sessions Roamtty created.</li>
-</ul>
-
-<h3>mosh</h3>
-<p>When the host has mosh, new sessions carry the terminal over mosh (UDP), while file browsing and monitoring stay on SSH. If mosh doesn't answer within 8 seconds Roamtty falls back to SSH, so a blocked UDP port costs you roaming, not the session.</p>
-
-<h2 id="terminal">Using the terminal</h2>
-<table>
-<tr><th>Gesture</th><th>Effect</th></tr>
-<tr><td>Tap the cursor line (or within 2 lines of it)</td><td>Shows the keyboard; taps elsewhere don't</td></tr>
-<tr><td>Double tap</td><td>Sends Tab (completion), with ↑ ↓ ← keys appearing around the ghost to pick a candidate</td></tr>
-<tr><td>Triple tap</td><td>Pastes the clipboard</td></tr>
-<tr><td>Swipe left / right</td><td>Sends ← / →; hold after swiping to jump to the start or end of the line; light up Shift first to send Shift+←</td></tr>
-<tr><td>Swipe up / down</td><td>Scrolls history (tmux's own history in tmux sessions); back at the bottom it follows output again</td></tr>
-<tr><td>Pinch</td><td>Changes the font size</td></tr>
-<tr><td>Long-press the command line</td><td>Shows a magnifier to drag the cursor, across lines too</td></tr>
-<tr><td>Long-press other output</td><td>Selects and copies text</td></tr>
-<tr><td>Tap a link</td><td>Opens HTTP(S) links in the output; GitHub links prefer the GitHub app</td></tr>
-<tr><td>Hold the keyboard's delete key ~1 s</td><td>Clears the current line (the remote must support Ctrl+U / Ctrl+K)</td></tr>
-</table>
-<h3>The ghost and the action bar</h3>
-<ul>
-<li><strong>Tap</strong> the ghost holding a wrench at the screen edge to open the action bar: upload, download, insert images (up to 9, with their remote paths typed into the terminal, handy for showing an agent a screenshot), common commands (from the remote shell history) and the session menu (host details, close or restart the session, switch sessions).</li>
-<li><strong>Long-press</strong> the ghost for a ring of shortcuts for the program in front (Claude Code, Codex, Grok and Gemini CLI each have their own; a plain shell gets Esc, Ctrl, Shift, Fn and more). Drag onto a key and let go to send it; resting on Fn opens F1–F12.</li>
-<li><strong>Edit text</strong> in the settings button lets you compose a long prompt or several lines first and send it when you confirm; sending the text and Enter are separate.</li>
-<li>When you stop typing an Enter key appears at the end of the cursor line, and an Esc key the rest of the time, for answering or interrupting an agent.</li>
-</ul>
-<p>In Settings you can choose a built-in monospace font or import a <code>.ttf</code> / <code>.otf</code> font, with Nerd Font icon fallback.</p>
-
-<h2 id="files">Files</h2>
-<p><strong>View files</strong> in the host menu explores the server over SFTP:</p>
-<ul>
-<li>Preview text, code (syntax highlighted), Markdown and images; double-tap a preview (single tap for images) for full screen. Large text files show their first 256 KiB; images over 8 MiB need downloading.</li>
-<li>Rename, delete, create folders, copy paths, and download one file or a multi-selection, with fuzzy search.</li>
-<li>Open a terminal or start an AI agent in the current folder from the browser's menu.</li>
-<li>Share images from Photos or another app to Roamtty, pick the host and session, and they are uploaded.</li>
-</ul>
-<p>On Android files download to the folder you choose; on iOS they appear in the Files app. Existing files are never overwritten.</p>
-
-<h2 id="monitor">Host monitor</h2>
-<p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, useful for checking whether an agent's tests or build are stuck. Works with Linux, macOS and Windows (Windows uses the built-in PowerShell 5.1; NVIDIA GPUs appear when <code>nvidia-smi</code> is installed).</p>
-
-<h2 id="background">Background &amp; lock screen</h2>
-<h3>Android</h3>
-<p>While a connection is open Roamtty runs a foreground service with a notification (which can disconnect everything at once) and releases it when the last connection closes. To keep SSH connected with the screen locked:</p>
-<ol>
-<li>Turn on <strong>Allow background activity</strong> in Roamtty's Settings and allow it to ignore battery optimisation.</li>
-<li>Some phones (Xiaomi, Huawei, OPPO, vivo and others) also need Roamtty allowed to auto-start and run in the background in system settings, and locked in Recents.</li>
-</ol>
-<h3>iPhone</h3>
-<p>iOS suspends an app's network connections a while after it goes to the background; that's a system limit. Use tmux sessions: the task keeps running on the server and Roamtty reconnects and reattaches when you return.</p>
-<p class="note">On either platform, what keeps a task alive is tmux on the server, not the phone staying online.</p>
-
-<h2 id="tailscale">Remote access: Tailscale</h2>
-<p>When the server sits on a home or office network, your phone loses it the moment it leaves that network. Forwarding the SSH port to the internet is risky; <a href="https://tailscale.com/">Tailscale</a> is a better approach. It builds an encrypted, WireGuard-based virtual network (a tailnet) between your devices. Each device gets a stable <code>100.x.y.z</code> address, and your phone reaches the server from any network as if it were on the LAN, without a public IP on the server and without opening any inbound port.</p>
-<p>Roamtty has no Tailscale built in and needs no special settings: install the official Tailscale app on your phone, connect it, and Roamtty's traffic goes through the Tailscale tunnel via the system VPN.</p>
-
-<div class="topo" role="img" aria-label="Tailscale network: the phone and the server both register with a coordination server, connect to each other directly over WireGuard when possible, and relay encrypted traffic through DERP when hole punching fails">
-<div class="node ctl"><b>Coordination server</b><span>Tailscale's service or a self-hosted Headscale<br>Exchanges keys and addresses, never your traffic</span></div>
-<div class="node dev"><b>Phone</b><span>Roamtty<br>Tailscale app</span></div>
-<div class="link"><span class="direct">⇄ Direct WireGuard</span><span class="relay">↓ via relay if that fails</span></div>
-<div class="node dev"><b>Server</b><span>sshd · tmux · mosh<br>tailscaled</span></div>
-<div class="node relay"><b>DERP relay</b><span>Tailscale's or your own; forwards encrypted packets it cannot read</span></div>
+<p>Install <code>claude</code>, <code>codex</code> or <code>grok</code> following its own instructions and <strong>sign in once on the server</strong>. Roamtty never handles your account or API key.</p>
+<p>No need to install tmux (keeps tasks running when you disconnect) or mosh (survives network changes) by hand: choose <strong>Install plugins</strong> from the host menu and Roamtty installs them with the host's package manager (sudo on Linux, never stored; Homebrew on macOS; psmux via winget on Windows).</p>
+</div>
+<figure><img src="/assets/screens/hosts-en.webp" width="720" height="1600" loading="lazy" alt="Host card menu: Open terminal, AI Agent, Edit host, View files, Install plugins, Delete host"><figcaption>Host card menu</figcaption></figure>
 </div>
 
-<p>There are two separate roles:</p>
-<ul>
-<li>The <strong>coordination server</strong> (control plane) handles sign-in, assigns addresses and distributes each device's public keys and access policy. Use Tailscale's service, or self-host the open-source <a href="https://headscale.net/">Headscale</a>.</li>
-<li><strong>DERP relays</strong> forward traffic when two devices can't connect directly, for example when both sit behind strict or carrier-grade NAT or a corporate firewall. Traffic stays end-to-end encrypted and the relay can't read it, but latency depends on how far away the relay is.</li>
-</ul>
+<h2 id="hosts">Add a host</h2>
+<div class="pair"><div>
+<p>Tap <strong>+</strong> on the Hosts page and fill in a name, the address (domain, LAN IP or Tailscale <code>100.x.y.z</code>), username and port.</p>
+<p>Sign in with a <strong>Password</strong>, a <strong>Private key</strong> (Ed25519 / RSA, encrypted keys supported) or <strong>Interactive authentication</strong> (one-time codes and similar). A password is stored only if you turn on “Encrypt and save password on this device”. Leave the session mode on <strong>tmux</strong>.</p>
+<p><strong>Check the fingerprint on first connect.</strong> Run this on the server and compare with the SHA-256 fingerprint Roamtty shows before trusting it:</p>
+<pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
+<p>If the fingerprint later changes, the connection is blocked. Once you've confirmed the server was reinstalled or rekeyed, choose “Verify again…” from the host menu.</p>
+</div>
+<figure><img src="/assets/screens/add-host-en.webp" width="720" height="1600" loading="lazy" alt="Add host screen: name, address, username, port, authentication method and session mode"><figcaption>Add host</figcaption></figure>
+</div>
 
-<h3 id="ts-choose">Choosing a setup</h3>
+<h2 id="agent">Start an AI agent</h2>
+<div class="pair"><div>
+<p>Tap <strong>AI Agent</strong> (also in the host menu), then pick a starting folder, the agent and a permission mode:</p>
+<ul>
+<li><strong>Plan / Read-only</strong>: Claude Code plans first and edits only after you approve; Codex and Grok run in a read-only sandbox.</li>
+<li><strong>Standard</strong>: asks before editing files or running commands.</li>
+<li><strong>YOLO</strong>: runs everything without asking. Use it only when you trust the task and the machine.</li>
+</ul>
+<p>Your last choices are remembered and recent folders appear at the top. <strong>Open terminal</strong> starts a plain shell instead.</p>
+</div>
+<figure><img src="/assets/screens/agent-en.webp" width="720" height="1600" loading="lazy" alt="Open with AI Agent: choose a folder, Claude and a permission mode (Plan, Standard, YOLO)"><figcaption>Folder and permission mode</figcaption></figure>
+</div>
+
+<h2 id="sessions">Sessions</h2>
+<div class="pair"><div>
+<p>The home page groups every session into <strong>Needs you</strong>, <strong>Running</strong> and <strong>Done</strong>, titled with the agent's current task.</p>
+<ul>
+<li>Tap <strong>Allow</strong> on a card that needs you to approve without opening the terminal.</li>
+<li>Done cards show a summary of the answer; tap <strong>Reply</strong> to send the next instruction right there.</li>
+<li>Each session is its own tmux session on the server. Lock the phone, lose signal or close the app and the task keeps running; tap the card to reattach.</li>
+<li><strong>Close</strong> in the card menu ends the remote task. If the server is unreachable, long-press to force delete, which removes only the card on your phone.</li>
+</ul>
+<p>With mosh installed the terminal prefers mosh (UDP) and falls back to SSH after 8 seconds without a reply.</p>
+</div>
+<figure><img src="/assets/screens/sessions-en.webp" width="720" height="1600" loading="lazy" alt="Session list: one session needs approval with an Allow button, one is running, one is done with a summary"><figcaption>Session states and Allow</figcaption></figure>
+</div>
+
+<h2 id="terminal">Terminal</h2>
 <table>
-<tr><th>Setup</th><th>Good for</th><th>You need</th></tr>
-<tr><td><a href="#ts-official">Tailscale's service</a></td><td>The quickest start; the free personal plan is plenty</td><td>A Tailscale account and access to Tailscale's sign-in and coordination servers</td></tr>
-<tr><td>Tailscale's service + <a href="#derp">your own DERP</a></td><td>Direct connections often fail and the official relays are far away (for example in mainland China, where there is no official relay)</td><td>A server with a public IP close to you</td></tr>
-<tr><td><a href="#headscale">Self-hosted Headscale</a> + <a href="#derp">DERP</a></td><td>No third-party account, or Tailscale's service is unreliable where you are</td><td>A VPS with a public IP and a domain name</td></tr>
+<tr><th>Gesture</th><th>Does</th></tr>
+<tr><td>Tap near the cursor</td><td>Shows the keyboard</td></tr>
+<tr><td>Double / triple tap</td><td>Tab completion / paste</td></tr>
+<tr><td>Swipe left or right</td><td>← / →; hold after swiping to jump to the start or end of the line</td></tr>
+<tr><td>Swipe up or down</td><td>Scroll back through history</td></tr>
+<tr><td>Pinch</td><td>Font size</td></tr>
+<tr><td>Long-press</td><td>Drag the cursor on the command line; select and copy elsewhere</td></tr>
 </table>
+<p>The <strong>ghost</strong> with a wrench at the screen edge: <strong>tap</strong> it for the action bar (upload / download files, insert images, frequent commands, edit long text, switch sessions); <strong>hold</strong> it for the current agent's shortcut ring and release on a key to send it.</p>
+<div class="figs">
+<figure><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal showing full Claude Code output"><figcaption>Agent terminal</figcaption></figure>
+<figure><img src="/assets/screens/ring-en.webp" width="720" height="1600" loading="lazy" alt="Claude Code shortcut ring shown while holding the ghost"><figcaption>Hold the ghost: shortcut ring</figcaption></figure>
+</div>
 
-<h3 id="ts-official">Option 1: Tailscale's service</h3>
-<ol>
-<li><strong>Server</strong>: on Linux run
-<pre><code>curl -fsSL https://tailscale.com/install.sh | sh
-sudo tailscale up</code></pre>
-and open the printed link to sign in. On macOS and Windows install the client from <a href="https://tailscale.com/download">tailscale.com/download</a> and sign in.</li>
-<li><strong>Phone</strong>: install Tailscale from Google Play or the App Store, sign in with <strong>the same account</strong> and allow it to add a VPN configuration.</li>
-<li>Run <code>tailscale ip -4</code> on the server to get its <code>100.x.y.z</code> address (or find it in the phone app's device list) and add that address as a host in Roamtty.</li>
-</ol>
-<p>In the Tailscale admin console, consider Disable key expiry for the server so it doesn't need signing in again every few months, which would otherwise cut you off while you are away.</p>
+<h2 id="files">Files and monitoring</h2>
+<p><strong>View files</strong> in the host menu browses the server over SFTP: preview code, Markdown and images, rename, delete, download several files at once, or start an AI agent in the current folder. Share images to Roamtty from your gallery to upload them.</p>
+<p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, handy for checking whether a build or test run is stuck.</p>
+<div class="figs">
+<figure><img src="/assets/screens/files-en.webp" width="720" height="1600" loading="lazy" alt="File browser showing docs, src, package.json and README.md in acme-app"><figcaption>File browser</figcaption></figure>
+<figure><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview with a table, code block and task list"><figcaption>Markdown preview</figcaption></figure>
+<figure><img src="/assets/screens/monitor-en.webp" width="720" height="1600" loading="lazy" alt="Host details with live CPU, memory, disk and network"><figcaption>Host monitor</figcaption></figure>
+</div>
 
-<h3 id="headscale">Option 2: self-hosted Headscale</h3>
-<p>Headscale is an open-source implementation of Tailscale's coordination server. Phones and computers still use the official Tailscale clients, signing in to your server instead. The example below uses a Debian / Ubuntu VPS and the domain <code>hs.example.com</code>.</p>
-
-<h4>1. Prerequisites</h4>
+<h2 id="background">Background and lock screen</h2>
 <ul>
-<li>A VPS with a public IP, ideally close to where you usually are (it often doubles as the DERP relay).</li>
-<li><code>hs.example.com</code> resolving to the VPS's public IP.</li>
-<li>TCP 80 and 443 open (HTTPS and certificates), plus UDP 3478 if you enable the embedded DERP's STUN.</li>
+<li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents.</li>
+<li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return.</li>
+</ul>
+<p class="note">What keeps a task alive is tmux on the server, not your phone staying online.</p>
+
+<h2 id="tailscale">Connecting from anywhere: Tailscale</h2>
+<p><a href="https://tailscale.com/">Tailscale</a> puts your phone and server on one encrypted virtual network, each with a fixed <code>100.x.y.z</code> address. The server needs no public IP and no open ports, and Roamtty needs no settings: its traffic goes through the system VPN.</p>
+<ol class="steps">
+<li><strong>Server</strong>: on Linux run the commands below and sign in in the browser; on macOS or Windows install from <a href="https://tailscale.com/download">tailscale.com/download</a>.
+<pre><code>curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up</code></pre></li>
+<li><strong>Phone</strong>: install the Tailscale app and sign in with the same account.</li>
+<li>Add the server in Roamtty by its <code>100.x.y.z</code> address (<code>tailscale ip -4</code>).</li>
+</ol>
+<ul>
+<li>Connect Tailscale before opening Roamtty; a phone runs one VPN at a time.</li>
+<li>mosh works inside the tunnel with no UDP ports to open.</li>
+<li>Use the server's own OpenSSH and leave Tailscale SSH (<code>--ssh</code>) off, otherwise the host fingerprint changes.</li>
+<li>Turn off key expiry for the server in the Tailscale admin console (Disable key expiry) so it doesn't drop off months later while you're away.</li>
+<li>If latency is high, run <code>tailscale ping &lt;phone's 100.x address&gt;</code> on the server. <code>via DERP</code> means traffic is relayed; consider your own DERP relay (below).</li>
 </ul>
 
-<h4>2. Install Headscale</h4>
-<p>Download the latest deb package from <a href="https://github.com/juanfont/headscale/releases">GitHub Releases</a> (0.29.5 at the time of writing):</p>
-<pre><code>HEADSCALE_VERSION=0.29.5
-HEADSCALE_ARCH=amd64   # arm64 on ARM servers
-wget -O headscale.deb \
-  "https://github.com/juanfont/headscale/releases/download/v${HEADSCALE_VERSION}/headscale_${HEADSCALE_VERSION}_linux_${HEADSCALE_ARCH}.deb"
+<details>
+<summary>Self-hosted Headscale (no Tailscale account)</summary>
+<p><a href="https://headscale.net/">Headscale</a> is an open-source coordination server; phones and computers keep using the official Tailscale clients. You need a VPS with a public IP and a domain (<code>hs.example.com</code> below), with TCP 80 and 443 open.</p>
+<pre><code># Install (see GitHub Releases; 0.29.5 at the time of writing)
+wget -O headscale.deb https://github.com/juanfont/headscale/releases/download/v0.29.5/headscale_0.29.5_linux_amd64.deb
 sudo apt install ./headscale.deb</code></pre>
-
-<h4>3. Configure</h4>
-<p>Edit <code>/etc/headscale/config.yaml</code> and change at least these keys (the full example is in <code>/usr/share/doc/headscale/examples/config-example.yaml</code>):</p>
-<pre><code># The address clients use; must be HTTPS
-server_url: https://hs.example.com
-# Listen locally; the reverse proxy serves HTTPS
+<p>Edit <code>/etc/headscale/config.yaml</code>:</p>
+<pre><code>server_url: https://hs.example.com
 listen_addr: 127.0.0.1:8080
-
-prefixes:
-  v4: 100.64.0.0/10
-  v6: fd7a:115c:a1e0::/48
-
 dns:
   magic_dns: true
-  # Domain suffix inside the tailnet; must not equal or contain server_url's domain
-  base_domain: ts.example.net</code></pre>
-
-<h4>4. Put HTTPS in front</h4>
-<p>The reverse proxy <strong>must support WebSocket upgrades</strong>; Tailscale clients depend on them to talk to Headscale. <a href="https://caddyserver.com/">Caddy</a> is the easiest: it obtains certificates and handles upgrades automatically. <code>/etc/caddy/Caddyfile</code>:</p>
+  base_domain: ts.example.net   # must differ from the server_url domain</code></pre>
+<p>Serve HTTPS with Caddy (the proxy must pass WebSocket upgrades, which Caddy does by default), <code>/etc/caddy/Caddyfile</code>:</p>
 <pre><code>hs.example.com {
     reverse_proxy 127.0.0.1:8080
 }</code></pre>
-<p>With Nginx, set <code>proxy_http_version 1.1</code>, pass the <code>Upgrade</code> and <code>Connection</code> headers and turn off <code>proxy_buffering</code>; see <a href="https://headscale.net/stable/ref/integration/reverse-proxy/">Headscale's reverse proxy guide</a>.</p>
-<pre><code>sudo systemctl enable --now headscale
-sudo systemctl reload caddy
-sudo systemctl status headscale</code></pre>
-
-<h4>5. Create a user and a pre-auth key</h4>
-<pre><code>sudo headscale users create me
-sudo headscale users list                         # note the ID of "me"
+<pre><code>sudo systemctl enable --now headscale && sudo systemctl reload caddy
+sudo headscale users create me
 sudo headscale preauthkeys create --user 1 --reusable --expiration 24h</code></pre>
-<p>By default a pre-auth key is valid for one hour and works once; <code>--reusable</code> lets several devices use it. Treat the key as a credential for joining your network and don't share it.</p>
+<p>Join the devices:</p>
+<ul>
+<li><strong>Server</strong>: <code>sudo tailscale up --login-server https://hs.example.com --authkey &lt;key&gt;</code></li>
+<li><strong>Android</strong>: Tailscale settings → Accounts → ⋮ → Use an alternate server, enter <code>https://hs.example.com</code>; then ⋮ → Use an auth key and paste the key.</li>
+<li><strong>iPhone</strong>: Log in… → options menu → Use custom coordination server, enter the address, then run the registration command shown on the page on the VPS.</li>
+</ul>
+<p>When <code>sudo headscale nodes list</code> shows both devices, you're done.</p>
+</details>
 
-<h4>6. Join the server</h4>
-<p>Install the Tailscale client on the server Roamtty will connect to (the install script from <a href="#ts-official">option 1</a>, step 1), then:</p>
-<pre><code>sudo tailscale up --login-server https://hs.example.com --authkey &lt;pre-auth key&gt;</code></pre>
-<p>Without a pre-auth key, leave out <code>--authkey</code>, open the page it prints and run the registration command shown there on the VPS (<code>headscale auth register --user me --auth-id …</code>).</p>
-
-<h4>7. Join the phone</h4>
-<p><strong>Android</strong> (Tailscale app):</p>
-<ol>
-<li>Tap the settings icon at the top right → Accounts.</li>
-<li>Tap ⋮ at the top right → Use an alternate server and enter <code>https://hs.example.com</code>. You can close a web sign-in page if one opens.</li>
-<li>Go back to Accounts → ⋮ → Use an auth key and paste the pre-auth key; tap Log in on the main screen if needed.</li>
-</ol>
-<p><strong>iPhone</strong> (Tailscale app):</p>
-<ol>
-<li>Tap the account icon at the top right → Log in…</li>
-<li>Tap the options menu at the top right → Use custom coordination server and enter <code>https://hs.example.com</code>.</li>
-<li>A registration page opens; run the command it shows on the VPS to finish.</li>
-</ol>
-<p><code>sudo headscale nodes list</code> on the VPS should now show both the server and the phone with their <code>100.x</code> addresses.</p>
-
-<h3 id="derp">Self-hosted DERP relays</h3>
-<p>Tailscale always tries a direct connection first and uses DERP only when that fails. The default DERP relays are run by Tailscale in a limited set of regions; if you are far from all of them (in mainland China, for example), relayed traffic often has several hundred milliseconds of latency and typing in the terminal feels sluggish. A relay on a VPS near you fixes that.</p>
-
-<h4>Option A: Headscale's embedded DERP (recommended with Headscale)</h4>
-<p>In <code>/etc/headscale/config.yaml</code>:</p>
+<details>
+<summary>Your own DERP relay (when direct connections fail or lag)</summary>
+<p>When two devices can't connect directly, traffic goes through a DERP relay (still end-to-end encrypted). If Tailscale's relays are far away, typing can lag by hundreds of milliseconds. With Headscale, the simplest fix is its embedded DERP, in <code>config.yaml</code>:</p>
 <pre><code>derp:
   server:
     enabled: true
     region_id: 999
     region_code: "headscale"
     region_name: "Headscale Embedded DERP"
-    verify_clients: true          # only devices in this tailnet may use it
+    verify_clients: true
     stun_listen_addr: "0.0.0.0:3478"
     private_key_path: /var/lib/headscale/derp_server_private.key
     automatically_add_embedded_derp_region: true
-    ipv4: 203.0.113.10            # the VPS's public IPv4
-    # ipv6: 2001:db8::10          # if it has public IPv6
-  # Keep Tailscale's relays as a fallback; set to [] to use only yours
+    ipv4: 203.0.113.10          # the VPS's public IP
   urls:
-    - https://controlplane.tailscale.com/derpmap/default
+    - https://controlplane.tailscale.com/derpmap/default   # keep official relays as a fallback
   paths: []</code></pre>
-<p>The embedded relay shares Headscale's HTTPS port (through the reverse proxy above, at <code>/derp</code>) and also needs <strong>UDP 3478</strong> open. Run <code>sudo systemctl restart headscale</code> afterwards.</p>
-<p>Setting <code>urls</code> to <code>[]</code> leaves your single relay as the only one, so if that VPS fails every relayed connection fails with it. Make sure your relay works before removing Tailscale's.</p>
-
-<h4>Option B: a standalone derper</h4>
-<p>To put the relay on a different server closer to you, or to add your own relay to Tailscale's service, run Tailscale's <code>derper</code>. On the relay server (Go required):</p>
-<pre><code>go install tailscale.com/cmd/derper@latest
-sudo ~/go/bin/derper -hostname derp.example.com -a :443 -stun-port 3478 \
-  -certmode letsencrypt -verify-client-url https://hs.example.com/verify</code></pre>
-<ul>
-<li><code>-verify-client-url</code> has derper check visitors with Headscale so strangers can't use your relay. With Tailscale's service, install and sign in to Tailscale on the relay server and use <code>-verify-clients</code> instead.</li>
-<li>Open TCP 443 (or your chosen port) and UDP 3478; <code>letsencrypt</code> mode obtains the certificate automatically.</li>
-<li>Run derper under systemd so it comes back after a reboot.</li>
-</ul>
-<p>Then tell the coordination server about it. <strong>Headscale</strong>: create <code>/etc/headscale/derp.yaml</code>:</p>
-<pre><code>regions:
-  900:
-    regionid: 900
-    regioncode: home
-    regionname: My DERP
-    nodes:
-      - name: 900a
-        regionid: 900
-        hostname: derp.example.com
-        ipv4: 203.0.113.20
-        stunport: 3478
-        stunonly: false
-        derpport: 443</code></pre>
-<p>add <code>/etc/headscale/derp.yaml</code> to <code>derp.paths</code> in <code>config.yaml</code> and restart Headscale. <strong>Tailscale's service</strong>: add a <code>derpMap</code> to the policy file under Access controls in the admin console; see <a href="https://tailscale.com/kb/1118/custom-derp-servers">Tailscale's custom DERP guide</a>.</p>
-
-<h4>Notes for mainland China</h4>
-<ul>
-<li>Cloud servers in mainland China usually can't serve HTTPS on ports 80 / 443 for a domain without ICP filing. Use a filed domain; or have derper listen on a non-standard port (such as <code>-a :33445</code>, with <code>derpport</code> set to 33445) and obtain the certificate through a DNS challenge (with acme.sh, for example), passing it with <code>-certmode manual -certdir</code> as files named <code>derp.example.com.crt</code> and <code>derp.example.com.key</code>; or use a server in Hong Kong or a nearby region.</li>
-<li>Open the TCP port and UDP 3478 in your cloud provider's security group as well as the system firewall; both layers apply.</li>
-</ul>
-
-<h3 id="ts-roamtty">Using it in Roamtty</h3>
-<ul>
-<li>For the <strong>host address</strong>, use the server's Tailscale address <code>100.x.y.z</code> or its MagicDNS name (such as <code>devbox.ts.example.net</code>). The IP is the most reliable since it doesn't depend on the phone's DNS settings.</li>
-<li><strong>Connect Tailscale first, then open Roamtty.</strong> With the Tailscale app disconnected, <code>100.x</code> addresses are unreachable and Roamtty reports “Connection timed out. Check the network, VPN, and host port.”</li>
-<li><strong>A phone runs one VPN at a time.</strong> Tailscale takes the system VPN slot, so other VPN or proxy apps disconnect, and vice versa. If you need both, consider an exit node in your tailnet instead.</li>
-<li><strong>mosh works over Tailscale as is.</strong> Roamtty's mosh connects to the address SSH actually reached, which is the <code>100.x</code> address, so UDP travels inside the tunnel and the cloud security group doesn't need 60000–61000 open. If a firewall such as ufw on the server blocks the Tailscale interface, run <code>sudo ufw allow in on tailscale0</code>.</li>
-<li><strong>Use the server's own OpenSSH and leave Tailscale SSH off</strong> (<code>tailscale up --ssh</code>). With it on, Tailscale takes over port 22 inside the tailnet and the host fingerprint and authentication change.</li>
-<li>The latency on a host card is measured along the actual tunnel path: close to real network latency when direct, including the detour when relayed. If it looks high, check whether you are relayed (next section).</li>
-<li>Make sure tailscaled starts at boot on the server (the install script enables it) and disable key expiry as in option 1, so you don't lose access while away.</li>
-</ul>
-
-<h3 id="ts-debug">Diagnosing the tailnet</h3>
-<table>
-<tr><th>Command (on the server)</th><th>Purpose</th></tr>
-<tr><td><code>tailscale status</code></td><td>Lists tailnet devices and whether they are online; check the phone is there</td></tr>
-<tr><td><code>tailscale ping &lt;phone's 100.x address&gt;</code></td><td>Shows whether the path is direct (<code>via 1.2.3.4:41641</code>) or relayed (<code>via DERP(xxx)</code>), with the round-trip time</td></tr>
-<tr><td><code>tailscale netcheck</code></td><td>Shows the NAT type, whether UDP works and the latency to each DERP relay; your own relay should be listed and closest</td></tr>
-<tr><td><code>sudo headscale nodes list</code></td><td>(Headscale) Registered devices and when they were last seen</td></tr>
-</table>
-<p>If you are often relayed, turning on UPnP on the router in front of the server, or allowing inbound UDP 41641 to it, improves the odds of a direct connection.</p>
+<p>Open <strong>UDP 3478</strong> and restart Headscale; <code>tailscale netcheck</code> on the server should list your relay with the lowest latency.</p>
+<p>With Tailscale's own service, run the official <code>derper</code> on another server and add a <code>derpMap</code> to your policy file; see <a href="https://tailscale.com/kb/1118/custom-derp-servers">Tailscale's custom DERP guide</a>. Open the ports in both the cloud security group and the server firewall.</p>
+</details>
 
 <h2 id="troubleshooting">Common errors</h2>
 <table>
-<tr><th>Message</th><th>Cause and fix</th></tr>
-<tr><td>Connection timed out. Check the network, VPN, and host port.</td><td>Wrong address or port, the server is off, sshd isn't running, or Tailscale isn't connected. Check the Tailscale app first, then the port</td></tr>
-<tr><td>The network is unreachable or the connection was cut.</td><td>The phone switched networks or the VPN dropped. Tasks in tmux sessions are unaffected; tap the card to reconnect once you are back online</td></tr>
-<tr><td>Authentication failed. Check the username, credentials, and server settings.</td><td>Wrong username, password or key, or the server disables that method (check <code>PasswordAuthentication</code> and <code>PubkeyAuthentication</code> in <code>/etc/ssh/sshd_config</code>). For key login, the public key must be in <code>~/.ssh/authorized_keys</code> on the server</td></tr>
-<tr><td>The host fingerprint changed. The connection was blocked.</td><td>The server was reinstalled, its keys replaced or Tailscale SSH turned on, or someone is intercepting the connection. Confirm the new fingerprint, then choose Verify again… in the host menu</td></tr>
-<tr><td>Neither tmux nor psmux was found on the server.</td><td>Install it with Install plugins in the host menu, or use plain SSH</td></tr>
-<tr><td>This user has no root or sudo rights.</td><td>Ask an administrator to install tmux / mosh, or use Homebrew on macOS</td></tr>
-<tr><td>Each host can keep up to 8 sessions.</td><td>Close sessions you no longer need for that host from their card menu</td></tr>
-<tr><td>The agent says it isn't signed in, or the command isn't found</td><td>Check that <code>claude</code> / <code>codex</code> / <code>grok</code> runs and is signed in from a plain terminal. Agents start as if you typed the command, so on a shared machine make sure the host uses the account the agent was installed for</td></tr>
+<tr><th>Message</th><th>What to do</th></tr>
+<tr><td>Connection timed out</td><td>Check the address, port and that sshd is running, and that Tailscale is connected on the phone</td></tr>
+<tr><td>Authentication failed</td><td>Check the username, password or key; for keys, the public key must be in the server's <code>~/.ssh/authorized_keys</code></td></tr>
+<tr><td>The host fingerprint changed</td><td>The server was reinstalled, rekeyed or has Tailscale SSH on, or someone is intercepting the connection. Confirm the new fingerprint, then “Verify again…”</td></tr>
+<tr><td>Neither tmux nor psmux was found</td><td>Install it with Install plugins in the host menu</td></tr>
+<tr><td>Each host can keep up to 8 sessions</td><td>Close sessions you no longer need on that host</td></tr>
+<tr><td>The agent isn't signed in or isn't found</td><td>Check in a plain terminal, as the same user, that <code>claude</code> / <code>codex</code> / <code>grok</code> runs and is signed in</td></tr>
 </table>
-<p>Still stuck? Email <a href="mailto:support@roamtty.com">support@roamtty.com</a> with the device and server details listed on the <a href="/en/support/">Support</a> page (never send passwords, private keys or real server addresses).</p>
+<p>Still stuck? Email <a href="mailto:support@roamtty.com">support@roamtty.com</a> (never send passwords, private keys or real server addresses).</p>
 </div>
 </div></article>
 

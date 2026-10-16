@@ -61,6 +61,11 @@ code { font-family: var(--mono); background: var(--code); padding: 1px 5px; bord
 .store.soon { background: var(--surface-2); color: var(--muted); cursor: default; border: 1px dashed var(--rule); }
 .hero-note { margin-top: 14px; font-size: 14px; color: var(--muted); }
 
+/* Demo video above the screenshots. */
+.demo-video { margin: 0 0 28px; }
+.demo-video video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: var(--radius); background: #17181a;
+  border: 1px solid var(--rule); }
+
 /* Real app screenshots, shown in a simple device frame. */
 .device { margin: 0 auto; width: min(320px, 100%); padding: 8px; border-radius: 40px; background: #111214;
   box-shadow: 0 30px 60px -20px rgba(20, 16, 30, 0.45); }

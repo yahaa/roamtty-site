@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support &amp; contact · Roamtty</title>
+<meta name="description" content="Help, frequently asked questions and contact details for Roamtty on Android and iPhone.">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/en/support/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/support/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/support/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:title" content="Support &amp; contact · Roamtty">
+<meta property="og:description" content="Help, frequently asked questions and contact details for Roamtty on Android and iPhone.">
+<meta property="og:url" content="https://roamtty.com/en/support/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt" href="/en/support/" aria-current="page">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/support/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+</div></header>
+<main id="main">
+<article class="doc"><div class="wrap narrow">
+<h1>Support &amp; contact</h1>
+<p class="meta">Help for Roamtty on Android and iOS</p>
+
+<div class="contact-box">
+<p style="margin:0 0 4px">For problems, bug reports or feature ideas, email us at:</p>
+<p class="mail" style="margin:0"><a href="mailto:support@roamtty.com?subject=Roamtty%20feedback">support@roamtty.com</a></p>
+<p style="margin:8px 0 0;color:var(--muted);font-size:14px">We reply as soon as we can, in English or Chinese.</p>
+</div>
+
+<h2>When reporting a problem, please include</h2>
+<ul>
+<li>Your device and OS version (for example Pixel 8 · Android 15, or iPhone 15 · iOS 18)</li>
+<li>The Roamtty version (shown under Help in the app)</li>
+<li>The server's OS (for example Ubuntu 24.04, macOS or Windows) and whether you use tmux / mosh</li>
+<li>The steps, what you expected and what happened, with screenshots if possible</li>
+</ul>
+<p><strong>Never send passwords, private keys or real server addresses.</strong> Cover sensitive details before taking screenshots.</p>
+
+<h2>Requirements</h2>
+<table>
+<tr><th>Platform</th><th>Requirement</th></tr>
+<tr><td>Android</td><td>Android 8.0 (API 26) or later</td></tr>
+<tr><td>iPhone</td><td>iOS 16 or later</td></tr>
+<tr><td>Server</td><td>A Linux, macOS or Windows (OpenSSH) host you can log in to over SSH; tmux and mosh are optional</td></tr>
+</table>
+
+<h2>Frequently asked questions</h2>
+<details><summary>What do I need to use Roamtty?</summary>
+<p>A server you can log in to over SSH, and its password or private key (Ed25519 and RSA keys in OpenSSH or PEM format are supported, including encrypted keys). Tap + on the Hosts page to add it.</p></details>
+<details><summary>Does Roamtty include an AI model?</summary>
+<p>No. Roamtty is an SSH client. Command-line AI tools such as Claude Code, Codex and Grok must be installed and signed in on your server; Roamtty starts them and connects you to them from your phone.</p></details>
+<details><summary>Does my work keep running if I disconnect or close the app?</summary>
+<p>Yes, in tmux mode. Choose Install plugins in the host menu to detect and install tmux; each session then gets its own remote tmux session that is reattached when you reconnect. A plain SSH session without tmux ends when it disconnects.</p></details>
+<details><summary>mosh does not connect. What should I check?</summary>
+<p>mosh uses UDP ports 60000–61000. Allow them in the server firewall and your cloud provider's security group. If mosh does not answer within 8 seconds, Roamtty falls back to SSH.</p></details>
+<details><summary>The app says the host fingerprint changed and blocks the connection.</summary>
+<p>The server may have been reinstalled or its key replaced, or someone may be intercepting the connection. Confirm the new fingerprint with the server's administrator first, then choose Verify again… in the host menu.</p></details>
+<details><summary>The connection drops when the screen locks or the app goes to the background.</summary>
+<p>Android: allow background running in the app's settings and turn off battery optimization for Roamtty. iOS: the system suspends an app's network connections some time after it goes to the background. Use tmux mode so work keeps running on the server; Roamtty reconnects when you return.</p></details>
+<details><summary>Where are my passwords and keys stored?</summary>
+<p>Only on your phone: encrypted with the Android Keystore on Android, and in this-device-only Keychain storage on iOS. Passwords are stored only when you tick “Encrypt and save password on this device”, and key passphrases are never saved. See the <a href="/en/privacy/">privacy policy</a>.</p></details>
+<details><summary>How do I delete my data?</summary>
+<p>Roamtty has no accounts, and the developers hold none of your data. Deleting a host in the app removes its configuration, credentials and session records; uninstalling removes all local data (on iOS, delete your hosts before uninstalling to remove their Keychain credentials). Status files written to a server when you start an AI agent from the app live in <code>~/.roamtty</code> and can be deleted at any time.</p></details>
+<details><summary>Does Roamtty cost anything?</summary>
+<p>No. There are no in-app purchases, subscriptions or ads, and it is open source under the Apache-2.0 license.</p></details>
+
+<h2 id="security">Reporting security issues</h2>
+<p>If you find a security vulnerability, email <a href="mailto:support@roamtty.com?subject=Security">support@roamtty.com</a> with “Security” in the subject and steps to reproduce it. Please do not disclose it publicly until it is fixed. We will acknowledge your report and keep you updated.</p>
+
+<h2>Related</h2>
+<ul>
+<li><a href="/en/privacy/">Privacy policy</a></li>
+<li><a href="/en/terms/">Terms of use</a></li>
+</ul>
+</div></article>
+
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="Footer"><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty contributors · Apache-2.0</span>
+<p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
+</div></footer>
+</body>
+</html>

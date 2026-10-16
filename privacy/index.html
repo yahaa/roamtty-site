@@ -32,7 +32,7 @@
 <p>Roamtty 是一款 SSH 终端客户端，提供 Android 版与 iOS 版（以下合称“应用”）。我们（Roamtty 开发者）不运营任何应用后端服务器，不要求注册账号，不收集、不上传、不出售、也不与任何第三方共享你的个人数据。本政策适用于从 Google Play 或 App Store 获取的 Roamtty，以及网站 roamtty.com。</p>
 <div class="markdown-heading"><h2 class="heading-element">摘要</h2><a id="user-content-摘要" class="anchor" aria-label="Permalink: 摘要" href="#摘要"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <ul>
-<li>没有账号、广告、统计分析、崩溃上报或第三方 SDK。</li>
+<li>没有账号或广告，不集成统计分析或崩溃上报 SDK。</li>
 <li>主机配置、凭据和设置只保存在你的设备上；凭据由系统密钥库加密保护。</li>
 <li>应用只连接你自己添加的服务器，开发者收不到任何数据。</li>
 </ul>
@@ -64,7 +64,7 @@
 <li>SSH 与 mosh 连接均加密传输；应用不发起明文 HTTP 请求。点按终端中的链接时，链接由系统浏览器或对应的应用打开。</li>
 <li>连接时，应用会在远端执行只读操作：识别远端系统、检查 tmux / mosh 是否可用（结果保存在本机的主机信息中），以及读取远端 shell 历史文件作为“常用命令”。常用命令只缓存于会话的内存状态，断开后仍可能用于查看，不写入应用持久化存储，进程结束后不保留。主机详情页的监控数据（CPU、内存、磁盘、网络、进程）同样只在内存中显示。其他远端操作只在你主动发起时执行，例如安装 tmux / mosh，或通过 SFTP 上传、下载文件。</li>
 <li>从应用启动 Claude Code、Codex 或 Grok 时（Windows 起始目录除外），应用会在远端写入用于显示 Agent 状态的 hook 文件：<code>~/.roamtty/agent-hook.sh</code>，以及 <code>~/.roamtty/claude-hooks.json</code>（Claude Code）或启动器 <code>~/.roamtty/codex</code>、<code>~/.roamtty/grok</code>。Codex 启动器会在 <code>${CODEX_HOME:-~/.codex}/config.toml</code> 末尾追加这些 hook 的信任记录（已有同名条目则不改动）；Grok 启动器会写入 <code>${GROK_HOME:-~/.grok}/hooks/roamtty.json</code>，其中的 hook 只对从应用启动的 Grok 生效。hook 把 Agent 的状态、正在执行的工具和命令、你最近一条提示词的前 200 个字符，以及 Agent 最近一次回复的前 400 个字符，保存为该 tmux 会话的选项，Agent 退出时清除；应用通过 SSH 读取这些选项，在会话列表显示，只保存在内存中，不写入手机存储，也不发往其他地方。这些文件留在服务器上，可随时删除 <code>~/.roamtty</code> 目录、<code>config.toml</code> 中追加的条目和 <code>roamtty.json</code>；下次从应用启动 Agent 时会重新写入。不从应用启动 Agent 时不会写入这些文件。</li>
-<li>应用不包含广告、统计分析、崩溃上报或任何第三方 SDK，不会向开发者或第三方发送任何数据。</li>
+<li>应用不包含广告、统计分析或崩溃上报 SDK。应用使用 AndroidX、JSch 和 Bouncy Castle 等第三方开源库提供界面、SSH 和加密功能；这些库不用于向开发者收集数据。用户主动建立的连接和文件传输只发往用户选择的服务器。</li>
 </ul>
 <div class="markdown-heading"><h2 class="heading-element">权限</h2><a id="user-content-权限" class="anchor" aria-label="Permalink: 权限" href="#权限"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <table>
@@ -118,13 +118,13 @@
 <div class="markdown-heading"><h2 class="heading-element">政策变更</h2><a id="user-content-政策变更" class="anchor" aria-label="Permalink: 政策变更" href="#政策变更"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>本政策如有变更，会在本页面更新并修改生效日期。</p>
 <div class="markdown-heading"><h2 class="heading-element">联系方式</h2><a id="user-content-联系方式" class="anchor" aria-label="Permalink: 联系方式" href="#联系方式"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<p>如对本政策有任何疑问，请发送邮件至 <a href="mailto:support@roamtty.com">support@roamtty.com</a>，或访问 <a href="https://roamtty.com/support/" rel="nofollow">https://roamtty.com/support/</a> 。</p>
+<p>如对本政策有任何疑问，请发送邮件至 <a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a>，或访问 <a href="https://roamtty.com/support/" rel="nofollow">https://roamtty.com/support/</a> 。</p>
 </div><div class="policy" id="en" lang="en"><div class="markdown-heading"><h1 class="heading-element">Roamtty Privacy Policy</h1><a id="user-content-roamtty-privacy-policy" class="anchor" aria-label="Permalink: Roamtty Privacy Policy" href="#roamtty-privacy-policy"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>Effective date: 2026-10-16</p>
 <p>Roamtty is an SSH terminal client for Android and iOS (together, “the app”). We, the Roamtty developers, run no app backend servers and require no account. We do not collect, upload, sell or share any of your personal data with anyone. This policy covers Roamtty obtained from Google Play or the App Store, and the website roamtty.com.</p>
 <div class="markdown-heading"><h2 class="heading-element">Summary</h2><a id="user-content-summary" class="anchor" aria-label="Permalink: Summary" href="#summary"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <ul>
-<li>No accounts, ads, analytics, crash reporting or third-party SDKs.</li>
+<li>No accounts or ads, and no analytics or crash-reporting SDKs.</li>
 <li>Hosts, credentials and settings stay on your device; credentials are protected by the system keystore.</li>
 <li>The app connects only to servers you add. The developers receive no data.</li>
 </ul>
@@ -156,7 +156,7 @@
 <li>SSH and mosh connections are encrypted; the app makes no cleartext HTTP requests. Links you tap in the terminal open in the system browser or the matching app.</li>
 <li>When connecting, the app performs read-only operations on the server: it identifies the system, checks whether tmux / mosh are available (stored in the host entry on your device), and reads the remote shell history file to suggest common commands. Common commands are cached only in the session's memory and may remain available to view after disconnecting. They are not written to persistent app storage and do not survive process termination. Host monitoring data (CPU, memory, disk, network, processes) is likewise only shown from memory. Everything else happens only when you ask for it, such as installing tmux / mosh or uploading and downloading files over SFTP.</li>
 <li>When you start Claude Code, Codex or Grok from the app (except in a Windows start folder), the app writes hook files to the server so it can show the agent's status: <code>~/.roamtty/agent-hook.sh</code>, plus <code>~/.roamtty/claude-hooks.json</code> (Claude Code) or the launchers <code>~/.roamtty/codex</code> and <code>~/.roamtty/grok</code>. The Codex launcher appends trust entries for these hooks to the end of <code>${CODEX_HOME:-~/.codex}/config.toml</code> (an existing entry with the same name is left alone); the Grok launcher writes <code>${GROK_HOME:-~/.grok}/hooks/roamtty.json</code>, whose hooks act only for a Grok started from the app. The hooks store the agent's state, the tool and command it is running, the first 200 characters of your latest prompt and the first 400 characters of the agent's latest reply as options of that tmux session, cleared when the agent exits. The app reads them over SSH to show in the session list; they are kept in memory only, never written to the phone's storage or sent anywhere else. The files stay on the server; you can delete the <code>~/.roamtty</code> folder, the entries appended to <code>config.toml</code> and <code>roamtty.json</code> at any time, and the next agent started from the app writes them again. None of these files are written unless you start an agent from the app.</li>
-<li>The app contains no ads, analytics, crash reporting or third-party SDKs, and sends no data to the developers or any third party.</li>
+<li>The app contains no ads, analytics SDKs or crash-reporting SDKs. It uses third-party open-source libraries such as AndroidX, JSch and Bouncy Castle for its interface, SSH and cryptography; these libraries are not used to collect data for the developers. Connections and file transfers initiated by users go only to the servers they select.</li>
 </ul>
 <div class="markdown-heading"><h2 class="heading-element">Permissions</h2><a id="user-content-permissions" class="anchor" aria-label="Permalink: Permissions" href="#permissions"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <table>
@@ -210,11 +210,11 @@
 <div class="markdown-heading"><h2 class="heading-element">Changes</h2><a id="user-content-changes" class="anchor" aria-label="Permalink: Changes" href="#changes"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
 <p>If this policy changes, this page will be updated along with its effective date.</p>
 <div class="markdown-heading"><h2 class="heading-element">Contact</h2><a id="user-content-contact" class="anchor" aria-label="Permalink: Contact" href="#contact"><span aria-hidden="true" class="octicon octicon-link"></span></a></div>
-<p>If you have questions about this policy, email <a href="mailto:support@roamtty.com">support@roamtty.com</a> or visit <a href="https://roamtty.com/support/" rel="nofollow">https://roamtty.com/support/</a>.</p>
+<p>If you have questions about this policy, email <a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a> or visit <a href="https://roamtty.com/support/" rel="nofollow">https://roamtty.com/support/</a>.</p>
 </div></div></article>
 </main>
 <footer class="site-footer"><div class="wrap">
-<nav aria-label="页脚"><a href="/docs/">使用文档</a><a href="/support/">支持与联系</a><a href="/privacy/">隐私政策</a><a href="/terms/">使用条款</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<nav aria-label="页脚"><a href="/docs/">使用文档</a><a href="/support/">支持与联系</a><a href="/privacy/">隐私政策</a><a href="/terms/">使用条款</a><a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a></nav>
 <span>© 2026 Roamtty</span>
 <p class="tm">Claude Code、Codex、Grok 是其各自所有者的商标，Roamtty 与这些公司没有关联。Google Play 是 Google LLC 的商标；App Store、iPhone 是 Apple Inc. 的商标。</p>
 </div></footer>

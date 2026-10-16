@@ -1,4 +1,4 @@
-Contact: mailto:support@roamtty.com
+Contact: mailto:roamtty@gmail.com
 Expires: 2027-10-16T00:00:00Z
 Preferred-Languages: zh, en
 Canonical: https://roamtty.com/.well-known/security.txt

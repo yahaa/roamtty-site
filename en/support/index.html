@@ -24,12 +24,12 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
 <a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
-<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt" href="/en/support/" aria-current="page">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/support/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/">Docs</a><a class="opt" href="/en/support/" aria-current="page">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/support/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
 </div></header>
 <main id="main">
 <article class="doc"><div class="wrap narrow">
 <h1>Support &amp; contact</h1>
-<p class="meta">Help for Roamtty on Android and iOS</p>
+<p class="meta">Help for Roamtty on Android and iOS. For step-by-step instructions see the <a href="/en/docs/">documentation</a>.</p>
 
 <div class="contact-box">
 <p style="margin:0 0 4px">For problems, bug reports or feature ideas, email us at:</p>
@@ -61,8 +61,10 @@
 <p>No. Roamtty is an SSH client. Command-line AI tools such as Claude Code, Codex and Grok must be installed and signed in on your server; Roamtty starts them and connects you to them from your phone.</p></details>
 <details><summary>Does my work keep running if I disconnect or close the app?</summary>
 <p>Yes, in tmux mode. Choose Install plugins in the host menu to detect and install tmux; each session then gets its own remote tmux session that is reattached when you reconnect. A plain SSH session without tmux ends when it disconnects.</p></details>
+<details><summary>How do I reach my home or office computer from another network?</summary>
+<p>We recommend Tailscale: install it and sign in on both the phone and the server, then add the server in Roamtty by its <code>100.x.y.z</code> address, with no public IP or port forwarding. You can also self-host Headscale and DERP relays. See <a href="/en/docs/#tailscale">Documentation: Remote access</a>.</p></details>
 <details><summary>mosh does not connect. What should I check?</summary>
-<p>mosh uses UDP ports 60000–61000. Allow them in the server firewall and your cloud provider's security group. If mosh does not answer within 8 seconds, Roamtty falls back to SSH.</p></details>
+<p>mosh uses UDP ports 60000–61000. Allow them in the server firewall and your cloud provider's security group; over Tailscale the UDP traffic goes through the tunnel and usually needs nothing opened. If mosh does not answer within 8 seconds, Roamtty falls back to SSH.</p></details>
 <details><summary>The app says the host fingerprint changed and blocks the connection.</summary>
 <p>The server may have been reinstalled or its key replaced, or someone may be intercepting the connection. Confirm the new fingerprint with the server's administrator first, then choose Verify again… in the host menu.</p></details>
 <details><summary>The connection drops when the screen locks or the app goes to the background.</summary>
@@ -81,6 +83,7 @@
 
 <h2>Related</h2>
 <ul>
+<li><a href="/en/docs/">Documentation</a></li>
 <li><a href="/en/privacy/">Privacy policy</a></li>
 <li><a href="/en/terms/">Terms of use</a></li>
 </ul>
@@ -88,7 +91,7 @@
 
 </main>
 <footer class="site-footer"><div class="wrap">
-<nav aria-label="Footer"><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
 <span>© 2026 Roamtty</span>
 <p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
 </div></footer>

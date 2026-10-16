@@ -32,18 +32,11 @@
 <div>
 <span class="eyebrow">Android · iPhone · 一次买断</span>
 <h1>在手机上<em>继续</em>你的远程 AI 编程</h1>
-<p class="lede">Roamtty 是为触屏设计的 SSH 终端。用 tmux 保持会话、用 mosh 穿越网络切换，在通勤路上查看 Agent 进度、回答它的提问、审阅它改过的文件。</p>
+<p class="lede">Roamtty 是为触屏设计的 SSH 终端。用 tmux 保持会话、用 mosh 穿越网络切换，在通勤路上查看每个 Agent 的进度，直接在会话卡片上批准它的操作或接着追问，再打开终端或文件细看。</p>
 <div class="stores"><span class="store soon" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.6v18.8c0 .5.5.8 1 .6l15.6-8.9c.5-.3.5-1 0-1.3L5 2c-.5-.2-1 .1-1 .6z"/></svg><span><small>即将上架</small><strong>Google Play</strong></span></span><span class="store soon" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-3 1.6-.6.7-1.2 1.9-1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>即将上架</small><strong>App Store</strong></span></span></div>
 <p class="hero-note">Android 8.0 及以上 · iOS 16 及以上 · 无账号、无广告、无遥测</p>
 </div>
-<div class="phone" role="img" aria-label="Roamtty 会话列表示意：三个 AI Agent 会话分别处于运行中、等待确认和空闲状态，下方是终端">
-<div class="bar"><b>会话</b><span>主机</span></div>
-<div class="label">会话 · 3</div>
-<div class="card"><span class="ic" style="background:#3a2a22;color:#f0a27e">✳</span><span class="t">重构登录模块并补充测试</span><span class="s">Claude Code · ~/app</span><span class="st"><i class="dot run"></i>运行中 · npm test</span></div>
-<div class="card"><span class="ic" style="background:#26304a;color:#9db4ff">◎</span><span class="t">修复 CI 中的构建缓存</span><span class="s">Codex · ~/infra</span><span class="st"><i class="dot ask"></i>等待确认</span></div>
-<div class="card"><span class="ic" style="background:#2b3a2f;color:#8fd6a5">❯</span><span class="t">tmux · deploy</span><span class="s">ubuntu · ~/</span><span class="st"><i class="dot idle"></i>空闲 · 上一轮 4 分钟</span></div>
-<div class="term"><span class="d">$ tmux attach -t roamtty-1</span><br><span class="g">✓</span> 42 passed <span class="d">(3.1s)</span><br><span class="p">❯</span> 运行完整测试<br><span class="d">  ⎿ 正在编辑 src/auth/session.ts</span><br><br><span class="p">●</span> 需要运行 <span class="g">git push</span>，是否允许？<br><span class="d">  1. 允许　2. 本次会话都允许　3. 拒绝</span><br><span class="p">❯</span> <span class="cur"></span><img class="pet" src="/assets/icon-512.png" alt=""></div>
-</div>
+<figure class="device"><img src="/assets/screens/sessions-zh.webp" width="720" height="1600" alt="Roamtty 会话列表截图：一个 Codex 会话等待确认（卡片上有“允许”按钮），一个 Claude Code 会话正在运行 npm test，一个已完成的会话显示了结果摘要" fetchpriority="high"></figure>
 </div>
 </section>
 
@@ -55,22 +48,44 @@
 </div>
 <div class="grid">
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.3l5-.7z"/></svg></span>
-<h3>AI Agent 会话</h3><p>选择 Agent、主机和起始文件夹即可开工，可选只读、普通或完全放行权限。会话卡片显示当前任务、运行中 / 等待确认 / 空闲状态和正在执行的命令。</p></div>
+<h3>AI Agent 会话</h3><p>选 Agent、主机和起始文件夹即可开工，可选只读、普通或 YOLO 权限。会话按待确认 / 运行中 / 已完成分组，卡片显示任务、正在执行的命令和结果摘要，可直接点“允许”或“追问”。</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 20V9"/></svg></span>
 <h3>tmux 会话保持</h3><p>每个会话对应独立的远端 tmux 会话。断网、锁屏或关闭应用后任务继续运行，回来时自动重新附着。</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a14.5 14.5 0 0 1 20 0"/><circle cx="12" cy="19.5" r="1"/></svg></span>
-<h3>mosh 漫游</h3><p>主机装有 mosh 时优先走 UDP，在 Wi-Fi 和蜂窝网络之间切换也不断线；没有回应时自动回退到 SSH。</p></div>
+<h3>mosh 漫游</h3><p>主机装有 mosh 时优先走 UDP，在 Wi-Fi 和蜂窝网络之间切换也不断线；没有回应时自动回退到 SSH。tmux 和 mosh 都可在应用内一键安装。</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M9 11V6a3 3 0 0 1 6 0v8"/><path d="M15 11.5a2 2 0 0 1 4 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.2-3L5 15a1.8 1.8 0 0 1 3-2l1 1.5"/></svg></span>
-<h3>为触屏设计的终端</h3><p>双击发送 Tab，左右滑动发送方向键，按住小幽灵拖向快捷键环发送 Esc、Ctrl、F1–F12 等按键；双指缩放字号，长按选择复制或拖动光标。</p></div>
+<h3>为触屏设计的终端</h3><p>双击发送 Tab，左右滑动发送方向键；按住小幽灵弹出按当前程序定制的快捷键环（Claude Code、Codex、Grok、Gemini CLI 各有一套）。双指缩放字号，长按选择复制或拖动光标。</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/><path d="M12 11v5M9.5 13.5L12 16l2.5-2.5"/></svg></span>
-<h3>SFTP 文件</h3><p>浏览服务器文件，预览代码（语法高亮）、Markdown 和图片；上传、下载、重命名、删除，或把手机里的图片路径直接插入终端。</p></div>
+<h3>SFTP 文件</h3><p>浏览服务器文件，预览代码（语法高亮）、Markdown 和图片；上传、下载、重命名、删除，或把手机里的图片路径直接插入终端交给 Agent。</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>
-<h3>主机监控</h3><p>实时查看 Linux、macOS 与 Windows 主机的 CPU、内存、磁盘、网络、GPU 和占用最高的进程，主机卡片显示在线状态与建连延时。</p></div>
+<h3>主机监控</h3><p>实时查看 CPU、内存、磁盘、网络、GPU 和占用最高的进程，确认 Agent 跑的测试或构建是否卡住。</p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+<h3>在任何网络连回家</h3><p>配合 Tailscale（或自建 Headscale 与 DERP 中继）即可从蜂窝网络连回家里或公司的电脑，服务器不必暴露在公网。<a href="/docs/#tailscale">查看组网教程</a></p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+<h3>安全默认</h3><p>首次连接核对 SHA-256 主机指纹，指纹变化直接阻止连接；密码只在你勾选后加密保存，私钥口令从不落盘。</p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+<h3>Linux、macOS、Windows</h3><p>支持 OpenSSH 的 Linux、macOS、BSD 与 Windows 主机，自动识别系统；Windows 上用 psmux 保持会话、PowerShell 读取目录与监控。</p></div>
 </div>
 </div>
 </section>
 
-<section class="block">
+<section class="block" id="screens">
+<div class="wrap">
+<div class="section-head">
+<h2>看看实际界面</h2>
+<p>以下均为 Android 版的实际界面，连接的是演示服务器和示例项目。</p>
+</div>
+<div class="shots">
+<figure class="shot"><img src="/assets/screens/terminal-zh.webp" width="720" height="1600" loading="lazy" alt="Agent 终端：完整的 Claude Code 输出，光标停在输入框里"><figcaption>Agent 终端：完整的 Claude Code 输出，光标停在输入框里</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/ring-zh.webp" width="720" height="1600" loading="lazy" alt="按住小幽灵：Claude Code 专属快捷键环"><figcaption>按住小幽灵：Claude Code 专属快捷键环</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/monitor-zh.webp" width="720" height="1600" loading="lazy" alt="主机详情：实时 CPU、内存、磁盘与网络"><figcaption>主机详情：实时 CPU、内存、磁盘与网络</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/markdown-zh.webp" width="720" height="1600" loading="lazy" alt="Markdown 预览：表格、代码块与任务列表"><figcaption>Markdown 预览：表格、代码块与任务列表</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/code-zh.webp" width="720" height="1600" loading="lazy" alt="代码预览：语法高亮与行号"><figcaption>代码预览：语法高亮与行号</figcaption></figure>
+</div>
+</div>
+</section>
+
+<section class="block alt">
 <div class="wrap">
 <div class="section-head">
 <h2>Android 与 iPhone，同一套体验</h2>
@@ -85,7 +100,7 @@
 </div>
 </section>
 
-<section class="block alt" id="privacy">
+<section class="block" id="privacy">
 <div class="wrap">
 <div class="section-head">
 <h2>你的服务器，只属于你</h2>
@@ -103,7 +118,7 @@
 </div>
 </section>
 
-<section class="block cta">
+<section class="block alt cta">
 <div class="wrap narrow">
 <h2>开始使用</h2>
 <p>从准备服务器、添加主机，到用 Tailscale（或自建 Headscale 与 DERP）在任何网络连回家里的电脑，都写在使用文档里。</p>

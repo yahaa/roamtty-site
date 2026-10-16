@@ -32,18 +32,11 @@
 <div>
 <span class="eyebrow">Android · iPhone · One-time purchase</span>
 <h1>Keep your remote AI coding <em>going</em> from your phone</h1>
-<p class="lede">Roamtty is an SSH terminal designed for touch. tmux keeps your sessions alive and mosh rides out network changes, so you can check on an agent, answer its questions and review the files it changed on the go.</p>
+<p class="lede">Roamtty is an SSH terminal designed for touch. tmux keeps your sessions alive and mosh rides out network changes, so on the go you can see where every agent is, approve its next step or send a follow-up right from the session card, then open the terminal or files for a closer look.</p>
 <div class="stores"><span class="store soon" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.6v18.8c0 .5.5.8 1 .6l15.6-8.9c.5-.3.5-1 0-1.3L5 2c-.5-.2-1 .1-1 .6z"/></svg><span><small>Coming soon</small><strong>Google Play</strong></span></span><span class="store soon" aria-disabled="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1-3.2-1 .1-2.2.7-3 1.6-.6.7-1.2 1.9-1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg><span><small>Coming soon</small><strong>App Store</strong></span></span></div>
 <p class="hero-note">Android 8.0+ · iOS 16+ · No accounts, ads or telemetry</p>
 </div>
-<div class="phone" role="img" aria-label="Illustration of the Roamtty session list: three AI agent sessions that are running, waiting for approval and idle, above a terminal">
-<div class="bar"><b>Sessions</b><span>Hosts</span></div>
-<div class="label">Sessions · 3</div>
-<div class="card"><span class="ic" style="background:#3a2a22;color:#f0a27e">✳</span><span class="t">Refactor login and add tests</span><span class="s">Claude Code · ~/app</span><span class="st"><i class="dot run"></i>Running · npm test</span></div>
-<div class="card"><span class="ic" style="background:#26304a;color:#9db4ff">◎</span><span class="t">Fix the CI build cache</span><span class="s">Codex · ~/infra</span><span class="st"><i class="dot ask"></i>Waiting for approval</span></div>
-<div class="card"><span class="ic" style="background:#2b3a2f;color:#8fd6a5">❯</span><span class="t">tmux · deploy</span><span class="s">ubuntu · ~/</span><span class="st"><i class="dot idle"></i>Idle · last turn 4 min</span></div>
-<div class="term"><span class="d">$ tmux attach -t roamtty-1</span><br><span class="g">✓</span> 42 passed <span class="d">(3.1s)</span><br><span class="p">❯</span> run the full test suite<br><span class="d">  ⎿ Editing src/auth/session.ts</span><br><br><span class="p">●</span> Allow <span class="g">git push</span>?<br><span class="d">  1. Yes　2. Always this session　3. No</span><br><span class="p">❯</span> <span class="cur"></span><img class="pet" src="/assets/icon-512.png" alt=""></div>
-</div>
+<figure class="device"><img src="/assets/screens/sessions-en.webp" width="720" height="1600" alt="Screenshot of the Roamtty session list: a Codex session waiting for approval with an Allow button, a Claude Code session running npm test, and a finished session showing a summary of its result" fetchpriority="high"></figure>
 </div>
 </section>
 
@@ -55,22 +48,44 @@
 </div>
 <div class="grid">
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.3l5-.7z"/></svg></span>
-<h3>AI agent sessions</h3><p>Pick an agent, a host and a start folder, with read-only, normal or skip-confirmation permissions. Session cards show the current task, whether it is running, waiting for you or idle, and the command it is running.</p></div>
+<h3>AI agent sessions</h3><p>Pick an agent, a host and a start folder, with read-only, standard or YOLO permissions. Sessions are grouped into needs you, running and done; cards show the task, the command being run and a summary of the answer, with Allow and Reply right on the card.</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 20V9"/></svg></span>
 <h3>tmux persistence</h3><p>Each session gets its own remote tmux session. Work keeps running when the network drops, the screen locks or the app closes, and reattaches when you come back.</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a14.5 14.5 0 0 1 20 0"/><circle cx="12" cy="19.5" r="1"/></svg></span>
-<h3>mosh roaming</h3><p>When the host has mosh, the terminal uses UDP and survives switching between Wi-Fi and cellular. If mosh does not answer, it falls back to SSH.</p></div>
+<h3>mosh roaming</h3><p>When the host has mosh, the terminal uses UDP and survives switching between Wi-Fi and cellular, falling back to SSH if mosh doesn't answer. Install tmux and mosh from inside the app.</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M9 11V6a3 3 0 0 1 6 0v8"/><path d="M15 11.5a2 2 0 0 1 4 0V15a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.2-3L5 15a1.8 1.8 0 0 1 3-2l1 1.5"/></svg></span>
-<h3>A terminal made for touch</h3><p>Double-tap for Tab, swipe for arrow keys, and hold the little ghost to drag onto a ring of keys such as Esc, Ctrl and F1–F12. Pinch to zoom; hold to select text or drag the cursor.</p></div>
+<h3>A terminal made for touch</h3><p>Double-tap for Tab and swipe for arrow keys. Hold the little ghost for a ring of shortcuts tailored to the program in front: Claude Code, Codex, Grok and Gemini CLI each get their own. Pinch to zoom; hold to select text or drag the cursor.</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 5h6l2 2h8v12H4z"/><path d="M12 11v5M9.5 13.5L12 16l2.5-2.5"/></svg></span>
-<h3>SFTP files</h3><p>Browse server files and preview code with syntax highlighting, Markdown and images. Upload, download, rename and delete, or insert a photo's remote path straight into the terminal.</p></div>
+<h3>SFTP files</h3><p>Browse server files and preview code with syntax highlighting, Markdown and images. Upload, download, rename and delete, or insert a photo's remote path into the terminal for the agent.</p></div>
 <div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg></span>
-<h3>Host monitoring</h3><p>Live CPU, memory, disk, network, GPU and top processes for Linux, macOS and Windows hosts. Host cards show online status and connection latency.</p></div>
+<h3>Host monitoring</h3><p>Live CPU, memory, disk, network, GPU and top processes, to see whether an agent's tests or build are stuck.</p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span>
+<h3>Reach home from any network</h3><p>With Tailscale, or a self-hosted Headscale and DERP relays, reach your home or office machine over cellular without exposing it to the internet. <a href="/en/docs/#tailscale">See the guide</a></p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+<h3>Secure by default</h3><p>Verify the SHA-256 host fingerprint on first connection; a changed fingerprint blocks the connection. Passwords are saved encrypted only if you choose, and key passphrases never are.</p></div>
+<div class="feature"><span class="fi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+<h3>Linux, macOS and Windows</h3><p>Works with Linux, macOS, BSD and Windows hosts running OpenSSH and detects the system for you; on Windows, psmux keeps sessions alive and PowerShell powers folders and monitoring.</p></div>
 </div>
 </div>
 </section>
 
-<section class="block">
+<section class="block" id="screens">
+<div class="wrap">
+<div class="section-head">
+<h2>See it in action</h2>
+<p>Real screens from the Android app, connected to a demo server and sample projects.</p>
+</div>
+<div class="shots">
+<figure class="shot"><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal: full Claude Code output with the cursor in its prompt"><figcaption>Agent terminal: full Claude Code output with the cursor in its prompt</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/ring-en.webp" width="720" height="1600" loading="lazy" alt="Hold the ghost: a shortcut ring made for Claude Code"><figcaption>Hold the ghost: a shortcut ring made for Claude Code</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/monitor-en.webp" width="720" height="1600" loading="lazy" alt="Host details: live CPU, memory, disk and network"><figcaption>Host details: live CPU, memory, disk and network</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview: tables, code blocks and task lists"><figcaption>Markdown preview: tables, code blocks and task lists</figcaption></figure>
+<figure class="shot"><img src="/assets/screens/code-en.webp" width="720" height="1600" loading="lazy" alt="Code preview: syntax highlighting and line numbers"><figcaption>Code preview: syntax highlighting and line numbers</figcaption></figure>
+</div>
+</div>
+</section>
+
+<section class="block alt">
 <div class="wrap">
 <div class="section-head">
 <h2>One experience on Android and iPhone</h2>
@@ -85,7 +100,7 @@
 </div>
 </section>
 
-<section class="block alt" id="privacy">
+<section class="block" id="privacy">
 <div class="wrap">
 <div class="section-head">
 <h2>Your servers stay yours</h2>
@@ -103,7 +118,7 @@
 </div>
 </section>
 
-<section class="block cta">
+<section class="block alt cta">
 <div class="wrap narrow">
 <h2>Get started</h2>
 <p>The documentation covers everything from preparing a server and adding hosts to reaching your home machine from any network with Tailscale, or a self-hosted Headscale and DERP.</p>

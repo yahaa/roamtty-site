@@ -24,7 +24,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
 <a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
-<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/" aria-current="page">Docs</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/docs/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/" aria-current="page">Docs</a><a class="opt keep" href="/en/blog/">Blog</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/docs/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
 </div></header>
 <main id="main">
 <article class="doc docs"><div class="wrap docs-layout">
@@ -46,7 +46,7 @@
 
 <div class="docs-body">
 <h1>Documentation</h1>
-<p class="meta">For Roamtty on Android and iOS. Something missing? See the <a href="/en/support/">support page</a> or email <a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a>.</p>
+<p class="meta">For Roamtty on Android and iOS. Something missing? See the <a href="/en/support/">support page</a> or email <a href="mailto:support@roamtty.com">support@roamtty.com</a>.</p>
 
 <p>Roamtty is an SSH client. AI coding tools (Claude Code, Codex, Grok and others) run on your own server; Roamtty starts them from your phone, shows what they are doing and makes the terminal easy to use by touch. There is no Roamtty backend: connections go only to the hosts you add.</p>
 
@@ -205,7 +205,7 @@ sudo headscale preauthkeys create --user 1 --reusable --expiration 24h</code></p
     - https://controlplane.tailscale.com/derpmap/default   # keep official relays as a fallback
   paths: []</code></pre>
 <p>Open <strong>UDP 3478</strong> and restart Headscale; <code>tailscale netcheck</code> on the server should list your relay with the lowest latency.</p>
-<p>With Tailscale's own service, run the official <code>derper</code> on another server and add a <code>derpMap</code> to your policy file; see <a href="https://tailscale.com/kb/1118/custom-derp-servers">Tailscale's custom DERP guide</a>. Open the ports in both the cloud security group and the server firewall.</p>
+<p>With Tailscale's hosted service, with a relay on another server, or with a server in mainland China, deploy the official <code>derper</code> as described in the blog post <a href="/en/blog/self-hosted-derp/">Self-hosting a DERP relay for Tailscale and Headscale</a>.</p>
 </details>
 
 <h2 id="troubleshooting">Common errors</h2>
@@ -218,13 +218,13 @@ sudo headscale preauthkeys create --user 1 --reusable --expiration 24h</code></p
 <tr><td>Each host can keep up to 8 sessions</td><td>Close sessions you no longer need on that host</td></tr>
 <tr><td>The agent isn't signed in or isn't found</td><td>Check in a plain terminal, as the same user, that <code>claude</code> / <code>codex</code> / <code>grok</code> runs and is signed in</td></tr>
 </table>
-<p>Still stuck? Email <a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a> (never send passwords, private keys or real server addresses).</p>
+<p>Still stuck? Email <a href="mailto:support@roamtty.com">support@roamtty.com</a> (never send passwords, private keys or real server addresses).</p>
 </div>
 </div></article>
 
 </main>
 <footer class="site-footer"><div class="wrap">
-<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:roamtty@gmail.com">roamtty@gmail.com</a></nav>
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/blog/">Blog</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
 <span>© 2026 Roamtty</span>
 <p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
 </div></footer>

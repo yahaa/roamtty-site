@@ -181,3 +181,15 @@ details p, details ul { margin: 6px 0; }
 .site-footer a { color: var(--muted); }
 .site-footer a:hover { color: var(--fg); }
 .site-footer .tm { flex-basis: 100%; font-size: 12.5px; }
+
+/* Blog: a list of post cards; posts reuse the documentation layout. */
+.posts { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 14px; }
+.doc .posts li + li { margin-top: 0; }
+.post-card { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: var(--radius); padding: 18px 20px;
+  color: var(--fg); text-decoration: none; }
+.post-card:hover { color: var(--fg); border-color: color-mix(in srgb, var(--accent) 50%, var(--rule)); }
+.post-card time { font-size: 13.5px; color: var(--muted); }
+.doc .post-card h2 { font-size: 19px; line-height: 1.4; margin: 2px 0 6px; padding: 0; border: 0; color: var(--accent); }
+.post-card p { margin: 0; color: var(--muted); font-size: 15px; }
+.crumb { margin: 0 0 10px; font-size: 14px; }
+.crumb a { text-decoration: none; }

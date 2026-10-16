@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自建 DERP 中继：Tailscale 与 Headscale 教程 · Roamtty</title>
+<meta name="description" content="Tailscale 直连失败时会走 DERP 中继，官方节点都在海外，国内延迟常达数百毫秒。本文部署自己的 derper，分别接入 Tailscale 官方服务和自建 Headscale，并只允许自己的设备使用。">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/blog/self-hosted-derp/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/self-hosted-derp/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/self-hosted-derp/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:title" content="自建 DERP 中继：Tailscale 与 Headscale 教程 · Roamtty">
+<meta property="og:description" content="Tailscale 直连失败时会走 DERP 中继，官方节点都在海外，国内延迟常达数百毫秒。本文部署自己的 derper，分别接入 Tailscale 官方服务和自建 Headscale，并只允许自己的设备使用。">
+<meta property="og:url" content="https://roamtty.com/blog/self-hosted-derp/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="主导航"><a class="opt" href="/#features">功能</a><a class="opt keep" href="/docs/">文档</a><a class="opt keep" href="/blog/" aria-current="page">博客</a><a class="opt" href="/support/">支持</a><a class="opt" href="/privacy/">隐私</a><a class="lang" href="/en/blog/self-hosted-derp/" hreflang="en" lang="en">English</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="目录"><p class="toc-title">目录</p><ol><li><a href="#how">DERP 是什么</a></li><li><a href="#choose">选择方案</a></li><li><a href="#prepare">准备工作</a></li><li><a href="#derper">部署 derper</a></li><li><a href="#tailscale">接入 Tailscale 官方服务</a></li><li><a href="#headscale-embedded">Headscale：开启内置 DERP</a></li><li><a href="#headscale-derper">Headscale：使用独立 derper</a></li><li><a href="#check">验证</a></li><li><a href="#china">国内服务器</a></li><li><a href="#faq">常见问题</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/blog/">← 全部文章</a></p>
+<h1>自建 DERP 中继：Tailscale 与 Headscale 教程</h1>
+<p class="meta"><time datetime="2026-10-16">2026 年 10 月 16 日</time></p>
+<p>在外面用 Roamtty 连家里或公司的服务器时，Tailscale 会先尝试让手机和服务器直接连通；直连失败，流量就改由 DERP 中继转发。官方 DERP 节点都在海外，在中国大陆延迟常达 200–500 ms，打一个字要等半秒才回显。在离你近的服务器上自建 DERP，中继延迟可以降到几十毫秒。</p>
+<p>本文先部署官方的 <code>derper</code>，再分别接入 Tailscale 官方服务和自建 Headscale。命令按写作时的最新版本核对：Tailscale 1.104、Headscale 0.29.5。</p>
+
+<h2 id="how">DERP 是什么</h2>
+<ul>
+<li>Tailscale 设备之间优先用 UDP 直连（NAT 打洞）。两端都在运营商级 NAT、对称 NAT 或严格的防火墙后面时，打洞会失败，手机用蜂窝网络时很常见。</li>
+<li>这时流量经 DERP 中继转发。DERP 走 HTTPS，只转发 WireGuard 加密后的数据包，中继看不到内容，也无法冒充你的设备。</li>
+<li>同一个 <code>derper</code> 进程还提供 STUN（UDP 3478），帮设备发现自己的公网地址，近处的 STUN 也有助于直连成功。</li>
+</ul>
+<p>判断当前是否走中继：在服务器上运行 <code>tailscale status</code>，对端那一行显示 <code>relay "tok"</code> 表示经东京中继，显示 <code>direct 198.51.100.7:41641</code> 则是直连。</p>
+
+<h2 id="choose">选择方案</h2>
+<table>
+<tr><th>你在用</th><th>做法</th></tr>
+<tr><td>Tailscale 官方账号</td><td><a href="#derper">部署 derper</a>，再<a href="#tailscale">在策略文件中添加 derpMap</a></td></tr>
+<tr><td>自建 Headscale，中继放在同一台 VPS</td><td><a href="#headscale-embedded">开启 Headscale 内置 DERP</a>，不用另装 derper</td></tr>
+<tr><td>自建 Headscale，中继放在另一台服务器</td><td><a href="#derper">部署 derper</a>，再<a href="#headscale-derper">写入 derp.yaml</a></td></tr>
+</table>
+
+<h2 id="prepare">准备工作</h2>
+<ul>
+<li><strong>一台有公网 IP 的服务器</strong>，网络上离你常去的地方近（国内云厂商或香港）。1 核 1 GB 足够，SSH 和 mosh 的流量很小。不要放在负载均衡、反向代理或 CDN 后面。</li>
+<li><strong>一个域名</strong>，A 记录指向这台服务器，下文用 <code>derp.example.com</code>、公网 IP 用 <code>203.0.113.10</code> 代替。DNS 托管在 Cloudflare 时设为“仅 DNS”（灰色云），DERP 经 CDN 代理会连不上。没有域名见<a href="#ip">直接用 IP</a>。</li>
+<li><strong>放行端口</strong>：TCP 443（DERP）、TCP 80（申请证书和网络检测）、UDP 3478（STUN），并允许 ICMP。云厂商的安全组和系统防火墙都要放行。</li>
+</ul>
+<pre><code># Ubuntu / Debian 用 ufw 时
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 3478/udp</code></pre>
+<p class="note">中国大陆的服务器：未备案的域名访问 80 / 443 端口会被云厂商拦截，请先看<a href="#china">国内服务器</a>一节，改用高位端口。</p>
+
+<h2 id="derper">部署 derper</h2>
+<p>接入 Tailscale 官方服务和 Headscale 外置中继都用这一节，以 Ubuntu / Debian 为例。</p>
+<h3>1. 编译安装</h3>
+<p>derper 没有预编译包，用 Go 编译。ARM 服务器把下面的 <code>amd64</code> 换成 <code>arm64</code>；在国内把 <code>go.dev</code> 换成 <code>golang.google.cn</code>，并先设置 <code>export GOPROXY=https://goproxy.cn,direct</code>。</p>
+<pre><code>curl -fsSL https://go.dev/dl/go1.27.2.linux-amd64.tar.gz | sudo tar -C /usr/local -xz
+export PATH=$PATH:/usr/local/go/bin
+go install tailscale.com/cmd/derper@latest
+sudo install -m 755 ~/go/bin/derper /usr/local/bin/derper</code></pre>
+<p>Tailscale 客户端升级后偶尔需要新版 derper，每隔几个月重新运行后两条命令并重启服务即可。</p>
+
+<h3>2. 用 systemd 运行</h3>
+<pre><code>sudo tee /etc/systemd/system/derper.service &gt; /dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Tailscale DERP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/derper -hostname derp.example.com -a :443 -http-port 80 -stun-port 3478 -certdir /var/lib/derper/certs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now derper</code></pre>
+<p>默认的证书模式会在第一次 HTTPS 访问时向 Let's Encrypt 申请证书并自动续期，所以域名解析要已生效，80、443 端口要能从公网访问。验证：</p>
+<pre><code>curl https://derp.example.com</code></pre>
+<p>返回的 HTML 里有 <code>This is a Tailscale DERP server</code> 即部署成功。出错时用 <code>journalctl -u derper -f</code> 查看日志。</p>
+
+<h3 id="verify-clients">3. 只允许自己的设备使用</h3>
+<p>默认任何人知道你的域名，都能把它加进自己的 DERP 列表，占用你的带宽。按接入方式二选一，在 <code>ExecStart</code> 那一行末尾追加参数：</p>
+<ul>
+<li><strong>Tailscale 官方</strong>：先在这台服务器上安装 Tailscale 并登录同一个账号（<code>curl -fsSL https://tailscale.com/install.sh | sh</code>，再 <code>sudo tailscale up</code>），然后追加 <code>-verify-clients</code>。derper 通过本机的 tailscaled 判断连接者是否属于你的 tailnet。在管理后台为这台机器关闭密钥过期（Disable key expiry），否则过期后所有中继请求都会被拒绝。</li>
+<li><strong>Headscale</strong>：追加 <code>-verify-client-url=https://hs.example.com/verify -verify-client-url-fail-open=false</code>。有设备接入时 derper 询问 Headscale，只放行在 Headscale 登记过的设备；第二个参数让 Headscale 暂时不可达时拒绝连接，默认是放行。</li>
+</ul>
+<pre><code>sudo systemctl daemon-reload &amp;&amp; sudo systemctl restart derper</code></pre>
+
+<h2 id="tailscale">接入 Tailscale 官方服务</h2>
+<p>打开 Tailscale 管理后台的 <strong>Access controls</strong>，切换到 JSON 编辑器，在策略文件最外层加入 <code>derpMap</code>：</p>
+<pre><code>{
+  // 原有的 grants、acls、tagOwners 等保持不变
+  "derpMap": {
+    "Regions": {
+      "900": {
+        "RegionID": 900,
+        "RegionCode": "myderp",
+        "RegionName": "My DERP",
+        "Nodes": [
+          {
+            "Name": "900a",
+            "RegionID": 900,
+            "HostName": "derp.example.com",
+            "IPv4": "203.0.113.10"
+          }
+        ]
+      }
+    }
+  }
+}</code></pre>
+<ul>
+<li>区域 ID 900–999 留给自建节点。每个区域放一台服务器，有多台就分别建 900、901……</li>
+<li><code>IPv4</code> 可选，建议填写，DNS 出问题时设备仍能连上中继。</li>
+<li>端口不是 443 时在节点里加 <code>"DERPPort": 33445</code>，STUN 端口不是 3478 时加 <code>"STUNPort"</code>。</li>
+<li>官方节点会保留作为后备，设备自动选延迟最低的区域。只想用自己的节点时，在 <code>derpMap</code> 中加 <code>"OmitDefaultRegions": true</code>；但这台服务器一旦故障，无法直连的设备就会断开。</li>
+</ul>
+<p>保存后新的 DERP 列表会立即下发到所有设备，不用重启客户端。</p>
+
+<h2 id="headscale-embedded">Headscale：开启内置 DERP</h2>
+<p>Headscale 自带 DERP 服务器，使用 <code>server_url</code> 的域名、端口和证书，不用另装 derper。编辑 <code>/etc/headscale/config.yaml</code>：</p>
+<pre><code>derp:
+  server:
+    enabled: true
+    region_id: 999
+    region_code: "headscale"
+    region_name: "Headscale Embedded DERP"
+    verify_clients: true              # 只允许本 Headscale 的设备使用
+    stun_listen_addr: "0.0.0.0:3478"
+    private_key_path: /var/lib/headscale/derp_server_private.key
+    automatically_add_embedded_derp_region: true
+    ipv4: 203.0.113.10                # VPS 的公网 IP
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default   # 保留官方节点作后备
+  paths: []
+  auto_update_enabled: true
+  update_frequency: 3h</code></pre>
+<pre><code>sudo ufw allow 3478/udp
+sudo systemctl restart headscale</code></pre>
+<ul>
+<li><code>server_url</code> 必须是 https。用 Caddy 反向代理时不用改；用 nginx 时要转发 <code>Upgrade</code> 和 <code>Connection</code> 请求头。</li>
+<li>VPS 访问不了 <code>controlplane.tailscale.com</code> 时，Headscale 会因下载不到官方 DERP 列表而启动失败，此时把 <code>urls</code> 改成 <code>[]</code>，只用自建节点。</li>
+<li>内置 DERP 没有做吞吐优化，自用足够；中继流量大时改用独立的 derper。</li>
+</ul>
+
+<h2 id="headscale-derper">Headscale：使用独立 derper</h2>
+<p>中继放在另一台离你更近的服务器上时，先按<a href="#derper">部署 derper</a>装好（客户端验证用 <code>-verify-client-url</code>），再在 Headscale 所在的 VPS 上新建 <code>/etc/headscale/derp.yaml</code>，键名全部小写：</p>
+<pre><code>regions:
+  900:
+    regionid: 900
+    regioncode: myderp
+    regionname: My DERP
+    nodes:
+      - name: 900a
+        regionid: 900
+        hostname: derp.example.com
+        ipv4: 203.0.113.10
+        stunport: 3478
+        derpport: 443</code></pre>
+<p>在 <code>config.yaml</code> 中引用它：</p>
+<pre><code>derp:
+  server:
+    enabled: false
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default
+  paths:
+    - /etc/headscale/derp.yaml
+  auto_update_enabled: true
+  update_frequency: 3h</code></pre>
+<p>运行 <code>sudo systemctl restart headscale</code> 后生效。内置 DERP 和独立 derper 也可以同时用：保持 <code>server.enabled: true</code>，再在 <code>paths</code> 中加上 derp.yaml。</p>
+
+<h2 id="check">验证</h2>
+<p>在任意一台已加入网络的电脑或服务器上运行：</p>
+<pre><code>tailscale netcheck</code></pre>
+<p>DERP 延迟列表里应出现你的节点，并且延迟最低，输出类似：</p>
+<pre><code>* Nearest DERP: My DERP
+* DERP latency:
+    - myderp: 12.3ms  (My DERP)
+    - hkg: 48.9ms  (Hong Kong)
+    - tok: 71.4ms  (Tokyo)</code></pre>
+<p>Headscale 内置 DERP 的区域代码是 <code>headscale</code>。还可以检查连通性，并看到对端的实际路径：</p>
+<pre><code>tailscale debug derp myderp      # 检查与该区域的 TLS 和 STUN
+tailscale ping 100.64.0.2        # 对端的 Tailscale IP</code></pre>
+<p><code>tailscale ping</code> 先显示 <code>via DERP(myderp)</code>，打洞成功后变成 <code>via 198.51.100.7:41641</code> 直连。Roamtty 里不用做任何设置，照常用服务器的 <code>100.x.y.z</code> 地址连接。</p>
+
+<h2 id="china">国内服务器</h2>
+<p>中国大陆的云服务器上，未备案域名访问 80 / 443 会被拦截，Let's Encrypt 的验证也随之失败。做法是换一个高位端口（下例 33445），并用 DNS 验证申请证书。</p>
+<h3>1. 用 DNS 验证申请证书</h3>
+<p>以 DNS 托管在 Cloudflare 为例，用 <a href="https://github.com/acmesh-official/acme.sh">acme.sh</a> 申请（API 令牌需要该域名的 DNS 编辑权限；其他 DNS 服务商见 acme.sh 文档），在 root 下运行：</p>
+<pre><code>curl https://get.acme.sh | sh -s email=you@example.com
+export CF_Token=&lt;Cloudflare API 令牌&gt;
+~/.acme.sh/acme.sh --issue --server letsencrypt --dns dns_cf -d derp.example.com
+mkdir -p /etc/derper/certs
+~/.acme.sh/acme.sh --install-cert -d derp.example.com \
+  --key-file /etc/derper/certs/derp.example.com.key \
+  --fullchain-file /etc/derper/certs/derp.example.com.crt \
+  --reloadcmd "systemctl restart derper"</code></pre>
+<p>证书文件名必须是 <code>&lt;域名&gt;.crt</code> 和 <code>&lt;域名&gt;.key</code>。acme.sh 会自动续期，并在续期后重启 derper 加载新证书。</p>
+<h3>2. 改用高位端口</h3>
+<p>把 <code>derper.service</code> 的 <code>ExecStart</code> 改为下面这行，关闭 80 端口，从目录读取证书；安全组放行 TCP 33445 和 UDP 3478：</p>
+<pre><code>ExecStart=/usr/local/bin/derper -hostname derp.example.com -a :33445 -http-port -1 -stun-port 3478 -certmode manual -certdir /etc/derper/certs</code></pre>
+<p>DERP 列表里同步改端口：Tailscale 策略文件的节点加 <code>"DERPPort": 33445</code>，Headscale 的 derp.yaml 写 <code>derpport: 33445</code>。</p>
+<h3 id="ip">没有域名：直接用 IP</h3>
+<p><code>-hostname</code> 填公网 IP 并使用 <code>-certmode manual</code> 时，derper 会自动生成自签名证书，并在日志里打印一段带 <code>CertName</code> 的节点配置：</p>
+<pre><code>ExecStart=/usr/local/bin/derper -hostname 203.0.113.10 -a :33445 -http-port -1 -stun-port 3478 -certmode manual -certdir /etc/derper/certs</code></pre>
+<pre><code>sudo journalctl -u derper | grep CertName</code></pre>
+<p>把日志中的 <code>"CertName": "sha256-raw:…"</code> 加到节点配置里（derp.yaml 中写作 <code>certname</code>），<code>HostName</code> 填 IP。客户端按证书指纹校验，不需要域名和 CA 证书，但所有设备的 Tailscale 都要是 1.82 或更新的版本。</p>
+
+<h2 id="faq">常见问题</h2>
+<table>
+<tr><th>现象</th><th>处理</th></tr>
+<tr><td><code>netcheck</code> 里没有自己的节点</td><td>Tailscale：确认策略文件已保存。Headscale：确认已重启，运行 <code>tailscale debug derp-map</code> 查看是否有该区域，derp.yaml 键名是否小写</td></tr>
+<tr><td>有节点但没有延迟数值</td><td>DERP 端口不通或证书无效：在另一台机器上运行 <code>curl -v https://derp.example.com</code>（自定义端口加上 <code>:33445</code>），检查安全组</td></tr>
+<tr><td>Let's Encrypt 证书申请失败</td><td>域名未解析到本机、80 / 443 不通，或开了 Cloudflare 代理（橙色云）；国内服务器见上一节</td></tr>
+<tr><td>加了 <code>-verify-clients</code> 后都连不上</td><td>这台服务器上的 Tailscale 未登录、已过期或不在同一个 tailnet，运行 <code>tailscale status</code> 检查</td></tr>
+<tr><td>Headscale 启动失败，日志提到 DERPMap</td><td>VPS 访问不了 <code>controlplane.tailscale.com</code>，把 <code>urls</code> 设为 <code>[]</code></td></tr>
+<tr><td>走自建中继后延迟仍高</td><td>中继延迟等于手机到中继再到服务器的往返，选两边都近的机房；给服务器放行 UDP 41641 有助于直连</td></tr>
+</table>
+<p>Tailscale 与 Headscale 的基本配置见使用文档的<a href="/docs/#tailscale">从外网连接</a>一节。</p>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="页脚"><a href="/docs/">使用文档</a><a href="/blog/">博客</a><a href="/support/">支持与联系</a><a href="/privacy/">隐私政策</a><a href="/terms/">使用条款</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code、Codex、Grok 是其各自所有者的商标，Roamtty 与这些公司没有关联。Google Play 是 Google LLC 的商标；App Store、iPhone 是 Apple Inc. 的商标。</p>
+</div></footer>
+</body>
+</html>

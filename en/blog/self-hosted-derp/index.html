@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-hosting a DERP relay for Tailscale and Headscale · Roamtty</title>
+<meta name="description" content="When Tailscale can&#x27;t connect two devices directly, it relays traffic through DERP servers that may be far away. Run your own derper, add it to Tailscale or Headscale, and keep it for your own devices.">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/en/blog/self-hosted-derp/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/self-hosted-derp/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/self-hosted-derp/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:title" content="Self-hosting a DERP relay for Tailscale and Headscale · Roamtty">
+<meta property="og:description" content="When Tailscale can&#x27;t connect two devices directly, it relays traffic through DERP servers that may be far away. Run your own derper, add it to Tailscale or Headscale, and keep it for your own devices.">
+<meta property="og:url" content="https://roamtty.com/en/blog/self-hosted-derp/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/">Docs</a><a class="opt keep" href="/en/blog/" aria-current="page">Blog</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/blog/self-hosted-derp/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li><a href="#how">What DERP does</a></li><li><a href="#choose">Pick a setup</a></li><li><a href="#prepare">Before you start</a></li><li><a href="#derper">Deploy derper</a></li><li><a href="#tailscale">Add it to Tailscale</a></li><li><a href="#headscale-embedded">Headscale: the embedded DERP</a></li><li><a href="#headscale-derper">Headscale: a standalone derper</a></li><li><a href="#check">Check that it works</a></li><li><a href="#china">Servers in mainland China</a></li><li><a href="#faq">Troubleshooting</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/en/blog/">← All posts</a></p>
+<h1>Self-hosting a DERP relay for Tailscale and Headscale</h1>
+<p class="meta"><time datetime="2026-10-16">October 16, 2026</time></p>
+<p>When you use Roamtty to reach a server at home or at work, Tailscale first tries to connect your phone and the server directly. If that fails, traffic goes through a DERP relay. Tailscale's relays are spread across the world, but if none is near you (mainland China is the usual example), every keystroke can take 200–500 ms to echo. A DERP relay of your own, close to you, brings that down to tens of milliseconds.</p>
+<p>This guide sets up the official <code>derper</code> and then adds it to Tailscale's hosted service or to a self-hosted Headscale. Commands were checked against the latest releases at the time of writing: Tailscale 1.104 and Headscale 0.29.5.</p>
+
+<h2 id="how">What DERP does</h2>
+<ul>
+<li>Tailscale devices prefer a direct UDP connection (NAT traversal). When both ends sit behind carrier-grade NAT, symmetric NAT or a strict firewall, traversal fails. This is common on mobile networks.</li>
+<li>Traffic then goes through a DERP relay over HTTPS. The relay only forwards WireGuard-encrypted packets: it can't read them or impersonate your devices.</li>
+<li>The same <code>derper</code> process also runs STUN (UDP 3478), which lets devices discover their public address. A nearby STUN server also helps direct connections succeed.</li>
+</ul>
+<p>To see whether you are relayed, run <code>tailscale status</code> on the server. <code>relay "tok"</code> on the peer's line means traffic goes through Tokyo; <code>direct 198.51.100.7:41641</code> means a direct connection.</p>
+
+<h2 id="choose">Pick a setup</h2>
+<table>
+<tr><th>You use</th><th>Steps</th></tr>
+<tr><td>Tailscale's hosted service</td><td><a href="#derper">Deploy derper</a>, then <a href="#tailscale">add a derpMap to your policy file</a></td></tr>
+<tr><td>Headscale, relay on the same VPS</td><td><a href="#headscale-embedded">Turn on Headscale's embedded DERP</a>; no separate derper needed</td></tr>
+<tr><td>Headscale, relay on another server</td><td><a href="#derper">Deploy derper</a>, then <a href="#headscale-derper">add it to derp.yaml</a></td></tr>
+</table>
+
+<h2 id="prepare">Before you start</h2>
+<ul>
+<li><strong>A server with a public IP</strong>, close (in network terms) to where you usually are. One CPU and 1 GB of memory are plenty; SSH and mosh use very little bandwidth. Don't put it behind a load balancer, reverse proxy or CDN.</li>
+<li><strong>A domain name</strong> with an A record pointing at the server. This guide uses <code>derp.example.com</code> and the public IP <code>203.0.113.10</code>. If your DNS is on Cloudflare, set the record to "DNS only" (grey cloud): DERP does not work through the CDN proxy. No domain? See <a href="#ip">using an IP address</a>.</li>
+<li><strong>Open ports</strong>: TCP 443 (DERP), TCP 80 (certificates and captive-portal checks), UDP 3478 (STUN), and allow ICMP. Open them in both your cloud provider's security group and the server firewall.</li>
+</ul>
+<pre><code># Ubuntu / Debian with ufw
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 3478/udp</code></pre>
+<p class="note">Servers in mainland China: providers block ports 80 and 443 for domains without an ICP filing. Read <a href="#china">servers in mainland China</a> first and use a high port instead.</p>
+
+<h2 id="derper">Deploy derper</h2>
+<p>Both Tailscale's hosted service and a standalone Headscale relay use this section. The examples are for Ubuntu / Debian.</p>
+<h3>1. Build and install</h3>
+<p>derper has no prebuilt packages, so build it with Go. On ARM servers replace <code>amd64</code> with <code>arm64</code>.</p>
+<pre><code>curl -fsSL https://go.dev/dl/go1.27.2.linux-amd64.tar.gz | sudo tar -C /usr/local -xz
+export PATH=$PATH:/usr/local/go/bin
+go install tailscale.com/cmd/derper@latest
+sudo install -m 755 ~/go/bin/derper /usr/local/bin/derper</code></pre>
+<p>New Tailscale clients occasionally need a newer derper. Every few months, run the last two commands again and restart the service.</p>
+
+<h3>2. Run it with systemd</h3>
+<pre><code>sudo tee /etc/systemd/system/derper.service &gt; /dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Tailscale DERP server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/derper -hostname derp.example.com -a :443 -http-port 80 -stun-port 3478 -certdir /var/lib/derper/certs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable --now derper</code></pre>
+<p>By default derper requests a Let's Encrypt certificate on the first HTTPS request and renews it automatically, so the DNS record must already resolve and ports 80 and 443 must be reachable from the internet. Check it:</p>
+<pre><code>curl https://derp.example.com</code></pre>
+<p>If the HTML contains <code>This is a Tailscale DERP server</code>, it works. Otherwise read the log with <code>journalctl -u derper -f</code>.</p>
+
+<h3 id="verify-clients">3. Allow only your own devices</h3>
+<p>Out of the box, anyone who knows your domain can add it to their DERP map and use your bandwidth. Append one of these to the <code>ExecStart</code> line:</p>
+<ul>
+<li><strong>Tailscale</strong>: install Tailscale on this server and sign in to the same tailnet (<code>curl -fsSL https://tailscale.com/install.sh | sh</code>, then <code>sudo tailscale up</code>), and append <code>-verify-clients</code>. derper asks the local tailscaled whether each client belongs to your tailnet. Disable key expiry for this machine in the admin console, or every relay request is refused once its key expires.</li>
+<li><strong>Headscale</strong>: append <code>-verify-client-url=https://hs.example.com/verify -verify-client-url-fail-open=false</code>. derper asks Headscale about each client and admits only devices Headscale knows. The second flag refuses connections while Headscale is unreachable; the default is to let them through.</li>
+</ul>
+<pre><code>sudo systemctl daemon-reload &amp;&amp; sudo systemctl restart derper</code></pre>
+
+<h2 id="tailscale">Add it to Tailscale</h2>
+<p>In the Tailscale admin console, open <strong>Access controls</strong>, switch to the JSON editor and add a top-level <code>derpMap</code> to the policy file:</p>
+<pre><code>{
+  // keep your existing grants, acls, tagOwners and so on
+  "derpMap": {
+    "Regions": {
+      "900": {
+        "RegionID": 900,
+        "RegionCode": "myderp",
+        "RegionName": "My DERP",
+        "Nodes": [
+          {
+            "Name": "900a",
+            "RegionID": 900,
+            "HostName": "derp.example.com",
+            "IPv4": "203.0.113.10"
+          }
+        ]
+      }
+    }
+  }
+}</code></pre>
+<ul>
+<li>Region IDs 900–999 are reserved for your own relays. Use one server per region; for more servers, add regions 901, 902 and so on.</li>
+<li><code>IPv4</code> is optional but recommended: devices can still reach the relay when DNS has problems.</li>
+<li>If DERP is not on port 443, add <code>"DERPPort": 33445</code> to the node; if STUN is not on 3478, add <code>"STUNPort"</code>.</li>
+<li>Tailscale's own regions stay as a fallback and devices pick the fastest region automatically. To use only your relay, add <code>"OmitDefaultRegions": true</code> to <code>derpMap</code>, but devices that can't connect directly will lose connectivity whenever that server is down.</li>
+</ul>
+<p>Once saved, the new DERP map reaches all devices right away; no client restart is needed.</p>
+
+<h2 id="headscale-embedded">Headscale: the embedded DERP</h2>
+<p>Headscale has a DERP server built in. It uses the domain, port and certificate of <code>server_url</code>, so no separate derper is needed. In <code>/etc/headscale/config.yaml</code>:</p>
+<pre><code>derp:
+  server:
+    enabled: true
+    region_id: 999
+    region_code: "headscale"
+    region_name: "Headscale Embedded DERP"
+    verify_clients: true              # only this Headscale's devices may use it
+    stun_listen_addr: "0.0.0.0:3478"
+    private_key_path: /var/lib/headscale/derp_server_private.key
+    automatically_add_embedded_derp_region: true
+    ipv4: 203.0.113.10                # the VPS's public IP
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default   # keep Tailscale's relays as a fallback
+  paths: []
+  auto_update_enabled: true
+  update_frequency: 3h</code></pre>
+<pre><code>sudo ufw allow 3478/udp
+sudo systemctl restart headscale</code></pre>
+<ul>
+<li><code>server_url</code> must use https. Caddy as a reverse proxy works as is; with nginx, pass the <code>Upgrade</code> and <code>Connection</code> headers through.</li>
+<li>If the VPS can't reach <code>controlplane.tailscale.com</code>, Headscale fails to start because it can't download Tailscale's DERP map. Set <code>urls</code> to <code>[]</code> to use only your own relay.</li>
+<li>The embedded DERP isn't tuned for throughput. It's fine for personal use; switch to a standalone derper if you relay a lot of traffic.</li>
+</ul>
+
+<h2 id="headscale-derper">Headscale: a standalone derper</h2>
+<p>To run the relay on another server closer to you, deploy it as in <a href="#derper">deploy derper</a> (with <code>-verify-client-url</code>), then create <code>/etc/headscale/derp.yaml</code> on the Headscale VPS. All keys are lowercase:</p>
+<pre><code>regions:
+  900:
+    regionid: 900
+    regioncode: myderp
+    regionname: My DERP
+    nodes:
+      - name: 900a
+        regionid: 900
+        hostname: derp.example.com
+        ipv4: 203.0.113.10
+        stunport: 3478
+        derpport: 443</code></pre>
+<p>Reference it from <code>config.yaml</code>:</p>
+<pre><code>derp:
+  server:
+    enabled: false
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default
+  paths:
+    - /etc/headscale/derp.yaml
+  auto_update_enabled: true
+  update_frequency: 3h</code></pre>
+<p>Apply it with <code>sudo systemctl restart headscale</code>. You can also use the embedded DERP and a standalone derper together: keep <code>server.enabled: true</code> and list derp.yaml under <code>paths</code>.</p>
+
+<h2 id="check">Check that it works</h2>
+<p>On any computer or server in your network, run:</p>
+<pre><code>tailscale netcheck</code></pre>
+<p>Your relay should appear in the DERP latency list, with the lowest latency. The output looks like this:</p>
+<pre><code>* Nearest DERP: My DERP
+* DERP latency:
+    - myderp: 12.3ms  (My DERP)
+    - hkg: 48.9ms  (Hong Kong)
+    - tok: 71.4ms  (Tokyo)</code></pre>
+<p>The embedded Headscale DERP shows up with the region code <code>headscale</code>. You can also test connectivity and see the path to a peer:</p>
+<pre><code>tailscale debug derp myderp      # TLS and STUN checks for that region
+tailscale ping 100.64.0.2        # the peer's Tailscale IP</code></pre>
+<p><code>tailscale ping</code> first reports <code>via DERP(myderp)</code>, then <code>via 198.51.100.7:41641</code> once a direct path is found. Nothing changes in Roamtty: keep connecting to the server's <code>100.x.y.z</code> address.</p>
+
+<h2 id="china">Servers in mainland China</h2>
+<p>On cloud servers in mainland China, ports 80 and 443 are blocked for domains without an ICP filing, and Let's Encrypt validation fails with them. Use a high port (33445 below) and get the certificate through DNS validation instead.</p>
+<h3>1. Get a certificate with DNS validation</h3>
+<p>With DNS on Cloudflare and <a href="https://github.com/acmesh-official/acme.sh">acme.sh</a> (the API token needs DNS edit permission for the zone; acme.sh documents other DNS providers), run as root:</p>
+<pre><code>curl https://get.acme.sh | sh -s email=you@example.com
+export CF_Token=&lt;Cloudflare API token&gt;
+~/.acme.sh/acme.sh --issue --server letsencrypt --dns dns_cf -d derp.example.com
+mkdir -p /etc/derper/certs
+~/.acme.sh/acme.sh --install-cert -d derp.example.com \
+  --key-file /etc/derper/certs/derp.example.com.key \
+  --fullchain-file /etc/derper/certs/derp.example.com.crt \
+  --reloadcmd "systemctl restart derper"</code></pre>
+<p>The files must be named <code>&lt;domain&gt;.crt</code> and <code>&lt;domain&gt;.key</code>. acme.sh renews the certificate and restarts derper so it loads the new one.</p>
+<h3>2. Move to a high port</h3>
+<p>Change <code>ExecStart</code> in <code>derper.service</code> to the line below, which turns off port 80 and reads the certificate from the directory. Open TCP 33445 and UDP 3478 in the security group:</p>
+<pre><code>ExecStart=/usr/local/bin/derper -hostname derp.example.com -a :33445 -http-port -1 -stun-port 3478 -certmode manual -certdir /etc/derper/certs</code></pre>
+<p>Update the port in your DERP map too: <code>"DERPPort": 33445</code> on the node in the Tailscale policy file, or <code>derpport: 33445</code> in Headscale's derp.yaml.</p>
+<h3 id="ip">No domain: using an IP address</h3>
+<p>With a public IP as <code>-hostname</code> and <code>-certmode manual</code>, derper generates a self-signed certificate and logs a node entry containing a <code>CertName</code>:</p>
+<pre><code>ExecStart=/usr/local/bin/derper -hostname 203.0.113.10 -a :33445 -http-port -1 -stun-port 3478 -certmode manual -certdir /etc/derper/certs</code></pre>
+<pre><code>sudo journalctl -u derper | grep CertName</code></pre>
+<p>Add the logged <code>"CertName": "sha256-raw:…"</code> to your node (<code>certname</code> in derp.yaml) and set <code>HostName</code> to the IP. Clients then check the certificate's fingerprint, so you need neither a domain nor a CA-issued certificate, but every device must run Tailscale 1.82 or later.</p>
+
+<h2 id="faq">Troubleshooting</h2>
+<table>
+<tr><th>Symptom</th><th>What to do</th></tr>
+<tr><td>Your relay is missing from <code>netcheck</code></td><td>Tailscale: make sure the policy file was saved. Headscale: make sure you restarted it, that <code>tailscale debug derp-map</code> lists the region, and that derp.yaml keys are lowercase</td></tr>
+<tr><td>Your relay is listed without a latency</td><td>The DERP port is closed or the certificate is invalid: run <code>curl -v https://derp.example.com</code> from another machine (add <code>:33445</code> for a custom port) and check the security group</td></tr>
+<tr><td>Let's Encrypt fails</td><td>The domain doesn't resolve to this server, ports 80 / 443 are closed, or the Cloudflare proxy (orange cloud) is on. For servers in mainland China, see the previous section</td></tr>
+<tr><td>Nothing connects after adding <code>-verify-clients</code></td><td>Tailscale on this server is signed out, expired or in another tailnet; check with <code>tailscale status</code></td></tr>
+<tr><td>Headscale won't start and the log mentions DERPMap</td><td>The VPS can't reach <code>controlplane.tailscale.com</code>; set <code>urls</code> to <code>[]</code></td></tr>
+<tr><td>Still slow through your own relay</td><td>Relay latency is the round trip from phone to relay to server, so pick a location close to both. Allowing UDP 41641 into the server helps direct connections</td></tr>
+</table>
+<p>For the basic Tailscale and Headscale setup, see <a href="/en/docs/#tailscale">connecting from anywhere</a> in the documentation.</p>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/blog/">Blog</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
+</div></footer>
+</body>
+</html>

@@ -76,8 +76,11 @@
 <div class="pair"><div>
 <p>Tap <strong>+</strong> on the Hosts page and fill in a name, the address (domain, LAN IP or Tailscale <code>100.x.y.z</code>), username and port.</p>
 <p>Sign in with a <strong>Password</strong>, a <strong>Private key</strong> (Ed25519 / RSA, encrypted keys supported) or <strong>Interactive authentication</strong> (one-time codes and similar). A password is stored only if you turn on “Encrypt and save password on this device”. Leave the session mode on <strong>tmux</strong>.</p>
-<p><strong>Check the fingerprint on first connect.</strong> Run this on the server and compare with the SHA-256 fingerprint Roamtty shows before trusting it:</p>
+<p>On first connect Roamtty shows the server's SHA-256 fingerprint; tap “Trust and connect”.</p>
+<details><summary>Optional: check the fingerprint</summary>
+<p>To make sure you reached your own server (say, on public Wi-Fi), run this on the server and check that the <code>SHA256:…</code> in the output matches the one Roamtty shows:</p>
 <pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
+</details>
 <p>If the fingerprint later changes, the connection is blocked. Once you've confirmed the server was reinstalled or rekeyed, choose “Verify again…” from the host menu.</p>
 </div>
 <figure><img src="/assets/screens/add-host-en.webp" width="720" height="1600" loading="lazy" alt="Add host screen: name, address, username, port, authentication method and session mode"><figcaption>Add host</figcaption></figure>

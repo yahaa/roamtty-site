@@ -76,8 +76,11 @@
 <div class="pair"><div>
 <p>在主机页点 <strong>+</strong>，填名称、地址（域名、局域网 IP 或 Tailscale 的 <code>100.x.y.z</code>）、用户名和端口。</p>
 <p>认证方式可选<strong>密码</strong>、<strong>私钥</strong>（Ed25519 / RSA，支持加密私钥）或<strong>交互式认证</strong>（一次性验证码等）。密码只在勾选“在本机加密保存密码”时保存。会话模式保持默认的 <strong>tmux</strong>。</p>
-<p><strong>首次连接要核对指纹。</strong>在服务器上运行下面的命令，与应用显示的 SHA-256 指纹比对后再信任：</p>
+<p>首次连接会弹出服务器的 SHA-256 指纹，点“信任并连接”即可。</p>
+<details><summary>可选：核对指纹</summary>
+<p>想确认连上的确实是自己的服务器（比如在公共 Wi-Fi 上），可在服务器上运行下面的命令，看输出中的 <code>SHA256:…</code> 是否与应用显示的一致：</p>
 <pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
+</details>
 <p>以后指纹变化时连接会被阻止；确认是服务器重装或换了密钥后，在主机菜单中选“重新核验…”。</p>
 </div>
 <figure><img src="/assets/screens/add-host-zh.webp" width="720" height="1600" loading="lazy" alt="添加主机页：名称、地址、用户名、端口、认证方式和会话模式"><figcaption>添加主机</figcaption></figure>

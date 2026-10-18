@@ -9,16 +9,20 @@
 <link rel="canonical" href="https://roamtty.com/support/">
 <link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/support/">
 <link rel="alternate" hreflang="en" href="https://roamtty.com/en/support/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/support/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/style.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="支持与联系 · Roamtty">
 <meta property="og:description" content="Roamtty 使用帮助、常见问题与联系方式。">
 <meta property="og:url" content="https://roamtty.com/support/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "使用 Roamtty 需要准备什么？", "acceptedAnswer": {"@type": "Answer", "text": "一台可以通过 SSH 登录的服务器，以及登录用的密码或私钥（支持 OpenSSH / PEM 格式的 Ed25519、RSA 私钥，包括加密私钥）。在主机页点 + 添加主机即可。"}}, {"@type": "Question", "name": "Roamtty 自带 AI 模型吗？", "acceptedAnswer": {"@type": "Answer", "text": "不带。Roamtty 是 SSH 客户端，Claude Code、Codex、Grok 等命令行 AI 工具需要你自行安装在服务器上并完成登录，Roamtty 负责在手机上启动并连接它们。"}}, {"@type": "Question", "name": "断线或关掉应用后，服务器上的任务还在吗？", "acceptedAnswer": {"@type": "Answer", "text": "使用 tmux 模式时还在。在主机菜单中选“安装插件”可以检测并安装 tmux；之后每个会话都对应独立的远端 tmux 会话，重新连接时自动附着。不使用 tmux 的普通 SSH 会话在断开后会结束。"}}, {"@type": "Question", "name": "不在家里的网络时，怎么连回家里或公司的电脑？", "acceptedAnswer": {"@type": "Answer", "text": "推荐使用 Tailscale 组网：手机和服务器都装上 Tailscale 并登录，在 Roamtty 中用服务器的 100.x.y.z 地址添加主机，无需公网 IP 或端口映射。也可以自建 Headscale 和 DERP 中继。详见使用文档：从外网连接。"}}, {"@type": "Question", "name": "mosh 连不上怎么办？", "acceptedAnswer": {"@type": "Answer", "text": "mosh 使用 UDP 端口 60000–61000，请在服务器防火墙和云服务商安全组中放行这些端口；通过 Tailscale 连接时 UDP 走隧道，通常无需放行。mosh 8 秒没有回应时，Roamtty 会自动回退到 SSH。"}}, {"@type": "Question", "name": "提示“主机指纹已变化”，连接被阻止？", "acceptedAnswer": {"@type": "Answer", "text": "这可能是服务器重装或更换了密钥，也可能是中间人攻击。请先向服务器管理员确认新指纹，确认无误后在主机菜单中选择“重新核验…”。"}}, {"@type": "Question", "name": "锁屏或切到后台后连接断开？", "acceptedAnswer": {"@type": "Answer", "text": "Android：在应用设置中允许后台运行，并关闭系统对 Roamtty 的电池优化。iOS：系统会在应用进入后台一段时间后暂停其网络连接，这是系统限制；使用 tmux 模式可以让任务在服务器上继续运行，回到应用后会自动重新连接。"}}, {"@type": "Question", "name": "我的密码和私钥存在哪里？", "acceptedAnswer": {"@type": "Answer", "text": "只存在你的手机上：Android 使用 Android Keystore 加密，iOS 使用仅限本设备的钥匙串。密码只在你勾选“在本机加密保存密码”后写入，私钥口令从不保存。详见隐私政策。"}}, {"@type": "Question", "name": "如何删除我的数据？", "acceptedAnswer": {"@type": "Answer", "text": "Roamtty 没有账号，开发者不持有你的任何数据。在应用中删除主机即可删除其配置、凭据和会话记录；卸载应用会删除全部本地数据（iOS 上请在卸载前删除主机，以移除钥匙串中的凭据）。从应用启动 AI Agent 时写到服务器上的状态文件位于 ~/.roamtty，可随时删除。"}}, {"@type": "Question", "name": "Roamtty 收费吗？", "acceptedAnswer": {"@type": "Answer", "text": "Roamtty 是一次性买断的付费应用，价格以 Google Play 或 App Store 页面显示为准。购买后没有内购、订阅或广告。Android 版与 iOS 版分别在各自的商店销售，需要分别购买。"}}, {"@type": "Question", "name": "如何申请退款？", "acceptedAnswer": {"@type": "Answer", "text": "付款和退款由商店处理，我们无法直接退款。Google Play 请按 Google Play 退款政策申请；App Store 请在 reportaproblem.apple.com 申请。"}}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>

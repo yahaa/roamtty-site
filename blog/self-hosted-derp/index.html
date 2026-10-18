@@ -9,16 +9,20 @@
 <link rel="canonical" href="https://roamtty.com/blog/self-hosted-derp/">
 <link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/self-hosted-derp/">
 <link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/self-hosted-derp/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/self-hosted-derp/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/style.css">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="自建 DERP 中继：Tailscale 与 Headscale 教程 · Roamtty">
 <meta property="og:description" content="Tailscale 直连失败时会走 DERP 中继，官方节点都在海外，国内延迟常达数百毫秒。本文部署自己的 derper，分别接入 Tailscale 官方服务和自建 Headscale，并只允许自己的设备使用。">
 <meta property="og:url" content="https://roamtty.com/blog/self-hosted-derp/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "自建 DERP 中继：Tailscale 与 Headscale 教程", "description": "Tailscale 直连失败时会走 DERP 中继，官方节点都在海外，国内延迟常达数百毫秒。本文部署自己的 derper，分别接入 Tailscale 官方服务和自建 Headscale，并只允许自己的设备使用。", "datePublished": "2026-10-16", "dateModified": "2026-10-16", "inLanguage": "zh-CN", "mainEntityOfPage": "https://roamtty.com/blog/self-hosted-derp/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>

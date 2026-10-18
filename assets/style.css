@@ -194,9 +194,16 @@ details p, details ul { margin: 6px 0; }
 .crumb { margin: 0 0 10px; font-size: 14px; }
 .crumb a { text-decoration: none; }
 
-/* Blog diagrams: inline SVG drawn with the colour tokens above, so they follow dark mode. Phones scroll them sideways. */
+/* Blog diagrams: inline SVG drawn with the colour tokens above, so they follow dark mode. Each figure has a landscape
+   drawing and a portrait one for phones. */
 .doc .diagram { margin: 22px 0; overflow-x: auto; }
-.diagram svg { display: block; width: 100%; min-width: 560px; height: auto; font-family: var(--sans); }
+.diagram svg { display: block; width: 100%; height: auto; font-family: var(--sans); }
+.diagram .wide { min-width: 560px; }
+.diagram .tall { display: none; max-width: 420px; margin: 0 auto; }
+@media (max-width: 600px) {
+  .diagram .wide { display: none; }
+  .diagram .tall { display: block; }
+}
 .diagram figcaption { margin-top: 8px; font-size: 13.5px; line-height: 1.5; color: var(--muted); text-align: center; }
 .diagram text { fill: var(--fg); font-size: 14px; }
 .diagram .muted { fill: var(--muted); font-size: 12.5px; }

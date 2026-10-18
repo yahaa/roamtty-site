@@ -12,7 +12,7 @@
 <link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/how-mosh-works/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=ff6c69f32c">
+<link rel="stylesheet" href="/assets/style.css?v=3bca38f3e6">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Roamtty">
 <meta property="og:locale" content="zh_CN">
@@ -42,7 +42,7 @@
 
 <h2 id="overview">整体结构：两个程序、两条通道</h2>
 <figure class="diagram">
-<svg viewBox="0 0 720 290" role="img" aria-label="mosh 整体结构：手机上的 mosh-client 和服务器上的 mosh-server 通过加密 UDP 交换按键和屏幕差分，SSH 只在开头用一次">
+<svg class="wide" viewBox="0 0 720 290" role="img" aria-label="mosh 整体结构：手机上的 mosh-client 和服务器上的 mosh-server 通过加密 UDP 交换按键和屏幕差分，SSH 只在开头用一次">
 <defs>
 <marker id="o-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="o-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -77,6 +77,39 @@
 <line class="line dash" x1="226" y1="239" x2="492" y2="239" marker-end="url(#o-h)"/>
 <text class="muted" x="360" y="230" text-anchor="middle">SSH：只在开头登录一次</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 520" role="img" aria-label="mosh 整体结构：手机上的 mosh-client 和服务器上的 mosh-server 通过加密 UDP 交换按键和屏幕差分，SSH 只在开头用一次">
+<defs><marker id="om-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="om-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="group" x="10" y="10" width="340" height="150" rx="14"/>
+<text class="bold" x="180" y="34" text-anchor="middle">手机 / 电脑</text>
+<rect class="hl" x="24" y="46" width="190" height="100" rx="10"/>
+<text class="bold" x="119" y="72" text-anchor="middle">mosh-client</text>
+<text class="muted" x="119" y="96" text-anchor="middle">一份屏幕副本</text>
+<text class="muted" x="119" y="116" text-anchor="middle">本地预测回显</text>
+<text class="muted" x="119" y="136" text-anchor="middle">心跳 · 重传 · 漫游</text>
+<line class="line" x1="216" y1="96" x2="234" y2="96" marker-start="url(#om-h)" marker-end="url(#om-h)"/>
+<rect class="box" x="236" y="46" width="100" height="100" rx="10"/>
+<text x="286" y="90" text-anchor="middle">终端界面</text>
+<text class="muted" x="286" y="112" text-anchor="middle">键盘 · 屏幕</text>
+<rect class="group" x="10" y="360" width="340" height="150" rx="14"/>
+<text class="bold" x="180" y="384" text-anchor="middle">服务器</text>
+<rect class="hl" x="24" y="396" width="190" height="100" rx="10"/>
+<text class="bold" x="119" y="422" text-anchor="middle">mosh-server</text>
+<text class="muted" x="119" y="446" text-anchor="middle">真正的屏幕状态</text>
+<text class="muted" x="119" y="466" text-anchor="middle">内置终端模拟器</text>
+<text class="muted" x="119" y="486" text-anchor="middle">监听 UDP 60001 起</text>
+<line class="line" x1="216" y1="446" x2="234" y2="446" marker-start="url(#om-h)" marker-end="url(#om-h)"/>
+<rect class="box" x="236" y="396" width="100" height="100" rx="10"/>
+<text x="286" y="430" text-anchor="middle">shell</text>
+<text x="286" y="450" text-anchor="middle">tmux · vim</text>
+<text class="muted" x="286" y="474" text-anchor="middle">跑在 pty 里</text>
+<line class="line-acc" x1="60" y1="148" x2="60" y2="392" marker-end="url(#om-a)"/>
+<line class="line-acc" x1="96" y1="392" x2="96" y2="148" marker-end="url(#om-a)"/>
+<text x="112" y="232" text-anchor="start">↓ 按键 · 窗口大小</text>
+<text x="112" y="256" text-anchor="start">↑ 屏幕差分</text>
+<text class="acc bold" x="112" y="284" text-anchor="start">加密 UDP（SSP 协议）</text>
+<line class="line dash" x1="286" y1="148" x2="286" y2="392" marker-end="url(#om-h)"/>
+<text class="muted" x="276" y="330" text-anchor="end">SSH：只在开头登录一次</text>
+</svg>
 <figcaption>图 1：mosh 的两端。SSH 只负责“开门”，之后的终端流量全部走加密 UDP。</figcaption>
 </figure>
 <p>mosh 由两个程序组成：</p>
@@ -88,7 +121,7 @@
 
 <h2 id="bootstrap">第一步：借 SSH 登录，拿到端口和密钥</h2>
 <figure class="diagram">
-<svg viewBox="0 0 720 400" role="img" aria-label="mosh 启动时序：客户端用 SSH 登录并运行 mosh-server new，服务器回 MOSH CONNECT 端口和密钥，SSH 退出后改走 UDP">
+<svg class="wide" viewBox="0 0 720 400" role="img" aria-label="mosh 启动时序：客户端用 SSH 登录并运行 mosh-server new，服务器回 MOSH CONNECT 端口和密钥，SSH 退出后改走 UDP">
 <defs>
 <marker id="b-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="b-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -122,6 +155,38 @@
 <line class="line-acc" x1="606" y1="372" x2="114" y2="372" marker-end="url(#b-a)"/>
 <text class="acc" x="360" y="362" text-anchor="middle">⑥ 屏幕状态……之后只走 UDP</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 444" role="img" aria-label="mosh 启动时序：客户端用 SSH 登录并运行 mosh-server new，服务器回 MOSH CONNECT 端口和密钥，SSH 退出后改走 UDP">
+<defs><marker id="bm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="bm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="box" x="10" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="60" y="33" text-anchor="middle">客户端</text>
+<rect class="box" x="130" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="180" y="33" text-anchor="middle">sshd</text>
+<rect class="box" x="250" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="300" y="33" text-anchor="middle">mosh-server</text>
+<line class="line dash" x1="60" y1="46" x2="60" y2="436"/>
+<line class="line dash" x1="180" y1="46" x2="180" y2="290"/>
+<line class="line dash" x1="300" y1="146" x2="300" y2="436"/>
+<line class="line" x1="62" y1="86" x2="176" y2="86" marker-end="url(#bm-h)"/>
+<text x="120" y="76" text-anchor="middle">① ssh 登录</text>
+<text class="muted" x="120" y="104" text-anchor="middle">TCP 22</text>
+<line class="line" x1="182" y1="140" x2="296" y2="140" marker-end="url(#bm-h)"/>
+<text x="240" y="130" text-anchor="middle">② mosh-server new</text>
+<rect class="hl" x="225" y="154" width="130" height="46" rx="8"/>
+<text class="muted" x="290" y="173" text-anchor="middle">绑定 UDP 端口</text>
+<text class="muted" x="290" y="191" text-anchor="middle">生成随机密钥</text>
+<rect class="knock" x="170" y="208" width="20" height="38"/>
+<rect class="knock" x="170" y="258" width="20" height="18"/>
+<text class="mono" x="180" y="222" text-anchor="middle">③ MOSH CONNECT 60001</text>
+<text class="mono" x="180" y="240" text-anchor="middle">4NeCCgvZFe2RnPgrcU1PQw</text>
+<line class="line" x1="296" y1="250" x2="64" y2="250" marker-end="url(#bm-h)"/>
+<text class="muted" x="180" y="270" text-anchor="middle">经 SSH 通道送回</text>
+<path class="line" d="M172,290L188,306M188,290L172,306"/>
+<text class="muted" x="180" y="330" text-anchor="middle">④ SSH 退出，mosh-server 转入后台</text>
+<line class="line-acc" x1="62" y1="376" x2="296" y2="376" marker-end="url(#bm-a)"/>
+<text class="acc" x="180" y="364" text-anchor="middle">⑤ 第一个加密 UDP 包</text>
+<line class="line-acc" x1="296" y1="420" x2="64" y2="420" marker-end="url(#bm-a)"/>
+<text class="acc" x="180" y="408" text-anchor="middle">⑥ 屏幕状态……之后只走 UDP</text>
+</svg>
 <figcaption>图 2：启动过程。端口和密钥搭 SSH 的便车送到客户端，登录认证完全复用 SSH。</figcaption>
 </figure>
 <p>脚本执行的命令大致是：</p>
@@ -137,7 +202,7 @@
 <h2 id="layers">协议分几层</h2>
 <p>SSH 退出以后，双方之间只剩 UDP。mosh 在 UDP 上叠了几层，每层只管一件事：</p>
 <figure class="diagram">
-<svg viewBox="0 0 720 330" role="img" aria-label="mosh 协议栈，从上到下：用户输入流和屏幕状态、SSP 传输指令、zlib 压缩与分片、加密数据报层、UDP">
+<svg class="wide" viewBox="0 0 720 330" role="img" aria-label="mosh 协议栈，从上到下：用户输入流和屏幕状态、SSP 传输指令、zlib 压缩与分片、加密数据报层、UDP">
 <rect class="box" x="20" y="20" width="150" height="50" rx="8"/>
 <text class="bold" x="95" y="50" text-anchor="middle">同步的对象</text>
 <rect class="box" x="180" y="20" width="255" height="50" rx="8"/>
@@ -163,6 +228,30 @@
 <rect class="group" x="20" y="260" width="680" height="50" rx="8"/>
 <text class="bold" x="360" y="290" text-anchor="middle">UDP / IP</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 422" role="img" aria-label="mosh 协议栈，从上到下：用户输入流和屏幕状态、SSP 传输指令、zlib 压缩与分片、加密数据报层、UDP">
+<rect class="box" x="10" y="10" width="165" height="74" rx="8"/>
+<text class="bold" x="92" y="34" text-anchor="middle">用户输入流</text>
+<text class="muted" x="92" y="54" text-anchor="middle">客户端 → 服务器</text>
+<text class="muted" x="92" y="72" text-anchor="middle">每个按键都要送到</text>
+<rect class="box" x="185" y="10" width="165" height="74" rx="8"/>
+<text class="bold" x="267" y="34" text-anchor="middle">屏幕状态</text>
+<text class="muted" x="267" y="54" text-anchor="middle">服务器 → 客户端</text>
+<text class="muted" x="267" y="72" text-anchor="middle">中间画面可以跳过</text>
+<rect class="hl" x="10" y="94" width="340" height="92" rx="8"/>
+<text class="bold" x="180" y="116" text-anchor="middle">传输层 SSP</text>
+<text class="mono" x="180" y="138" text-anchor="middle">old_num · new_num · ack_num</text>
+<text class="mono" x="180" y="158" text-anchor="middle">throwaway_num · diff</text>
+<text class="muted" x="180" y="178" text-anchor="middle">把第 old_num 号状态用 diff 变成 new_num 号</text>
+<rect class="box" x="10" y="196" width="340" height="66" rx="8"/>
+<text class="bold" x="180" y="220" text-anchor="middle">压缩与分片</text>
+<text class="muted" x="180" y="244" text-anchor="middle">protobuf → zlib → 几百字节的小片</text>
+<rect class="box" x="10" y="272" width="340" height="86" rx="8"/>
+<text class="bold" x="180" y="296" text-anchor="middle">数据报层</text>
+<text class="muted" x="180" y="318" text-anchor="middle">AES-128-OCB 加密 · 序号 · 时间戳</text>
+<text class="muted" x="180" y="340" text-anchor="middle">认准最新合法包的来源地址（漫游）</text>
+<rect class="group" x="10" y="368" width="340" height="44" rx="8"/>
+<text class="bold" x="180" y="395" text-anchor="middle">UDP / IP</text>
+</svg>
 <figcaption>图 3：mosh 的协议栈。没有 TCP，可靠性由上面的 SSP 自己负责。</figcaption>
 </figure>
 <p>从下往上看：数据报层保证“包是对方发的、没被改过”，并负责找到对方；分片层把大的更新拆小；SSP 负责“双方最终一致”；最上面是真正要同步的两样东西。下面挨个讲。</p>
@@ -170,7 +259,7 @@
 <h2 id="datagram">数据报层：加密、序号、测速和漫游</h2>
 <h3>一个 UDP 包里有什么</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 210" role="img" aria-label="mosh UDP 包格式：8 字节方向位加序号明文，加密的时间戳、回应时间戳、分片头和分片数据，最后是 16 字节认证标签">
+<svg class="wide" viewBox="0 0 720 210" role="img" aria-label="mosh UDP 包格式：8 字节方向位加序号明文，加密的时间戳、回应时间戳、分片头和分片数据，最后是 16 字节认证标签">
 <text class="muted" x="70" y="34" text-anchor="middle">明文</text>
 <path class="line" d="M12,44V40H128V44"/>
 <text class="acc" x="370" y="34" text-anchor="middle">加密（AES-128-OCB）</text>
@@ -209,6 +298,38 @@
 <text class="muted" x="660" y="146" text-anchor="middle">都会校验失败</text>
 <text x="360" y="190" text-anchor="middle">收到包先验标签：不是用会话密钥加密的，直接丢弃，不回任何东西。</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 384" role="img" aria-label="mosh UDP 包格式：8 字节方向位加序号明文，加密的时间戳、回应时间戳、分片头和分片数据，最后是 16 字节认证标签">
+<rect class="hl" x="10" y="12" width="16" height="16" rx="3"/>
+<text class="muted" x="32" y="25" text-anchor="start">加密（AES-128-OCB）</text>
+<rect class="box" x="214" y="12" width="16" height="16" rx="3"/>
+<text class="muted" x="236" y="25" text-anchor="start">明文 / 认证标签</text>
+<rect class="box" x="10" y="44" width="130" height="46"/>
+<text class="bold" x="75" y="64" text-anchor="middle">nonce</text>
+<text class="muted" x="75" y="82" text-anchor="middle">8 字节</text>
+<text class="muted" x="152" y="72" text-anchor="start">最高位：方向；其余 63 位：序号</text>
+<rect class="hl" x="10" y="90" width="130" height="46"/>
+<text class="bold" x="75" y="110" text-anchor="middle">时间戳</text>
+<text class="muted" x="75" y="128" text-anchor="middle">2 字节</text>
+<text class="muted" x="152" y="118" text-anchor="start">发送时刻（毫秒）</text>
+<rect class="hl" x="10" y="136" width="130" height="46"/>
+<text class="bold" x="75" y="156" text-anchor="middle">回应时间戳</text>
+<text class="muted" x="75" y="174" text-anchor="middle">2 字节</text>
+<text class="muted" x="152" y="164" text-anchor="start">对方的时间戳 + 停留时间</text>
+<rect class="hl" x="10" y="182" width="130" height="46"/>
+<text class="bold" x="75" y="202" text-anchor="middle">分片头</text>
+<text class="muted" x="75" y="220" text-anchor="middle">10 字节</text>
+<text class="muted" x="152" y="210" text-anchor="start">指令编号 · 片号 · 末片标记</text>
+<rect class="hl" x="10" y="228" width="130" height="46"/>
+<text class="bold" x="75" y="248" text-anchor="middle">分片数据</text>
+<text class="muted" x="75" y="266" text-anchor="middle">不定长</text>
+<text class="muted" x="152" y="256" text-anchor="start">压缩后的 Instruction，可拆成多片</text>
+<rect class="box" x="10" y="274" width="130" height="46"/>
+<text class="bold" x="75" y="294" text-anchor="middle">标签</text>
+<text class="muted" x="75" y="312" text-anchor="middle">16 字节</text>
+<text class="muted" x="152" y="302" text-anchor="start">改动任何一位都会校验失败</text>
+<text x="180" y="350" text-anchor="middle">收到包先验标签：</text>
+<text x="180" y="370" text-anchor="middle">验不过直接丢弃，不回任何东西。</text>
+</svg>
 <figcaption>图 4：mosh 数据报的格式。除了开头 8 字节，其余内容都被加密。</figcaption>
 </figure>
 <ul>
@@ -218,7 +339,7 @@
 </ul>
 <h3>漫游：服务器只认最新的合法包</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 270" role="img" aria-label="漫游：手机从 Wi-Fi 换到蜂窝网络，新地址发来的合法包序号更大，服务器改往新地址回包">
+<svg class="wide" viewBox="0 0 720 270" role="img" aria-label="漫游：手机从 Wi-Fi 换到蜂窝网络，新地址发来的合法包序号更大，服务器改往新地址回包">
 <defs>
 <marker id="r-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -245,6 +366,31 @@
 <text class="acc" x="198" y="214" text-anchor="end">序号 1042</text>
 <text class="acc" x="360" y="160" text-anchor="middle">通过认证 + 序号最大 → 改往新地址回包</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 452" role="img" aria-label="漫游：手机从 Wi-Fi 换到蜂窝网络，新地址发来的合法包序号更大，服务器改往新地址回包">
+<defs><marker id="rm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="rm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="box" x="125" y="10" width="110" height="60" rx="12"/>
+<text class="bold" x="180" y="36" text-anchor="middle">手机</text>
+<text class="muted" x="180" y="56" text-anchor="middle">mosh-client</text>
+<rect class="box" x="125" y="330" width="110" height="60" rx="12"/>
+<text class="bold" x="180" y="356" text-anchor="middle">服务器</text>
+<text class="muted" x="180" y="376" text-anchor="middle">mosh-server</text>
+<g class="faded">
+<rect class="box" x="10" y="160" width="150" height="54" rx="27"/>
+<text class="bold" x="85" y="183" text-anchor="middle">Wi-Fi</text>
+<text class="muted" x="85" y="202" text-anchor="middle">出口 203.0.113.7</text>
+<line class="line dash" x1="140" y1="72" x2="85" y2="158"/>
+<line class="line dash" x1="85" y1="216" x2="140" y2="328" marker-end="url(#rm-h)"/>
+</g>
+<text class="muted" x="10" y="110" text-anchor="start">旧路径：已不通</text>
+<rect class="hl" x="200" y="160" width="150" height="54" rx="27"/>
+<text class="bold" x="275" y="183" text-anchor="middle">蜂窝网络</text>
+<text class="muted" x="275" y="202" text-anchor="middle">出口 198.51.100.24</text>
+<line class="line-acc" x1="220" y1="72" x2="273" y2="156" marker-end="url(#rm-a)"/>
+<line class="line-acc" x1="275" y1="218" x2="222" y2="326" marker-end="url(#rm-a)"/>
+<text class="acc" x="262" y="118" text-anchor="start">序号 1042</text>
+<text class="acc" x="180" y="420" text-anchor="middle">通过认证 + 序号最大</text>
+<text class="acc" x="180" y="440" text-anchor="middle">→ 改往新地址回包</text>
+</svg>
 <figcaption>图 5：漫游。服务器不记“连接”，只记“最近一次收到合法新包的地址”。</figcaption>
 </figure>
 <p>TCP 连接由四元组（双方 IP 和端口）确定，手机 IP 一变，连接就作废了。mosh 的服务器没有这种绑定：<strong>每收到一个通过认证、序号比之前都大的包，就把回包地址改成这个包的来源地址</strong>。手机从 Wi-Fi 换到 4G，下一个包从新地址发出，服务器验完标签就跟着改，用户什么都感觉不到。</p>
@@ -254,7 +400,7 @@
 <h2 id="ssp">状态同步协议 SSP：只追最新的屏幕</h2>
 <h3>为什么 TCP 字节流不适合</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 330" role="img" aria-label="对比：SSH 的 TCP 字节流里输出排队，必须按顺序全部送达；mosh 只把客户端持有的 1 号屏幕直接更新到最新的 5 号屏幕，中间画面跳过">
+<svg class="wide" viewBox="0 0 720 330" role="img" aria-label="对比：SSH 的 TCP 字节流里输出排队，必须按顺序全部送达；mosh 只把客户端持有的 1 号屏幕直接更新到最新的 5 号屏幕，中间画面跳过">
 <defs>
 <marker id="s-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
 <marker id="s-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
@@ -293,6 +439,40 @@
 <line class="line-acc" x1="362" y1="230" x2="126" y2="230" marker-end="url(#s-a)"/>
 <text class="acc" x="244" y="220" text-anchor="middle">diff：#1 → #5</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 400" role="img" aria-label="对比：SSH 的 TCP 字节流里输出排队，必须按顺序全部送达；mosh 只把客户端持有的 1 号屏幕直接更新到最新的 5 号屏幕，中间画面跳过">
+<defs><marker id="sm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="sm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<text class="bold" x="10" y="24" text-anchor="start">SSH（TCP）：字节流，一个都不能少</text>
+<rect class="box" x="10" y="40" width="70" height="50" rx="8"/>
+<text x="45" y="70" text-anchor="middle">客户端</text>
+<rect class="box" x="280" y="40" width="70" height="50" rx="8"/>
+<text x="315" y="70" text-anchor="middle">服务器</text>
+<rect class="group" x="88" y="50" width="184" height="30" rx="6"/>
+<rect class="hl" x="96" y="55" width="28" height="20" rx="4"/><text class="mono" x="110" y="70" text-anchor="middle">1</text>
+<rect class="hl" x="132" y="55" width="28" height="20" rx="4"/><text class="mono" x="146" y="70" text-anchor="middle">2</text>
+<rect class="hl" x="168" y="55" width="28" height="20" rx="4"/><text class="mono" x="182" y="70" text-anchor="middle">3</text>
+<rect class="hl" x="204" y="55" width="28" height="20" rx="4"/><text class="mono" x="218" y="70" text-anchor="middle">4</text>
+<rect class="hl" x="240" y="55" width="28" height="20" rx="4"/><text class="mono" x="254" y="70" text-anchor="middle">…</text>
+<line class="line" x1="270" y1="100" x2="92" y2="100" marker-end="url(#sm-h)"/>
+<text class="muted" x="180" y="124" text-anchor="middle">cat 大日志：几 MB 输出已在排队，</text>
+<text class="muted" x="180" y="144" text-anchor="middle">按 Ctrl-C 后还得等它们送完</text>
+<text class="bold" x="10" y="186" text-anchor="start">mosh：直接改到最新状态</text>
+<rect class="group" x="10" y="200" width="340" height="98" rx="12"/>
+<rect class="box" x="27" y="212" width="50" height="36" rx="4"/><text class="mono" x="52" y="235" text-anchor="middle">#1</text>
+<g class="faded"><rect class="box" x="91" y="212" width="50" height="36" rx="4"/><text class="mono" x="116" y="235" text-anchor="middle">#2</text>
+</g>
+<g class="faded"><rect class="box" x="155" y="212" width="50" height="36" rx="4"/><text class="mono" x="180" y="235" text-anchor="middle">#3</text>
+</g>
+<g class="faded"><rect class="box" x="219" y="212" width="50" height="36" rx="4"/><text class="mono" x="244" y="235" text-anchor="middle">#4</text>
+</g>
+<rect class="hl" x="283" y="212" width="50" height="36" rx="4"/><text class="mono acc" x="308" y="235" text-anchor="middle">#5</text>
+<text class="muted" x="150" y="268" text-anchor="middle">#2–#4 不用发</text>
+<text class="muted" x="180" y="288" text-anchor="middle">服务器上的屏幕，每次输出一个新状态</text>
+<line class="line-acc" x1="308" y1="250" x2="308" y2="336" marker-end="url(#sm-a)"/>
+<text class="acc" x="298" y="322" text-anchor="end">diff：#1 → #5</text>
+<rect class="box" x="10" y="340" width="340" height="50" rx="10"/>
+<text x="180" y="362" text-anchor="middle">客户端</text>
+<text class="muted" x="180" y="380" text-anchor="middle">持有 #1，收到后变成 #5</text>
+</svg>
 <figcaption>图 6：字节流必须一个不落地按顺序送达；状态同步只关心“对方手里是哪一版、最新是哪一版”。</figcaption>
 </figure>
 <p>终端用户真正关心的是“现在屏幕上是什么”，而不是“中间每一帧是什么”。TCP 不知道这一点：它会把所有字节按顺序送到，丢一个包后面的全都得等；网络慢的时候，发送缓冲区里积压的旧输出会让 Ctrl-C 迟迟不生效。</p>
@@ -330,7 +510,7 @@
 <h2 id="predict">本地预测回显：网慢也能跟手打字</h2>
 <p>SSH 里每敲一个字，都要等服务器把它回显回来才能看到。往返 300 毫秒的网络上，打字就像隔着一层胶水。mosh 的客户端会<strong>猜</strong>：大多数时候，在命令行里敲一个普通字符，它就会出现在光标处，光标右移一格。于是客户端不等服务器，先把字符画上去。</p>
 <figure class="diagram">
-<svg viewBox="0 0 720 222" role="img" aria-label="预测回显的三种情况：先显示带下划线的预测字符；服务器确认后去掉下划线；猜错时撤回，以服务器屏幕为准">
+<svg class="wide" viewBox="0 0 720 222" role="img" aria-label="预测回显的三种情况：先显示带下划线的预测字符；服务器确认后去掉下划线；猜错时撤回，以服务器屏幕为准">
 <text class="bold" x="120" y="24" text-anchor="middle">① 按下 l、s</text>
 <rect class="term" x="10" y="38" width="220" height="90" rx="10"/>
 <text class="term-text" x="26" y="90" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
@@ -351,6 +531,29 @@
 <text class="muted" x="600" y="152" text-anchor="middle">服务器确认收到了按键，屏幕上却没有</text>
 <text class="muted" x="600" y="172" text-anchor="middle">撤回预测，一切以服务器为准</text>
 <text x="360" y="212" text-anchor="middle">靠 EchoAck 判断：输入送达约 50 毫秒后，服务器屏幕上该出现的回显应该已经出现了。</text>
+</svg>
+<svg class="tall" viewBox="0 0 360 344" role="img" aria-label="预测回显的三种情况：先显示带下划线的预测字符；服务器确认后去掉下划线；猜错时撤回，以服务器屏幕为准">
+<rect class="term" x="10" y="10" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="52" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<line class="line-acc" x1="42" y1="58" x2="60" y2="58"/>
+<rect x="62" y="38" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="28" text-anchor="start">① 按下 l、s</text>
+<text class="muted" x="172" y="52" text-anchor="start">还没收到回显，先画上去</text>
+<text class="muted" x="172" y="72" text-anchor="start">网慢时加下划线：这是猜的</text>
+<rect class="term" x="10" y="106" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="148" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<rect x="62" y="134" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="124" text-anchor="start">② 服务器确认</text>
+<text class="muted" x="172" y="148" text-anchor="start">服务器屏幕里也有 ls</text>
+<text class="muted" x="172" y="168" text-anchor="start">下划线去掉，预测转正</text>
+<rect class="term" x="10" y="202" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="244" textLength="81" lengthAdjust="spacingAndGlyphs">Password:</text>
+<rect x="114" y="230" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="220" text-anchor="start">③ 猜错了（如输入密码）</text>
+<text class="muted" x="172" y="244" text-anchor="start">按键已确认，屏幕上却没有</text>
+<text class="muted" x="172" y="264" text-anchor="start">撤回预测，以服务器为准</text>
+<text x="180" y="312" text-anchor="middle">靠 EchoAck 判断：</text>
+<text x="180" y="332" text-anchor="middle">输入送达约 50 毫秒后，回显应已出现</text>
 </svg>
 <figcaption>图 7：预测回显。猜对了让打字跟手，猜错了也只是短暂闪一下，最终屏幕总是服务器那一份。</figcaption>
 </figure>

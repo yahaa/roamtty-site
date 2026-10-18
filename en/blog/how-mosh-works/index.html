@@ -12,7 +12,7 @@
 <link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/how-mosh-works/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=ff6c69f32c">
+<link rel="stylesheet" href="/assets/style.css?v=3bca38f3e6">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Roamtty">
 <meta property="og:locale" content="en_US">
@@ -42,7 +42,7 @@
 
 <h2 id="overview">The big picture: two programs, two channels</h2>
 <figure class="diagram">
-<svg viewBox="0 0 720 290" role="img" aria-label="mosh overview: mosh-client on the phone and mosh-server on the server exchange keystrokes and screen diffs over encrypted UDP; SSH is used once at the start">
+<svg class="wide" viewBox="0 0 720 290" role="img" aria-label="mosh overview: mosh-client on the phone and mosh-server on the server exchange keystrokes and screen diffs over encrypted UDP; SSH is used once at the start">
 <defs>
 <marker id="o-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="o-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -77,6 +77,39 @@
 <line class="line dash" x1="226" y1="239" x2="492" y2="239" marker-end="url(#o-h)"/>
 <text class="muted" x="360" y="230" text-anchor="middle">SSH: one login at the start</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 520" role="img" aria-label="mosh overview: mosh-client on the phone and mosh-server on the server exchange keystrokes and screen diffs over encrypted UDP; SSH is used once at the start">
+<defs><marker id="om-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="om-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="group" x="10" y="10" width="340" height="150" rx="14"/>
+<text class="bold" x="180" y="34" text-anchor="middle">Phone / laptop</text>
+<rect class="hl" x="24" y="46" width="190" height="100" rx="10"/>
+<text class="bold" x="119" y="72" text-anchor="middle">mosh-client</text>
+<text class="muted" x="119" y="96" text-anchor="middle">a copy of the screen</text>
+<text class="muted" x="119" y="116" text-anchor="middle">local echo prediction</text>
+<text class="muted" x="119" y="136" text-anchor="middle">heartbeat · resend · roam</text>
+<line class="line" x1="216" y1="96" x2="234" y2="96" marker-start="url(#om-h)" marker-end="url(#om-h)"/>
+<rect class="box" x="236" y="46" width="100" height="100" rx="10"/>
+<text x="286" y="90" text-anchor="middle">Terminal</text>
+<text class="muted" x="286" y="112" text-anchor="middle">keys · screen</text>
+<rect class="group" x="10" y="360" width="340" height="150" rx="14"/>
+<text class="bold" x="180" y="384" text-anchor="middle">Server</text>
+<rect class="hl" x="24" y="396" width="190" height="100" rx="10"/>
+<text class="bold" x="119" y="422" text-anchor="middle">mosh-server</text>
+<text class="muted" x="119" y="446" text-anchor="middle">the real screen state</text>
+<text class="muted" x="119" y="466" text-anchor="middle">built-in emulator</text>
+<text class="muted" x="119" y="486" text-anchor="middle">UDP port from 60001</text>
+<line class="line" x1="216" y1="446" x2="234" y2="446" marker-start="url(#om-h)" marker-end="url(#om-h)"/>
+<rect class="box" x="236" y="396" width="100" height="100" rx="10"/>
+<text x="286" y="430" text-anchor="middle">shell</text>
+<text x="286" y="450" text-anchor="middle">tmux · vim</text>
+<text class="muted" x="286" y="474" text-anchor="middle">in a pty</text>
+<line class="line-acc" x1="60" y1="148" x2="60" y2="392" marker-end="url(#om-a)"/>
+<line class="line-acc" x1="96" y1="392" x2="96" y2="148" marker-end="url(#om-a)"/>
+<text x="112" y="232" text-anchor="start">↓ keystrokes · window size</text>
+<text x="112" y="256" text-anchor="start">↑ screen diffs</text>
+<text class="acc bold" x="112" y="284" text-anchor="start">encrypted UDP (SSP)</text>
+<line class="line dash" x1="286" y1="148" x2="286" y2="392" marker-end="url(#om-h)"/>
+<text class="muted" x="276" y="330" text-anchor="end">SSH: one login at the start</text>
+</svg>
 <figcaption>Figure 1: the two ends of mosh. SSH only opens the door; all terminal traffic after that is encrypted UDP.</figcaption>
 </figure>
 <p>mosh is two programs:</p>
@@ -88,7 +121,7 @@
 
 <h2 id="bootstrap">Step one: log in over SSH, get a port and a key</h2>
 <figure class="diagram">
-<svg viewBox="0 0 720 400" role="img" aria-label="mosh startup sequence: the client logs in with SSH and runs mosh-server new, the server answers MOSH CONNECT with a port and key, SSH exits and traffic moves to UDP">
+<svg class="wide" viewBox="0 0 720 400" role="img" aria-label="mosh startup sequence: the client logs in with SSH and runs mosh-server new, the server answers MOSH CONNECT with a port and key, SSH exits and traffic moves to UDP">
 <defs>
 <marker id="b-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="b-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -122,6 +155,38 @@
 <line class="line-acc" x1="606" y1="372" x2="114" y2="372" marker-end="url(#b-a)"/>
 <text class="acc" x="360" y="362" text-anchor="middle">⑥ screen state… UDP only from here on</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 444" role="img" aria-label="mosh startup sequence: the client logs in with SSH and runs mosh-server new, the server answers MOSH CONNECT with a port and key, SSH exits and traffic moves to UDP">
+<defs><marker id="bm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="bm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="box" x="10" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="60" y="33" text-anchor="middle">client</text>
+<rect class="box" x="130" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="180" y="33" text-anchor="middle">sshd</text>
+<rect class="box" x="250" y="10" width="100" height="36" rx="8"/>
+<text class="bold" x="300" y="33" text-anchor="middle">mosh-server</text>
+<line class="line dash" x1="60" y1="46" x2="60" y2="436"/>
+<line class="line dash" x1="180" y1="46" x2="180" y2="290"/>
+<line class="line dash" x1="300" y1="146" x2="300" y2="436"/>
+<line class="line" x1="62" y1="86" x2="176" y2="86" marker-end="url(#bm-h)"/>
+<text x="120" y="76" text-anchor="middle">① ssh login</text>
+<text class="muted" x="120" y="104" text-anchor="middle">TCP 22</text>
+<line class="line" x1="182" y1="140" x2="296" y2="140" marker-end="url(#bm-h)"/>
+<text x="240" y="130" text-anchor="middle">② mosh-server new</text>
+<rect class="hl" x="225" y="154" width="130" height="46" rx="8"/>
+<text class="muted" x="290" y="173" text-anchor="middle">bind a UDP port</text>
+<text class="muted" x="290" y="191" text-anchor="middle">make a random key</text>
+<rect class="knock" x="170" y="208" width="20" height="38"/>
+<rect class="knock" x="170" y="258" width="20" height="18"/>
+<text class="mono" x="180" y="222" text-anchor="middle">③ MOSH CONNECT 60001</text>
+<text class="mono" x="180" y="240" text-anchor="middle">4NeCCgvZFe2RnPgrcU1PQw</text>
+<line class="line" x1="296" y1="250" x2="64" y2="250" marker-end="url(#bm-h)"/>
+<text class="muted" x="180" y="270" text-anchor="middle">sent back over SSH</text>
+<path class="line" d="M172,290L188,306M188,290L172,306"/>
+<text class="muted" x="180" y="330" text-anchor="middle">④ SSH exits, mosh-server detaches</text>
+<line class="line-acc" x1="62" y1="376" x2="296" y2="376" marker-end="url(#bm-a)"/>
+<text class="acc" x="180" y="364" text-anchor="middle">⑤ first encrypted UDP packet</text>
+<line class="line-acc" x1="296" y1="420" x2="64" y2="420" marker-end="url(#bm-a)"/>
+<text class="acc" x="180" y="408" text-anchor="middle">⑥ screen state over UDP</text>
+</svg>
 <figcaption>Figure 2: startup. The port and key ride along on SSH, and authentication is entirely SSH's job.</figcaption>
 </figure>
 <p>The script runs roughly:</p>
@@ -137,7 +202,7 @@
 <h2 id="layers">The protocol layers</h2>
 <p>Once SSH has exited, only UDP is left between the two ends. mosh stacks a few layers on top, each with one job:</p>
 <figure class="diagram">
-<svg viewBox="0 0 720 330" role="img" aria-label="mosh protocol stack, top to bottom: user input stream and screen state, SSP transport instructions, zlib compression and fragmentation, encrypted datagram layer, UDP">
+<svg class="wide" viewBox="0 0 720 330" role="img" aria-label="mosh protocol stack, top to bottom: user input stream and screen state, SSP transport instructions, zlib compression and fragmentation, encrypted datagram layer, UDP">
 <rect class="box" x="20" y="20" width="150" height="50" rx="8"/>
 <text class="bold" x="95" y="50" text-anchor="middle">What is synced</text>
 <rect class="box" x="180" y="20" width="255" height="50" rx="8"/>
@@ -163,6 +228,30 @@
 <rect class="group" x="20" y="260" width="680" height="50" rx="8"/>
 <text class="bold" x="360" y="290" text-anchor="middle">UDP / IP</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 422" role="img" aria-label="mosh protocol stack, top to bottom: user input stream and screen state, SSP transport instructions, zlib compression and fragmentation, encrypted datagram layer, UDP">
+<rect class="box" x="10" y="10" width="165" height="74" rx="8"/>
+<text class="bold" x="92" y="34" text-anchor="middle">User input</text>
+<text class="muted" x="92" y="54" text-anchor="middle">client → server</text>
+<text class="muted" x="92" y="72" text-anchor="middle">every key must arrive</text>
+<rect class="box" x="185" y="10" width="165" height="74" rx="8"/>
+<text class="bold" x="267" y="34" text-anchor="middle">Screen state</text>
+<text class="muted" x="267" y="54" text-anchor="middle">server → client</text>
+<text class="muted" x="267" y="72" text-anchor="middle">may skip frames</text>
+<rect class="hl" x="10" y="94" width="340" height="92" rx="8"/>
+<text class="bold" x="180" y="116" text-anchor="middle">Transport: SSP</text>
+<text class="mono" x="180" y="138" text-anchor="middle">old_num · new_num · ack_num</text>
+<text class="mono" x="180" y="158" text-anchor="middle">throwaway_num · diff</text>
+<text class="muted" x="180" y="178" text-anchor="middle">state old_num + diff = state new_num</text>
+<rect class="box" x="10" y="196" width="340" height="66" rx="8"/>
+<text class="bold" x="180" y="220" text-anchor="middle">Compress and split</text>
+<text class="muted" x="180" y="244" text-anchor="middle">protobuf → zlib → small fragments</text>
+<rect class="box" x="10" y="272" width="340" height="86" rx="8"/>
+<text class="bold" x="180" y="296" text-anchor="middle">Datagram layer</text>
+<text class="muted" x="180" y="318" text-anchor="middle">AES-128-OCB · sequence · timestamps</text>
+<text class="muted" x="180" y="340" text-anchor="middle">follows the newest valid packet (roaming)</text>
+<rect class="group" x="10" y="368" width="340" height="44" rx="8"/>
+<text class="bold" x="180" y="395" text-anchor="middle">UDP / IP</text>
+</svg>
 <figcaption>Figure 3: the mosh protocol stack. There is no TCP; SSP provides reliability itself.</figcaption>
 </figure>
 <p>From the bottom up: the datagram layer makes sure a packet came from the peer and was not altered, and keeps track of where the peer is; the fragment layer splits large updates; SSP makes the two ends converge; on top are the two things actually being synchronized. One at a time:</p>
@@ -170,7 +259,7 @@
 <h2 id="datagram">The datagram layer: encryption, sequence numbers, RTT and roaming</h2>
 <h3>What is inside one UDP packet</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 210" role="img" aria-label="mosh UDP packet: an 8-byte plaintext direction bit and sequence number, then encrypted timestamp, timestamp reply, fragment header and fragment data, then a 16-byte authentication tag">
+<svg class="wide" viewBox="0 0 720 210" role="img" aria-label="mosh UDP packet: an 8-byte plaintext direction bit and sequence number, then encrypted timestamp, timestamp reply, fragment header and fragment data, then a 16-byte authentication tag">
 <text class="muted" x="70" y="34" text-anchor="middle">plaintext</text>
 <path class="line" d="M12,44V40H128V44"/>
 <text class="acc" x="370" y="34" text-anchor="middle">encrypted (AES-128-OCB)</text>
@@ -209,6 +298,38 @@
 <text class="muted" x="660" y="146" text-anchor="middle">the check fails</text>
 <text x="360" y="190" text-anchor="middle">The tag is checked first: a packet not sealed with the session key is dropped without reply.</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 384" role="img" aria-label="mosh UDP packet: an 8-byte plaintext direction bit and sequence number, then encrypted timestamp, timestamp reply, fragment header and fragment data, then a 16-byte authentication tag">
+<rect class="hl" x="10" y="12" width="16" height="16" rx="3"/>
+<text class="muted" x="32" y="25" text-anchor="start">encrypted (AES-128-OCB)</text>
+<rect class="box" x="214" y="12" width="16" height="16" rx="3"/>
+<text class="muted" x="236" y="25" text-anchor="start">plaintext / tag</text>
+<rect class="box" x="10" y="44" width="130" height="46"/>
+<text class="bold" x="75" y="64" text-anchor="middle">nonce</text>
+<text class="muted" x="75" y="82" text-anchor="middle">8 bytes</text>
+<text class="muted" x="152" y="72" text-anchor="start">direction bit + sequence</text>
+<rect class="hl" x="10" y="90" width="130" height="46"/>
+<text class="bold" x="75" y="110" text-anchor="middle">timestamp</text>
+<text class="muted" x="75" y="128" text-anchor="middle">2 bytes</text>
+<text class="muted" x="152" y="118" text-anchor="start">send time (ms)</text>
+<rect class="hl" x="10" y="136" width="130" height="46"/>
+<text class="bold" x="75" y="156" text-anchor="middle">reply stamp</text>
+<text class="muted" x="75" y="174" text-anchor="middle">2 bytes</text>
+<text class="muted" x="152" y="164" text-anchor="start">peer's stamp + time held</text>
+<rect class="hl" x="10" y="182" width="130" height="46"/>
+<text class="bold" x="75" y="202" text-anchor="middle">frag header</text>
+<text class="muted" x="75" y="220" text-anchor="middle">10 bytes</text>
+<text class="muted" x="152" y="210" text-anchor="start">id · index · final bit</text>
+<rect class="hl" x="10" y="228" width="130" height="46"/>
+<text class="bold" x="75" y="248" text-anchor="middle">fragment data</text>
+<text class="muted" x="75" y="266" text-anchor="middle">variable</text>
+<text class="muted" x="152" y="256" text-anchor="start">compressed Instruction slice</text>
+<rect class="box" x="10" y="274" width="130" height="46"/>
+<text class="bold" x="75" y="294" text-anchor="middle">tag</text>
+<text class="muted" x="75" y="312" text-anchor="middle">16 bytes</text>
+<text class="muted" x="152" y="302" text-anchor="start">flip a bit, check fails</text>
+<text x="180" y="350" text-anchor="middle">The tag is checked first;</text>
+<text x="180" y="370" text-anchor="middle">packets that fail are dropped silently.</text>
+</svg>
 <figcaption>Figure 4: the mosh datagram. Everything after the first 8 bytes is encrypted.</figcaption>
 </figure>
 <ul>
@@ -218,7 +339,7 @@
 </ul>
 <h3>Roaming: the server trusts the newest valid packet</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 270" role="img" aria-label="Roaming: the phone moves from Wi-Fi to cellular, a valid packet with a higher sequence number arrives from the new address, and the server starts replying there">
+<svg class="wide" viewBox="0 0 720 270" role="img" aria-label="Roaming: the phone moves from Wi-Fi to cellular, a valid packet with a higher sequence number arrives from the new address, and the server starts replying there">
 <defs>
 <marker id="r-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
 <marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
@@ -245,6 +366,31 @@
 <text class="acc" x="198" y="214" text-anchor="end">seq 1042</text>
 <text class="acc" x="360" y="160" text-anchor="middle">authentic + highest sequence → reply to the new address</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 452" role="img" aria-label="Roaming: the phone moves from Wi-Fi to cellular, a valid packet with a higher sequence number arrives from the new address, and the server starts replying there">
+<defs><marker id="rm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="rm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<rect class="box" x="125" y="10" width="110" height="60" rx="12"/>
+<text class="bold" x="180" y="36" text-anchor="middle">Phone</text>
+<text class="muted" x="180" y="56" text-anchor="middle">mosh-client</text>
+<rect class="box" x="125" y="330" width="110" height="60" rx="12"/>
+<text class="bold" x="180" y="356" text-anchor="middle">Server</text>
+<text class="muted" x="180" y="376" text-anchor="middle">mosh-server</text>
+<g class="faded">
+<rect class="box" x="10" y="160" width="150" height="54" rx="27"/>
+<text class="bold" x="85" y="183" text-anchor="middle">Wi-Fi</text>
+<text class="muted" x="85" y="202" text-anchor="middle">public 203.0.113.7</text>
+<line class="line dash" x1="140" y1="72" x2="85" y2="158"/>
+<line class="line dash" x1="85" y1="216" x2="140" y2="328" marker-end="url(#rm-h)"/>
+</g>
+<text class="muted" x="10" y="110" text-anchor="start">old path: gone</text>
+<rect class="hl" x="200" y="160" width="150" height="54" rx="27"/>
+<text class="bold" x="275" y="183" text-anchor="middle">Cellular</text>
+<text class="muted" x="275" y="202" text-anchor="middle">public 198.51.100.24</text>
+<line class="line-acc" x1="220" y1="72" x2="273" y2="156" marker-end="url(#rm-a)"/>
+<line class="line-acc" x1="275" y1="218" x2="222" y2="326" marker-end="url(#rm-a)"/>
+<text class="acc" x="262" y="118" text-anchor="start">seq 1042</text>
+<text class="acc" x="180" y="420" text-anchor="middle">authentic + highest sequence</text>
+<text class="acc" x="180" y="440" text-anchor="middle">→ reply to the new address</text>
+</svg>
 <figcaption>Figure 5: roaming. The server keeps no connection, only the address of the latest valid new packet.</figcaption>
 </figure>
 <p>A TCP connection is identified by a four-tuple (both IPs and ports); when the phone's IP changes, the connection is dead. mosh-server has no such binding: <strong>whenever it receives a packet that authenticates and has a higher sequence number than any before, it sends its replies to that packet's source address</strong>. Move from Wi-Fi to 4G, and the next packet comes from the new address; the server checks the tag and follows. You notice nothing.</p>
@@ -254,7 +400,7 @@
 <h2 id="ssp">The State Synchronization Protocol: only chase the latest screen</h2>
 <h3>Why a TCP byte stream is the wrong fit</h3>
 <figure class="diagram">
-<svg viewBox="0 0 720 330" role="img" aria-label="Comparison: in SSH's TCP byte stream output queues up and must all arrive in order; mosh updates the client's screen 1 straight to the latest screen 5 and skips the frames in between">
+<svg class="wide" viewBox="0 0 720 330" role="img" aria-label="Comparison: in SSH's TCP byte stream output queues up and must all arrive in order; mosh updates the client's screen 1 straight to the latest screen 5 and skips the frames in between">
 <defs>
 <marker id="s-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
 <marker id="s-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
@@ -293,6 +439,40 @@
 <line class="line-acc" x1="362" y1="230" x2="126" y2="230" marker-end="url(#s-a)"/>
 <text class="acc" x="244" y="220" text-anchor="middle">diff: #1 → #5</text>
 </svg>
+<svg class="tall" viewBox="0 0 360 400" role="img" aria-label="Comparison: in SSH's TCP byte stream output queues up and must all arrive in order; mosh updates the client's screen 1 straight to the latest screen 5 and skips the frames in between">
+<defs><marker id="sm-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker><marker id="sm-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker></defs>
+<text class="bold" x="10" y="24" text-anchor="start">SSH over TCP: every byte, in order</text>
+<rect class="box" x="10" y="40" width="70" height="50" rx="8"/>
+<text x="45" y="70" text-anchor="middle">Client</text>
+<rect class="box" x="280" y="40" width="70" height="50" rx="8"/>
+<text x="315" y="70" text-anchor="middle">Server</text>
+<rect class="group" x="88" y="50" width="184" height="30" rx="6"/>
+<rect class="hl" x="96" y="55" width="28" height="20" rx="4"/><text class="mono" x="110" y="70" text-anchor="middle">1</text>
+<rect class="hl" x="132" y="55" width="28" height="20" rx="4"/><text class="mono" x="146" y="70" text-anchor="middle">2</text>
+<rect class="hl" x="168" y="55" width="28" height="20" rx="4"/><text class="mono" x="182" y="70" text-anchor="middle">3</text>
+<rect class="hl" x="204" y="55" width="28" height="20" rx="4"/><text class="mono" x="218" y="70" text-anchor="middle">4</text>
+<rect class="hl" x="240" y="55" width="28" height="20" rx="4"/><text class="mono" x="254" y="70" text-anchor="middle">…</text>
+<line class="line" x1="270" y1="100" x2="92" y2="100" marker-end="url(#sm-h)"/>
+<text class="muted" x="180" y="124" text-anchor="middle">cat a big log: megabytes queue up,</text>
+<text class="muted" x="180" y="144" text-anchor="middle">Ctrl-C waits until they all arrive</text>
+<text class="bold" x="10" y="186" text-anchor="start">mosh: jump straight to the latest</text>
+<rect class="group" x="10" y="200" width="340" height="98" rx="12"/>
+<rect class="box" x="27" y="212" width="50" height="36" rx="4"/><text class="mono" x="52" y="235" text-anchor="middle">#1</text>
+<g class="faded"><rect class="box" x="91" y="212" width="50" height="36" rx="4"/><text class="mono" x="116" y="235" text-anchor="middle">#2</text>
+</g>
+<g class="faded"><rect class="box" x="155" y="212" width="50" height="36" rx="4"/><text class="mono" x="180" y="235" text-anchor="middle">#3</text>
+</g>
+<g class="faded"><rect class="box" x="219" y="212" width="50" height="36" rx="4"/><text class="mono" x="244" y="235" text-anchor="middle">#4</text>
+</g>
+<rect class="hl" x="283" y="212" width="50" height="36" rx="4"/><text class="mono acc" x="308" y="235" text-anchor="middle">#5</text>
+<text class="muted" x="150" y="268" text-anchor="middle">#2–#4 never sent</text>
+<text class="muted" x="180" y="288" text-anchor="middle">screens on the server, one per output</text>
+<line class="line-acc" x1="308" y1="250" x2="308" y2="336" marker-end="url(#sm-a)"/>
+<text class="acc" x="298" y="322" text-anchor="end">diff: #1 → #5</text>
+<rect class="box" x="10" y="340" width="340" height="50" rx="10"/>
+<text x="180" y="362" text-anchor="middle">Client</text>
+<text class="muted" x="180" y="380" text-anchor="middle">holds #1, becomes #5</text>
+</svg>
 <figcaption>Figure 6: a byte stream must deliver everything in order; state sync only cares which version the peer has and which is newest.</figcaption>
 </figure>
 <p>What a terminal user cares about is what is on the screen now, not every frame in between. TCP cannot know that: it delivers every byte in order, so one lost packet stalls everything behind it, and on a slow link the old output piled up in the send buffer keeps Ctrl-C from taking effect.</p>
@@ -330,7 +510,7 @@
 <h2 id="predict">Local echo prediction: typing that keeps up on a slow link</h2>
 <p>In SSH, every character you type appears only after the server echoes it back. With a 300 ms round trip, typing feels like wading through glue. The mosh client <strong>guesses</strong> instead: most of the time, a normal character typed at a prompt appears at the cursor and the cursor moves one cell right. So the client draws it without waiting for the server.</p>
 <figure class="diagram">
-<svg viewBox="0 0 720 222" role="img" aria-label="Three cases of echo prediction: a predicted character is shown underlined; once the server confirms, the underline goes; a wrong guess is withdrawn and the server's screen wins">
+<svg class="wide" viewBox="0 0 720 222" role="img" aria-label="Three cases of echo prediction: a predicted character is shown underlined; once the server confirms, the underline goes; a wrong guess is withdrawn and the server's screen wins">
 <text class="bold" x="120" y="24" text-anchor="middle">① you type l, s</text>
 <rect class="term" x="10" y="38" width="220" height="90" rx="10"/>
 <text class="term-text" x="26" y="90" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
@@ -351,6 +531,29 @@
 <text class="muted" x="600" y="152" text-anchor="middle">keys acked, but nothing on screen</text>
 <text class="muted" x="600" y="172" text-anchor="middle">guess withdrawn, server wins</text>
 <text x="360" y="212" text-anchor="middle">Decided by EchoAck: about 50 ms after input arrives, its echo should be on the server's screen.</text>
+</svg>
+<svg class="tall" viewBox="0 0 360 344" role="img" aria-label="Three cases of echo prediction: a predicted character is shown underlined; once the server confirms, the underline goes; a wrong guess is withdrawn and the server's screen wins">
+<rect class="term" x="10" y="10" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="52" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<line class="line-acc" x1="42" y1="58" x2="60" y2="58"/>
+<rect x="62" y="38" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="28" text-anchor="start">① you type l, s</text>
+<text class="muted" x="172" y="52" text-anchor="start">no echo yet, drawn anyway</text>
+<text class="muted" x="172" y="72" text-anchor="start">underlined on slow links</text>
+<rect class="term" x="10" y="106" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="148" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<rect x="62" y="134" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="124" text-anchor="start">② server confirms</text>
+<text class="muted" x="172" y="148" text-anchor="start">server shows ls too</text>
+<text class="muted" x="172" y="168" text-anchor="start">underline goes, guess kept</text>
+<rect class="term" x="10" y="202" width="150" height="70" rx="10"/>
+<text class="term-text" x="24" y="244" textLength="81" lengthAdjust="spacingAndGlyphs">Password:</text>
+<rect x="114" y="230" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="bold" x="172" y="220" text-anchor="start">③ wrong guess</text>
+<text class="muted" x="172" y="244" text-anchor="start">acked, but not on screen</text>
+<text class="muted" x="172" y="264" text-anchor="start">withdrawn; server wins</text>
+<text x="180" y="312" text-anchor="middle">Decided by EchoAck: about 50 ms after</text>
+<text x="180" y="332" text-anchor="middle">input arrives, its echo should be visible</text>
 </svg>
 <figcaption>Figure 7: echo prediction. A right guess makes typing feel local; a wrong one flickers briefly, and the final screen is always the server's.</figcaption>
 </figure>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>在手机上用 Claude Code 和 Codex：三种方式对比 · Roamtty</title>
+<meta name="description" content="在手机上用 Claude Code 或 Codex 有三条路：官方远程控制（Claude Remote Control、ChatGPT App 里的 Codex）、云端任务，以及 SSH 加 tmux 直接连自己的服务器。本文对比各自的要求和限制，并给出 SSH 方式的完整步骤。">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="在手机上用 Claude Code 和 Codex：三种方式对比 · Roamtty">
+<meta property="og:description" content="在手机上用 Claude Code 或 Codex 有三条路：官方远程控制（Claude Remote Control、ChatGPT App 里的 Codex）、云端任务，以及 SSH 加 tmux 直接连自己的服务器。本文对比各自的要求和限制，并给出 SSH 方式的完整步骤。">
+<meta property="og:url" content="https://roamtty.com/blog/claude-code-codex-on-phone/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "在手机上用 Claude Code 和 Codex：三种方式对比", "description": "在手机上用 Claude Code 或 Codex 有三条路：官方远程控制（Claude Remote Control、ChatGPT App 里的 Codex）、云端任务，以及 SSH 加 tmux 直接连自己的服务器。本文对比各自的要求和限制，并给出 SSH 方式的完整步骤。", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "zh-CN", "mainEntityOfPage": "https://roamtty.com/blog/claude-code-codex-on-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="主导航"><a class="opt" href="/#features">功能</a><a class="opt keep" href="/docs/">文档</a><a class="opt keep" href="/blog/" aria-current="page">博客</a><a class="opt" href="/support/">支持</a><a class="opt" href="/privacy/">隐私</a><a class="lang" href="/en/blog/claude-code-codex-on-phone/" hreflang="en" lang="en">English</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="目录"><p class="toc-title">目录</p><ol><li><a href="#compare">三种方式速查</a></li><li><a href="#claude-rc">方式一：Claude Code Remote Control</a></li><li><a href="#codex-mobile">方式一：ChatGPT 手机 App 里的 Codex</a></li><li><a href="#cloud">方式二：云端任务</a></li><li><a href="#ssh">方式三：SSH + tmux 直接连服务器</a></li><li><a href="#terminal">在手机终端里用 TUI 的难点</a></li><li><a href="#roamtty">用 Roamtty 走 SSH 方式</a></li><li><a href="#choose">怎么选</a></li><li><a href="#faq">常见问题</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/blog/">← 全部文章</a></p>
+<h1>在手机上用 Claude Code 和 Codex：三种方式对比</h1>
+<p class="meta"><time datetime="2026-10-18">2026 年 10 月 18 日</time></p>
+<p>想在手机上继续用 Claude Code 或 Codex，有三种做法：<strong>官方远程控制</strong>（Claude Code 的 Remote Control、ChatGPT 手机 App 里的 Codex），手机只是遥控器，Agent 仍在你的电脑上运行；<strong>云端任务</strong>，Agent 在厂商的云端沙箱里运行；<strong>SSH 加 tmux</strong>，用手机终端直接连到运行 Agent 的服务器。前两种上手最快，但对订阅、主机系统和 API 接入方式有要求；第三种适用于任何命令行 Agent 和任何能 SSH 登录的机器。</p>
+<p>本文按 2026 年 10 月的官方文档核对，命令在 Claude Code 2.1.302、Codex CLI 0.163 上验证过。</p>
+
+<h2 id="compare">三种方式速查</h2>
+<table>
+<tr><th></th><th>官方远程控制</th><th>云端任务</th><th>SSH + tmux</th></tr>
+<tr><td>Agent 运行在</td><td>你的电脑</td><td>厂商云端</td><td>你的服务器或电脑</td></tr>
+<tr><td>手机上用</td><td>Claude App / ChatGPT App</td><td>Claude App / ChatGPT App</td><td>SSH 终端 App</td></tr>
+<tr><td>主机要求</td><td>Claude：能跑 <code>claude</code> 的任意系统；Codex：Mac 或 Windows 上的 ChatGPT 桌面版</td><td>无，代码要能被云端环境拉取</td><td>能 SSH 登录的 Linux、macOS、BSD 或 Windows</td></tr>
+<tr><td>账号</td><td>Claude：Pro / Max / Team / Enterprise 订阅，不支持 API Key；Codex：ChatGPT 账号，按灰度开放</td><td>对应厂商的订阅</td><td>不限，API Key、Bedrock、自建网关都可以</td></tr>
+<tr><td>支持的 Agent</td><td>各自只支持自家的</td><td>各自只支持自家的</td><td>任何命令行 Agent：Claude Code、Codex、Gemini CLI、Grok……</td></tr>
+<tr><td>手机端体验</td><td>原生聊天界面，有推送通知</td><td>原生聊天界面</td><td>完整终端界面，需要习惯在小屏上操作 TUI</td></tr>
+</table>
+
+<h2 id="claude-rc">方式一：Claude Code Remote Control</h2>
+<p>Remote Control 把 Claude App（iOS、Android）或网页 claude.ai/code 接到你电脑上正在运行的 Claude Code 会话。Claude 始终在你的机器上运行，文件、MCP 服务器和项目配置都照常可用；手机和终端可以交替发消息，对话同步。</p>
+<h3>启动</h3>
+<pre><code># 在项目目录里启动一个可远程控制的交互会话
+claude --remote-control "my-project"
+
+# 或者以服务模式运行，手机上可以新建多个会话
+claude remote-control
+
+# 已经在 Claude Code 里了：把当前会话交给手机
+/remote-control</code></pre>
+<p>服务模式下按空格会显示二维码，手机扫码即可打开会话；也可以在 Claude App 的会话列表里找到它。</p>
+<h3>要求与限制</h3>
+<ul>
+<li><strong>订阅</strong>：需要 Pro、Max、Team 或 Enterprise，用 <code>/login</code> 登录 claude.ai 账号。Team 和 Enterprise 要管理员先在后台打开 Remote Control 开关。</li>
+<li><strong>不支持 API Key 和第三方接入</strong>：用 Amazon Bedrock、Google Cloud、Microsoft Foundry，或把 <code>ANTHROPIC_BASE_URL</code> 指向代理、网关时都不可用。</li>
+<li><strong><code>claude</code> 进程必须一直运行</strong>：关掉终端，会话就下线。官方文档建议在远程服务器上用 tmux 或 screen 启动，SSH 断开后会话仍在。</li>
+<li><strong>断网</strong>：交互会话会一直重试，网络恢复后自动重连；服务模式断网约 10 分钟后进程退出，要重新运行。</li>
+<li><strong>部分命令只能在终端里用</strong>：例如 <code>/plugin</code>、<code>/resume</code>；<code>/model</code>、<code>/compact</code>、<code>/context</code> 等可以在手机上用。</li>
+<li>可在 <code>/config</code> 中打开推送：需要你批准操作或回答问题时，手机收到通知。</li>
+</ul>
+
+<h2 id="codex-mobile">方式一：ChatGPT 手机 App 里的 Codex</h2>
+<p>OpenAI 在 ChatGPT 手机 App 里提供了 Codex。手机可以连到一台已配对的电脑，Agent 在那台电脑上运行，手机上启动任务、看终端输出和 diff、批准命令。</p>
+<ol class="steps">
+<li>在 Mac 或 Windows 电脑上打开 ChatGPT 桌面版，进入 设置 → Connections → <strong>Control this Mac or PC</strong>，选择 Set up 并完成验证。</li>
+<li>用手机扫描显示的二维码，登录<strong>同一个</strong> ChatGPT 账号和工作区，批准连接。</li>
+<li>在手机 App 里打开 Codex，选择这台电脑和项目，描述任务。</li>
+</ol>
+<ul>
+<li>电脑要保持开机、不休眠、联网。</li>
+<li>官方文档只写了 Mac 和 Windows 的桌面版作为被控端，没有提到 Linux 服务器或单独的 Codex CLI。代码和工具链在 Linux 开发机上时，这条路走不通。</li>
+<li>官方说明“是否可用取决于灰度和工作区设置”，具体以你账号里看到的为准。</li>
+</ul>
+
+<h2 id="cloud">方式二：云端任务</h2>
+<p>Claude Code 和 Codex 都能在厂商的云端环境里跑任务：在手机上选仓库、写需求，Agent 在云端沙箱里改代码，你看 diff、开 PR。电脑不用开着，适合“想到一个改动先丢出去”。</p>
+<p>代价是 Agent 看不到你本机的环境：内网服务、本地数据库、私有依赖、GPU、已经登录的命令行工具都用不上，构建和测试要能在云端环境里重现。这类任务和本地开发是两回事，下文不再展开。</p>
+
+<h2 id="ssh">方式三：SSH + tmux 直接连服务器</h2>
+<p>最通用的做法是让 Agent 在服务器的 tmux 里运行，手机用 SSH 连上去。tmux 让任务和手机的连接脱钩：锁屏、断网、换网络，任务都在服务器上继续，下次连上重新附着即可。任何命令行 Agent 都能这么用，账号和 API 接入方式也不受限制。</p>
+<h3>1. 服务器上准备好 Agent 和 tmux</h3>
+<pre><code># Ubuntu / Debian
+sudo apt install openssh-server tmux mosh
+
+# 先在服务器上登录一次 Agent
+claude        # 或 codex、gemini</code></pre>
+<p>mosh 可选，装上后手机在 Wi-Fi 和蜂窝网络之间切换也不断线。</p>
+<h3>2. 在 tmux 里启动 Agent</h3>
+<pre><code>tmux new -A -s claude              # 有同名会话就附着，没有就新建
+cd ~/my-project
+claude --permission-mode plan       # 先出计划，批准后才修改</code></pre>
+<p>断开后再次运行 <code>tmux new -A -s claude</code> 就回到原来的界面，Agent 的输出一行不少。Codex 对应的只读启动方式是 <code>codex --sandbox read-only</code>。不要在手机上随手用 <code>--dangerously-skip-permissions</code> 或 <code>--dangerously-bypass-approvals-and-sandbox</code>：它们跳过所有确认，你在小屏上很难及时发现 Agent 做了什么。</p>
+<h3>3. 从外网连回来</h3>
+<p>服务器在家里或公司内网时，用 Tailscale 组网，手机直接连服务器的 <code>100.x.y.z</code> 地址，SSH 不用暴露在公网。在国内延迟高时，可以<a href="/blog/self-hosted-derp/">自建 DERP 中继</a>。</p>
+<h3>4. 两者结合</h3>
+<p>Remote Control 和 tmux 并不冲突：在服务器的 tmux 里运行 <code>claude --remote-control</code>，手机上既能用 Claude App 聊天，也能随时 SSH 进去看完整的终端，或者在同一台机器上顺手跑 Codex、看日志。</p>
+
+<h2 id="terminal">在手机终端里用 TUI 的难点</h2>
+<p>SSH 方式最大的问题不在连接，而在手机键盘：Claude Code 和 Codex 的界面依赖 Esc、Shift+Tab、方向键、Ctrl+C，手机输入法上都没有。常用的几个按键：</p>
+<table>
+<tr><th>按键</th><th>Claude Code</th><th>Codex</th></tr>
+<tr><td>Esc</td><td>打断当前回复</td><td>打断当前回复</td></tr>
+<tr><td>Esc Esc</td><td>回退到之前的消息</td><td>编辑上一条消息</td></tr>
+<tr><td>Shift+Tab</td><td>切换模式（默认 / 接受编辑 / 计划）</td><td>切换 Plan 模式</td></tr>
+<tr><td>↑ ↓</td><td>翻阅历史输入、在选项间移动</td><td>翻阅历史输入、在选项间移动</td></tr>
+<tr><td>Ctrl+C</td><td>清空输入或取消</td><td>清空输入或退出</td></tr>
+</table>
+<p>其他问题：长提示词在终端输入框里不好改；想把截图发给 Agent，得先把图片传到服务器；多个 Agent 同时跑时，要一个个附着进去才知道谁在等你批准。</p>
+
+<h2 id="roamtty">用 Roamtty 走 SSH 方式</h2>
+<p>Roamtty 是为这个场景做的手机 SSH 终端（Android 和 iPhone），把上面这些步骤做成了按钮：</p>
+<ul>
+<li><strong>一键启动 Agent</strong>：选主机、文件夹、Agent（Claude Code、Codex、Grok）和权限模式，应用在服务器上新建独立的 tmux 会话并带上对应参数，例如计划模式就是 <code>claude --permission-mode plan</code>。</li>
+<li><strong>会话卡片</strong>：首页按待确认、运行中、已完成分组列出所有 Agent，等待批准的卡片上直接点“允许”，完成的卡片上点“追问”接着下指令，不用打开终端。</li>
+<li><strong>tmux 和 mosh</strong>：每个会话对应一个远端 tmux 会话，回来时自动重新附着；装了 mosh 优先走 UDP，8 秒无回应回退到 SSH。两者都可以在应用里一键安装。</li>
+<li><strong>按键</strong>：按住屏幕边缘的小幽灵弹出快捷键环，按前台是 Claude Code、Codex、Grok 还是 Gemini CLI 给出各自的按键（Esc Esc、Shift+Tab、Ctrl+C 等）；左右滑动发送方向键，双击发送 Tab。</li>
+<li><strong>图片和长文本</strong>：一次插入最多 9 张图片，上传后把服务器上的路径填进输入框；在大输入框里写好长提示词再发送。</li>
+</ul>
+<p>Roamtty 没有后端服务器，不经手你的 Agent 账号和 API Key，连接只发往你自己添加的主机。操作细节见<a href="/docs/#agent">使用文档</a>。</p>
+
+<h2 id="choose">怎么选</h2>
+<ul>
+<li><strong>只用 Claude Code，有 Pro 或 Max 订阅，主要在自己的电脑上开发</strong>：先用 Remote Control，最省事。</li>
+<li><strong>只用 Codex，主机是 Mac 或 Windows</strong>：用 ChatGPT 手机 App 里的 Codex。</li>
+<li><strong>改动不依赖本地环境，电脑不想一直开着</strong>：用云端任务。</li>
+<li><strong>代码在 Linux 服务器或开发机上、用 API Key 或企业网关、同时跑多种 Agent，或者想在手机上看到完整终端</strong>：用 SSH + tmux。</li>
+</ul>
+
+<h2 id="faq">常见问题</h2>
+<table>
+<tr><th>问题</th><th>回答</th></tr>
+<tr><td>手机锁屏后 Agent 会停吗？</td><td>Remote Control 和 SSH + tmux 下都不会，Agent 在电脑或服务器上运行。前提是 <code>claude</code> 进程或 tmux 会话还在，电脑没有休眠。</td></tr>
+<tr><td>Remote Control 报错要求 claude.ai 订阅</td><td>当前用的是 API Key 或第三方接入。用 <code>/login</code> 登录订阅账号，并取消 <code>ANTHROPIC_BASE_URL</code> 等变量；做不到就用 SSH 方式。</td></tr>
+<tr><td>ChatGPT App 里找不到要连的电脑</td><td>被控端必须是 Mac 或 Windows 上的 ChatGPT 桌面版，保持唤醒，并且和手机登录同一个账号与工作区。</td></tr>
+<tr><td>SSH 断开后 Agent 也退出了</td><td>Agent 没在 tmux 里运行。先 <code>tmux new -A -s 名称</code>，再启动 Agent。</td></tr>
+<tr><td>在外面连不上家里的服务器</td><td>用 Tailscale 组网，见使用文档的<a href="/docs/#tailscale">从外网连接</a>；国内延迟高时<a href="/blog/self-hosted-derp/">自建 DERP 中继</a>。</td></tr>
+</table>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="页脚"><a href="/docs/">使用文档</a><a href="/blog/">博客</a><a href="/support/">支持与联系</a><a href="/privacy/">隐私政策</a><a href="/terms/">使用条款</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code、Codex、Grok 是其各自所有者的商标，Roamtty 与这些公司没有关联。Google Play 是 Google LLC 的商标；App Store、iPhone 是 Apple Inc. 的商标。</p>
+</div></footer>
+</body>
+</html>

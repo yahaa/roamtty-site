@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Claude Code and Codex from your phone: three ways compared · Roamtty</title>
+<meta name="description" content="There are three ways to use Claude Code or Codex from a phone: the official remote controls (Claude Remote Control, Codex in the ChatGPT app), cloud tasks, and SSH plus tmux into your own server. This post compares their requirements and limits, with full steps for the SSH route.">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/claude-code-codex-on-phone/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:title" content="Using Claude Code and Codex from your phone: three ways compared · Roamtty">
+<meta property="og:description" content="There are three ways to use Claude Code or Codex from a phone: the official remote controls (Claude Remote Control, Codex in the ChatGPT app), cloud tasks, and SSH plus tmux into your own server. This post compares their requirements and limits, with full steps for the SSH route.">
+<meta property="og:url" content="https://roamtty.com/en/blog/claude-code-codex-on-phone/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "Using Claude Code and Codex from your phone: three ways compared", "description": "There are three ways to use Claude Code or Codex from a phone: the official remote controls (Claude Remote Control, Codex in the ChatGPT app), cloud tasks, and SSH plus tmux into your own server. This post compares their requirements and limits, with full steps for the SSH route.", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "en", "mainEntityOfPage": "https://roamtty.com/en/blog/claude-code-codex-on-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/">Docs</a><a class="opt keep" href="/en/blog/" aria-current="page">Blog</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/blog/claude-code-codex-on-phone/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li><a href="#compare">The three ways at a glance</a></li><li><a href="#claude-rc">Way one: Claude Code Remote Control</a></li><li><a href="#codex-mobile">Way one: Codex in the ChatGPT mobile app</a></li><li><a href="#cloud">Way two: cloud tasks</a></li><li><a href="#ssh">Way three: SSH + tmux into your server</a></li><li><a href="#terminal">What's hard about a TUI on a phone</a></li><li><a href="#roamtty">The SSH route with Roamtty</a></li><li><a href="#choose">Which one to pick</a></li><li><a href="#faq">FAQ</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/en/blog/">← All posts</a></p>
+<h1>Using Claude Code and Codex from your phone: three ways compared</h1>
+<p class="meta"><time datetime="2026-10-18">October 18, 2026</time></p>
+<p>There are three ways to keep using Claude Code or Codex from your phone. With an <strong>official remote control</strong> (Claude Code's Remote Control, or Codex in the ChatGPT mobile app), the phone is only a remote and the agent keeps running on your computer. With <strong>cloud tasks</strong>, the agent runs in the vendor's cloud sandbox. With <strong>SSH plus tmux</strong>, a terminal app on the phone connects straight to the server where the agent runs. The first two are the quickest to set up but come with requirements on your plan, host OS and how you reach the API. The third works with any command-line agent on any machine you can SSH into.</p>
+<p>Checked against the official documentation as of October 2026; commands were tested with Claude Code 2.1.302 and Codex CLI 0.163.</p>
+
+<h2 id="compare">The three ways at a glance</h2>
+<table>
+<tr><th></th><th>Official remote control</th><th>Cloud tasks</th><th>SSH + tmux</th></tr>
+<tr><td>Agent runs on</td><td>Your computer</td><td>Vendor's cloud</td><td>Your server or computer</td></tr>
+<tr><td>On the phone</td><td>Claude app / ChatGPT app</td><td>Claude app / ChatGPT app</td><td>An SSH terminal app</td></tr>
+<tr><td>Host requirements</td><td>Claude: any system that runs <code>claude</code>. Codex: the ChatGPT desktop app on a Mac or Windows PC</td><td>None; the cloud environment must be able to fetch your code</td><td>Any Linux, macOS, BSD or Windows host you can SSH into</td></tr>
+<tr><td>Account</td><td>Claude: Pro / Max / Team / Enterprise plan, no API keys. Codex: a ChatGPT account, subject to rollout</td><td>The vendor's subscription</td><td>Anything: API keys, Bedrock and self-hosted gateways all work</td></tr>
+<tr><td>Agents</td><td>Each vendor's own only</td><td>Each vendor's own only</td><td>Any CLI agent: Claude Code, Codex, Gemini CLI, Grok…</td></tr>
+<tr><td>Phone experience</td><td>Native chat UI with push notifications</td><td>Native chat UI</td><td>The full terminal UI; driving a TUI on a small screen takes some getting used to</td></tr>
+</table>
+
+<h2 id="claude-rc">Way one: Claude Code Remote Control</h2>
+<p>Remote Control connects the Claude app (iOS and Android) or claude.ai/code in a browser to a Claude Code session running on your machine. Claude runs on your machine the whole time, so your files, MCP servers and project configuration are all available, and you can send messages from the terminal and the phone interchangeably.</p>
+<h3>Starting it</h3>
+<pre><code># An interactive session you can also drive remotely, started in the project directory
+claude --remote-control "my-project"
+
+# Or server mode, which lets you start several sessions from the phone
+claude remote-control
+
+# Already inside Claude Code: hand the current session to your phone
+/remote-control</code></pre>
+<p>In server mode, press the spacebar to show a QR code and scan it with your phone, or find the session in the Claude app's session list.</p>
+<h3>Requirements and limits</h3>
+<ul>
+<li><strong>Plan</strong>: Pro, Max, Team or Enterprise, signed in with <code>/login</code>. On Team and Enterprise, an Owner has to turn on Remote Control in the admin settings first.</li>
+<li><strong>No API keys or third-party endpoints</strong>: it is unavailable with Amazon Bedrock, Google Cloud, Microsoft Foundry, or when <code>ANTHROPIC_BASE_URL</code> points to a proxy or gateway.</li>
+<li><strong>The <code>claude</code> process must keep running</strong>: close the terminal and the session goes offline. The official docs recommend starting it inside tmux or screen on a remote machine so it survives an SSH disconnect.</li>
+<li><strong>Network outages</strong>: an interactive session keeps retrying and reconnects when the network returns; server mode gives up after about 10 minutes and has to be restarted.</li>
+<li><strong>Some commands are terminal-only</strong>, such as <code>/plugin</code> and <code>/resume</code>. <code>/model</code>, <code>/compact</code>, <code>/context</code> and others work from the phone.</li>
+<li>Turn on push notifications in <code>/config</code> to get a notification on your phone when Claude needs an approval or an answer.</li>
+</ul>
+
+<h2 id="codex-mobile">Way one: Codex in the ChatGPT mobile app</h2>
+<p>OpenAI offers Codex in the ChatGPT mobile app. The phone connects to a paired computer and the agent runs there; from the phone you start tasks, read terminal output and diffs, and approve commands.</p>
+<ol class="steps">
+<li>On a Mac or Windows PC, open the ChatGPT desktop app, go to Settings → Connections → <strong>Control this Mac or PC</strong>, choose Set up and complete the verification.</li>
+<li>Scan the QR code with your phone, sign in to the <strong>same</strong> ChatGPT account and workspace, and approve the connection.</li>
+<li>Open Codex in the mobile app, pick the computer and project, and describe the task.</li>
+</ol>
+<ul>
+<li>The computer has to stay on, awake and online.</li>
+<li>The official docs only list the desktop app on Mac and Windows as the controlled machine; they don't mention Linux servers or the standalone Codex CLI. If your code and toolchain live on a Linux dev box, this route doesn't fit.</li>
+<li>OpenAI notes that availability depends on rollout and your workspace settings, so check what your account shows.</li>
+</ul>
+
+<h2 id="cloud">Way two: cloud tasks</h2>
+<p>Both Claude Code and Codex can run tasks in the vendor's cloud: pick a repository on your phone, describe the change, and the agent edits code in a cloud sandbox while you review the diff and open a PR. Your computer can stay off, which suits "I just thought of a change, let me hand it off".</p>
+<p>The trade-off is that the agent can't see your own environment: internal services, local databases, private dependencies, GPUs and CLI tools you're already signed in to are all out of reach, and the build and tests have to be reproducible in the cloud environment. That's a different job from local development, so the rest of this post leaves it aside.</p>
+
+<h2 id="ssh">Way three: SSH + tmux into your server</h2>
+<p>The most general approach is to run the agent inside tmux on the server and connect from the phone over SSH. tmux decouples the work from the phone's connection: lock the screen, lose signal or switch networks, and the task keeps running on the server; reconnect and reattach. Any command-line agent works this way, with no restriction on accounts or how you reach the API.</p>
+<h3>1. Install the agent and tmux on the server</h3>
+<pre><code># Ubuntu / Debian
+sudo apt install openssh-server tmux mosh
+
+# Sign in to the agent on the server once
+claude        # or codex, gemini</code></pre>
+<p>mosh is optional; with it, the phone can switch between Wi-Fi and mobile data without dropping the connection.</p>
+<h3>2. Start the agent inside tmux</h3>
+<pre><code>tmux new -A -s claude              # attach if the session exists, otherwise create it
+cd ~/my-project
+claude --permission-mode plan       # plan first, edit only after you approve</code></pre>
+<p>After a disconnect, run <code>tmux new -A -s claude</code> again to get back to the same screen with all of the agent's output intact. The read-only equivalent for Codex is <code>codex --sandbox read-only</code>. Think twice before using <code>--dangerously-skip-permissions</code> or <code>--dangerously-bypass-approvals-and-sandbox</code> from a phone: they skip every confirmation, and on a small screen it's hard to notice in time what the agent did.</p>
+<h3>3. Reach it from anywhere</h3>
+<p>When the server is on a home or office network, join it to Tailscale and connect to its <code>100.x.y.z</code> address from the phone, so SSH never has to face the internet. If relayed connections are slow where you are, <a href="/en/blog/self-hosted-derp/">run your own DERP relay</a>.</p>
+<h3>4. Combine them</h3>
+<p>Remote Control and tmux don't conflict: run <code>claude --remote-control</code> inside tmux on the server, and you can chat from the Claude app and still SSH in to see the full terminal, or run Codex and tail logs on the same machine.</p>
+
+<h2 id="terminal">What's hard about a TUI on a phone</h2>
+<p>The biggest problem with the SSH route isn't the connection, it's the phone keyboard: Claude Code and Codex rely on Esc, Shift+Tab, the arrow keys and Ctrl+C, none of which a phone keyboard has. The keys you'll use most:</p>
+<table>
+<tr><th>Key</th><th>Claude Code</th><th>Codex</th></tr>
+<tr><td>Esc</td><td>Interrupt the current reply</td><td>Interrupt the current reply</td></tr>
+<tr><td>Esc Esc</td><td>Rewind to an earlier message</td><td>Edit the previous message</td></tr>
+<tr><td>Shift+Tab</td><td>Switch mode (default / accept edits / plan)</td><td>Toggle Plan mode</td></tr>
+<tr><td>↑ ↓</td><td>Browse input history, move between options</td><td>Browse input history, move between options</td></tr>
+<tr><td>Ctrl+C</td><td>Clear input or cancel</td><td>Clear input or quit</td></tr>
+</table>
+<p>Other friction: long prompts are awkward to edit in a terminal input box; sending a screenshot to the agent means uploading it to the server first; and with several agents running, you have to attach to each one to find out which is waiting for you.</p>
+
+<h2 id="roamtty">The SSH route with Roamtty</h2>
+<p>Roamtty is a phone SSH terminal (Android and iPhone) built for this, and turns the steps above into buttons:</p>
+<ul>
+<li><strong>One-tap agent launch</strong>: pick a host, folder, agent (Claude Code, Codex, Grok) and permission mode. The app creates a separate tmux session on the server and passes the matching flags, for example <code>claude --permission-mode plan</code> for plan mode.</li>
+<li><strong>Session cards</strong>: the home screen groups every agent into needs approval, running and done. Tap Allow on a card that's waiting, or Follow up on a finished one to give the next instruction, without opening the terminal.</li>
+<li><strong>tmux and mosh</strong>: each session is its own remote tmux session and reattaches automatically. With mosh installed the terminal prefers UDP and falls back to SSH after 8 seconds without a reply. Both can be installed from inside the app.</li>
+<li><strong>Keys</strong>: press and hold the little ghost at the screen edge for a shortcut ring with the keys of whichever agent is in front, Claude Code, Codex, Grok or Gemini CLI (Esc Esc, Shift+Tab, Ctrl+C and so on). Swipe left or right for arrow keys, double-tap for Tab.</li>
+<li><strong>Images and long text</strong>: insert up to 9 images at once; they're uploaded and their server paths are typed into the prompt. Write long prompts in a full-size text box before sending.</li>
+</ul>
+<p>Roamtty has no backend server and never handles your agent accounts or API keys; connections go only to hosts you add. See the <a href="/en/docs/#agent">documentation</a> for details.</p>
+
+<h2 id="choose">Which one to pick</h2>
+<ul>
+<li><strong>You only use Claude Code, have a Pro or Max plan and mostly work on your own computer</strong>: start with Remote Control; it's the least effort.</li>
+<li><strong>You only use Codex and your machine is a Mac or Windows PC</strong>: use Codex in the ChatGPT mobile app.</li>
+<li><strong>The change doesn't depend on your local environment and you'd rather not keep a computer on</strong>: use cloud tasks.</li>
+<li><strong>Your code is on a Linux server or dev box, you use API keys or a company gateway, you run several kinds of agents, or you want the full terminal on your phone</strong>: use SSH + tmux.</li>
+</ul>
+
+<h2 id="faq">FAQ</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Does the agent stop when my phone locks?</td><td>Not with Remote Control or SSH + tmux: the agent runs on your computer or server, as long as the <code>claude</code> process or tmux session is still there and the computer isn't asleep.</td></tr>
+<tr><td>Remote Control says it needs a claude.ai subscription</td><td>You're on an API key or a third-party endpoint. Sign in to a subscription with <code>/login</code> and unset <code>ANTHROPIC_BASE_URL</code> and similar variables; if you can't, use the SSH route.</td></tr>
+<tr><td>The ChatGPT app doesn't list my computer</td><td>The controlled machine must be the ChatGPT desktop app on a Mac or Windows PC, kept awake and signed in to the same account and workspace as the phone.</td></tr>
+<tr><td>The agent exits when SSH disconnects</td><td>It wasn't running in tmux. Run <code>tmux new -A -s name</code> first, then start the agent.</td></tr>
+<tr><td>I can't reach my home server when I'm out</td><td>Use Tailscale; see <a href="/en/docs/#tailscale">Connecting from anywhere</a> in the docs, and <a href="/en/blog/self-hosted-derp/">run your own DERP relay</a> if relays are slow.</td></tr>
+</table>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/blog/">Blog</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
+</div></footer>
+</body>
+</html>

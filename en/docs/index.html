@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Documentation · Roamtty</title>
-<meta name="description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures, files and monitoring, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
+<meta name="description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures and the action bar, files and monitoring, settings, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
 <meta name="theme-color" content="#262728">
 <link rel="canonical" href="https://roamtty.com/en/docs/">
 <link rel="alternate" hreflang="en" href="https://roamtty.com/en/docs/">
@@ -18,7 +18,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="zh_CN">
 <meta property="og:title" content="Documentation · Roamtty">
-<meta property="og:description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures, files and monitoring, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
+<meta property="og:description" content="Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures and the action bar, files and monitoring, settings, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.">
 <meta property="og:url" content="https://roamtty.com/en/docs/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -41,6 +41,7 @@
 <li><a href="#sessions">Sessions</a></li>
 <li><a href="#terminal">Terminal</a></li>
 <li><a href="#files">Files and monitoring</a></li>
+<li><a href="#settings">Settings</a></li>
 <li><a href="#background">Background and lock screen</a></li>
 <li><a href="#tailscale">Connecting from anywhere</a></li>
 <li><a href="#troubleshooting">Common errors</a></li>
@@ -85,6 +86,7 @@
 <pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
 </details>
 <p>If the fingerprint later changes, the connection is blocked. Once you've confirmed the server was reinstalled or rekeyed, choose “Verify again…” from the host menu.</p>
+<p>Host cards show the system icon, whether the host is online and how long the connection took. The <strong>⋮</strong> menu on a card opens a terminal or files, starts an AI agent, installs plugins, or edits or deletes the host.</p>
 </div>
 <figure><img src="/assets/screens/add-host-en.webp" width="720" height="1600" loading="lazy" alt="Add host screen: name, address, username, port, authentication method and session mode"><figcaption>Add host</figcaption></figure>
 </div>
@@ -110,6 +112,7 @@
 <li>Done cards show a summary of the answer; tap <strong>Reply</strong> to send the next instruction right there.</li>
 <li>Each session is its own tmux session on the server. Lock the phone, lose signal or close the app and the task keeps running; tap the card to reattach.</li>
 <li><strong>Close</strong> in the card menu ends the remote task. If the server is unreachable, long-press to force delete, which removes only the card on your phone.</li>
+<li>Each host keeps at most 8 sessions.</li>
 </ul>
 <p>With mosh installed the terminal prefers mosh (UDP) and falls back to SSH after 8 seconds without a reply.</p>
 </div>
@@ -119,31 +122,51 @@
 <h2 id="terminal">Terminal</h2>
 <table>
 <tr><th>Gesture</th><th>Does</th></tr>
-<tr><td>Tap near the cursor</td><td>Shows the keyboard</td></tr>
-<tr><td>Double / triple tap</td><td>Tab completion / paste</td></tr>
+<tr><td>Tap the cursor's line</td><td>Shows the keyboard (taps elsewhere don't)</td></tr>
+<tr><td>Double tap</td><td>Tab completion; ↑ ↓ ← keys appear next to the ghost to pick a completion</td></tr>
+<tr><td>Triple tap</td><td>Paste the clipboard</td></tr>
 <tr><td>Swipe left or right</td><td>← / →; hold after swiping to jump to the start or end of the line</td></tr>
-<tr><td>Swipe up or down</td><td>Scroll back through history</td></tr>
+<tr><td>Swipe up or down</td><td>Scroll back through history (tmux's own history in a tmux session)</td></tr>
 <tr><td>Pinch</td><td>Font size</td></tr>
-<tr><td>Long-press</td><td>Drag the cursor on the command line; select and copy elsewhere</td></tr>
+<tr><td>Long-press</td><td>Drag the cursor with a magnifier on the command line; select and copy elsewhere</td></tr>
+<tr><td>Tap a link</td><td>Opens it in the browser, or in the GitHub app for GitHub links</td></tr>
 </table>
-<p>The <strong>ghost</strong> with a wrench at the screen edge: <strong>tap</strong> it for the action bar (upload / download files, insert images, frequent commands, edit long text, switch sessions); <strong>hold</strong> it for the current agent's shortcut ring and release on a key to send it.</p>
+<p>An <strong>Esc</strong> key sits at the end of the cursor's line and turns into <strong>Enter</strong> once you stop typing.</p>
+<p>The <strong>ghost</strong> with a wrench at the screen edge: <strong>hold</strong> it for a shortcut ring (Esc, Ctrl, Shift, F1–F12 and more, depending on the agent in front) and release on a key to send it; <strong>tap</strong> it for the action bar:</p>
+<ul>
+<li><strong>Session menu</strong>: back to the host, close or restart this session, or switch to another one</li>
+<li><strong>Upload file</strong> / <strong>Download file</strong></li>
+<li><strong>Insert image</strong>: up to 9 at a time; once uploaded, their remote paths are typed into the command line for the agent</li>
+<li><strong>Common commands</strong>: your shell history from the server; tap one to run it</li>
+<li><strong>Settings</strong>: Edit text (write a long prompt in a large editor before sending), pin or hide the controls, paste, and font size</li>
+</ul>
 <div class="figs">
 <figure><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal showing full Claude Code output"><figcaption>Agent terminal</figcaption></figure>
 <figure><img src="/assets/screens/ring-en.webp" width="720" height="1600" loading="lazy" alt="Claude Code shortcut ring shown while holding the ghost"><figcaption>Hold the ghost: shortcut ring</figcaption></figure>
 </div>
 
 <h2 id="files">Files and monitoring</h2>
-<p><strong>View files</strong> in the host menu browses the server over SFTP: preview code, Markdown and images, rename, delete, download several files at once, or start an AI agent in the current folder. Share images to Roamtty from your gallery to upload them.</p>
-<p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, handy for checking whether a build or test run is stuck.</p>
+<p><strong>View files</strong> in the host menu browses the server over SFTP: preview code (with syntax highlighting), Markdown and images and find text in them; rename, delete, create folders, copy paths and download one file or several; or open a terminal or start an AI agent in the current folder. The first download asks for a download folder on your phone, and later ones are saved there. Share images to Roamtty from your gallery or other apps to upload them.</p>
+<p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, handy for checking whether a build or test run is stuck; the buttons at the top start an AI agent, open a terminal or browse files.</p>
 <div class="figs">
 <figure><img src="/assets/screens/files-en.webp" width="720" height="1600" loading="lazy" alt="File browser showing docs, src, package.json and README.md in acme-app"><figcaption>File browser</figcaption></figure>
 <figure><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview with a table, code block and task list"><figcaption>Markdown preview</figcaption></figure>
 <figure><img src="/assets/screens/monitor-en.webp" width="720" height="1600" loading="lazy" alt="Host details with live CPU, memory, disk and network"><figcaption>Host monitor</figcaption></figure>
 </div>
 
+<h2 id="settings">Settings</h2>
+<p>Open the menu at the top left → <strong>Settings</strong>:</p>
+<ul>
+<li><strong>Appearance</strong>: follow the system, dark or light</li>
+<li><strong>Terminal font</strong>: several built-in monospaced fonts, or import your own TTF / OTF font, with Nerd Font icons as a fallback</li>
+<li><strong>Language</strong>: Simplified Chinese or English</li>
+<li><strong>Download folder</strong>: where downloaded files are saved</li>
+</ul>
+<p><strong>Help</strong> in the same menu has a quick reference for gestures and controls.</p>
+
 <h2 id="background">Background and lock screen</h2>
 <ul>
-<li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents.</li>
+<li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents. While connected, Roamtty keeps a notification in the shade; tap <strong>Disconnect all</strong> on it to close every connection at once.</li>
 <li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return.</li>
 </ul>
 <p class="note">What keeps a task alive is tmux on the server, not your phone staying online.</p>

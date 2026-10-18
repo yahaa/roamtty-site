@@ -7,7 +7,7 @@ Roamtty is an SSH client, not an AI model: Claude Code, Codex, Grok or Gemini CL
 ## English
 
 - [Roamtty: SSH for remote AI coding, in your pocket](https://roamtty.com/en/): Roamtty is an SSH client for remote AI coding on Android and iPhone, with tmux session persistence, mosh roaming, SFTP and AI agent session status. No accounts, ads or telemetry.
-- [Documentation · Roamtty](https://roamtty.com/en/docs/): Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures, files and monitoring, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.
+- [Documentation · Roamtty](https://roamtty.com/en/docs/): Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures and the action bar, files and monitoring, settings, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.
 - [Support & contact · Roamtty](https://roamtty.com/en/support/): Help, frequently asked questions and contact details for Roamtty on Android and iPhone.
 - [Terms of Use · Roamtty](https://roamtty.com/en/terms/): Roamtty terms of use.
 - [Self-hosting a DERP relay for Tailscale and Headscale](https://roamtty.com/en/blog/self-hosted-derp/): When Tailscale can't connect two devices directly, it relays traffic through DERP servers that may be far away. Run your own derper, add it to Tailscale or Headscale, and keep it for your own devices.
@@ -16,7 +16,7 @@ Roamtty is an SSH client, not an AI model: Claude Code, Codex, Grok or Gemini CL
 ## 中文 (Simplified Chinese)
 
 - [Roamtty：随身的远程 AI 编程终端](https://roamtty.com/): Roamtty 是面向远程 AI 编程的 SSH 客户端，支持 Android 与 iPhone：tmux 会话保持、mosh 漫游、SFTP 文件管理与 AI Agent 会话状态。无账号、无广告、无遥测。
-- [使用文档 · Roamtty](https://roamtty.com/docs/): Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势、文件与监控，以及用 Tailscale 或自建 Headscale 从外网连回服务器。
+- [使用文档 · Roamtty](https://roamtty.com/docs/): Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势与操作栏、文件与监控、设置，以及用 Tailscale 或自建 Headscale 从外网连回服务器。
 - [支持与联系 · Roamtty](https://roamtty.com/support/): Roamtty 使用帮助、常见问题与联系方式。
 - [使用条款 · Roamtty](https://roamtty.com/terms/): Roamtty 使用条款。
 - [自建 DERP 中继：Tailscale 与 Headscale 教程](https://roamtty.com/blog/self-hosted-derp/): Tailscale 直连失败时会走 DERP 中继，官方节点都在海外，国内延迟常达数百毫秒。本文部署自己的 derper，分别接入 Tailscale 官方服务和自建 Headscale，并只允许自己的设备使用。

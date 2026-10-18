@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用文档 · Roamtty</title>
-<meta name="description" content="Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势、文件与监控，以及用 Tailscale 或自建 Headscale 从外网连回服务器。">
+<meta name="description" content="Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势与操作栏、文件与监控、设置，以及用 Tailscale 或自建 Headscale 从外网连回服务器。">
 <meta name="theme-color" content="#262728">
 <link rel="canonical" href="https://roamtty.com/docs/">
 <link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/docs/">
@@ -18,7 +18,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="使用文档 · Roamtty">
-<meta property="og:description" content="Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势、文件与监控，以及用 Tailscale 或自建 Headscale 从外网连回服务器。">
+<meta property="og:description" content="Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势与操作栏、文件与监控、设置，以及用 Tailscale 或自建 Headscale 从外网连回服务器。">
 <meta property="og:url" content="https://roamtty.com/docs/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -41,6 +41,7 @@
 <li><a href="#sessions">会话列表</a></li>
 <li><a href="#terminal">终端操作</a></li>
 <li><a href="#files">文件与监控</a></li>
+<li><a href="#settings">设置</a></li>
 <li><a href="#background">后台与锁屏</a></li>
 <li><a href="#tailscale">从外网连接</a></li>
 <li><a href="#troubleshooting">常见错误</a></li>
@@ -85,6 +86,7 @@
 <pre><code>for f in /etc/ssh/ssh_host_*_key.pub; do ssh-keygen -lf "$f"; done</code></pre>
 </details>
 <p>以后指纹变化时连接会被阻止；确认是服务器重装或换了密钥后，在主机菜单中选“重新核验…”。</p>
+<p>主机卡片显示系统图标、在线状态与建连延时；卡片右侧的 <strong>⋮</strong> 菜单可打开终端、查看文件、启动 AI Agent、安装插件、编辑或删除主机。</p>
 </div>
 <figure><img src="/assets/screens/add-host-zh.webp" width="720" height="1600" loading="lazy" alt="添加主机页：名称、地址、用户名、端口、认证方式和会话模式"><figcaption>添加主机</figcaption></figure>
 </div>
@@ -110,6 +112,7 @@
 <li>已完成的卡片显示回答摘要，点<strong>“追问”</strong>直接输入下一条指令。</li>
 <li>每个会话是服务器上独立的 tmux 会话。锁屏、断网或关掉应用后任务继续运行，点卡片即重新附着。</li>
 <li>卡片菜单中的<strong>“关闭”</strong>会结束远端任务；服务器连不上时长按卡片可强制删除，只移除手机上的卡片。</li>
+<li>每台主机最多保留 8 个会话。</li>
 </ul>
 <p>装有 mosh 时终端优先走 mosh（UDP），8 秒无回应自动回退到 SSH。</p>
 </div>
@@ -119,31 +122,51 @@
 <h2 id="terminal">终端操作</h2>
 <table>
 <tr><th>操作</th><th>效果</th></tr>
-<tr><td>点击光标附近</td><td>弹出键盘</td></tr>
-<tr><td>双击 / 三击</td><td>Tab 补全 / 粘贴</td></tr>
+<tr><td>点击光标所在行</td><td>弹出键盘（点其他位置不弹出）</td></tr>
+<tr><td>双击</td><td>Tab 补全；小幽灵旁出现 ↑ ↓ ← 键，用来选择补全项</td></tr>
+<tr><td>三击</td><td>粘贴剪贴板</td></tr>
 <tr><td>左右滑动</td><td>← / →，滑动后按住跳到行首或行尾</td></tr>
-<tr><td>上下滑动</td><td>回看历史</td></tr>
+<tr><td>上下滑动</td><td>回看历史（tmux 会话滚动 tmux 自己的历史）</td></tr>
 <tr><td>双指缩放</td><td>调整字号</td></tr>
-<tr><td>长按</td><td>在命令行上拖动光标；在输出上选择复制</td></tr>
+<tr><td>长按</td><td>在命令行上用放大镜拖动光标；在输出上选择复制</td></tr>
+<tr><td>点击链接</td><td>用浏览器打开，GitHub 链接优先用 GitHub App</td></tr>
 </table>
-<p>屏幕边缘拿扳手的<strong>小幽灵</strong>：<strong>点按</strong>展开操作栏（上传 / 下载文件、插入图片、常用命令、编辑长文本、切换会话）；<strong>按住</strong>弹出当前 Agent 的快捷键环，拖到键上松手即发送。</p>
+<p>光标行末尾常驻一个 <strong>Esc</strong> 键，停止输入后它变成<strong>回车</strong>键。</p>
+<p>屏幕边缘拿扳手的<strong>小幽灵</strong>：<strong>按住</strong>弹出快捷键环（Esc、Ctrl、Shift、F1–F12 等，随前台的 Agent 变化），拖到键上松手即发送；<strong>点按</strong>展开操作栏：</p>
+<ul>
+<li><strong>会话菜单</strong>：返回主机详情、关闭或重启当前会话、切换到其他会话</li>
+<li><strong>上传文件</strong> / <strong>下载文件</strong></li>
+<li><strong>插入图片</strong>：一次最多 9 张，上传后把远端路径填进命令行，方便发给 Agent</li>
+<li><strong>常用命令</strong>：读取服务器上的 shell 历史，点一条即执行</li>
+<li><strong>设置</strong>：编辑文本（在大输入框里写好长提示词再发送）、固定或隐藏操作栏、粘贴、调整字号</li>
+</ul>
 <div class="figs">
 <figure><img src="/assets/screens/terminal-zh.webp" width="720" height="1600" loading="lazy" alt="Agent 终端：完整的 Claude Code 输出"><figcaption>Agent 终端</figcaption></figure>
 <figure><img src="/assets/screens/ring-zh.webp" width="720" height="1600" loading="lazy" alt="按住小幽灵弹出的 Claude Code 快捷键环"><figcaption>按住小幽灵：快捷键环</figcaption></figure>
 </div>
 
 <h2 id="files">文件与监控</h2>
-<p>主机菜单中的<strong>“查看文件”</strong>通过 SFTP 浏览服务器：预览代码、Markdown 和图片，重命名、删除、批量下载，或在当前文件夹直接启动 AI Agent。在相册中把图片分享给 Roamtty 即可上传到服务器。</p>
-<p>点主机卡片进入详情页，实时查看 CPU、内存、磁盘、网络、GPU 和占用最高的进程，适合确认构建或测试是否卡住。</p>
+<p>主机菜单中的<strong>“查看文件”</strong>通过 SFTP 浏览服务器：预览代码（带语法高亮）、Markdown 和图片并在文件中查找，重命名、删除、新建文件夹、复制路径、单个或批量下载，或在当前文件夹直接打开终端、启动 AI Agent。首次下载时选择手机上的下载目录，之后自动保存到那里。在相册等应用中把图片分享给 Roamtty 即可上传到服务器。</p>
+<p>点主机卡片进入详情页，实时查看 CPU、内存、磁盘、网络、GPU 和占用最高的进程，适合确认构建或测试是否卡住；顶部按钮可直接启动 AI Agent、打开终端或查看文件。</p>
 <div class="figs">
 <figure><img src="/assets/screens/files-zh.webp" width="720" height="1600" loading="lazy" alt="文件浏览：acme-app 文件夹中的 docs、src、package.json 和 README.md"><figcaption>文件浏览</figcaption></figure>
 <figure><img src="/assets/screens/markdown-zh.webp" width="720" height="1600" loading="lazy" alt="Markdown 预览：表格、代码块与任务列表"><figcaption>Markdown 预览</figcaption></figure>
 <figure><img src="/assets/screens/monitor-zh.webp" width="720" height="1600" loading="lazy" alt="主机详情：实时 CPU、内存、磁盘与网络"><figcaption>主机监控</figcaption></figure>
 </div>
 
+<h2 id="settings">设置</h2>
+<p>左上角菜单 →<strong>“设置”</strong>：</p>
+<ul>
+<li><strong>外观</strong>：跟随系统、深色或浅色</li>
+<li><strong>终端字体</strong>：内置多款等宽字体，也可导入自定义 TTF / OTF 字体，并带 Nerd Font 图标回退</li>
+<li><strong>语言</strong>：简体中文或 English</li>
+<li><strong>下载目录</strong>：下载的文件保存到哪里</li>
+</ul>
+<p>同一菜单中的<strong>“帮助”</strong>有一份手势与操作的速查。</p>
+
 <h2 id="background">后台与锁屏</h2>
 <ul>
-<li><strong>Android</strong>：在设置中打开“允许后台运行”并取消电池优化；小米、华为、OPPO、vivo 等还需允许自启动并在最近任务中锁定。</li>
+<li><strong>Android</strong>：在设置中打开“允许后台运行”并取消电池优化；小米、华为、OPPO、vivo 等还需允许自启动并在最近任务中锁定。有连接时通知栏常驻一条 Roamtty 通知，点其中的<strong>“全部断开”</strong>可一次断开所有连接。</li>
 <li><strong>iPhone</strong>：系统会在后台暂停网络连接。任务在服务器的 tmux 里继续运行，回到应用时自动重连。</li>
 </ul>
 <p class="note">保证任务不中断的是服务器上的 tmux，而不是手机一直在线。</p>

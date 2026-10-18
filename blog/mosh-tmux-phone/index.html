@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>手机 SSH 不断线：mosh 与 tmux 配置指南 · Roamtty</title>
+<meta name="description" content="手机锁屏、切换 Wi-Fi 和蜂窝网络时 SSH 会断开。用 tmux 让任务留在服务器上，用 mosh 让连接跟着手机换网络，再配上支持 mosh 的 Android 或 iPhone 客户端。本文给出服务器配置、常见报错和客户端对比。">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="手机 SSH 不断线：mosh 与 tmux 配置指南 · Roamtty">
+<meta property="og:description" content="手机锁屏、切换 Wi-Fi 和蜂窝网络时 SSH 会断开。用 tmux 让任务留在服务器上，用 mosh 让连接跟着手机换网络，再配上支持 mosh 的 Android 或 iPhone 客户端。本文给出服务器配置、常见报错和客户端对比。">
+<meta property="og:url" content="https://roamtty.com/blog/mosh-tmux-phone/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "手机 SSH 不断线：mosh 与 tmux 配置指南", "description": "手机锁屏、切换 Wi-Fi 和蜂窝网络时 SSH 会断开。用 tmux 让任务留在服务器上，用 mosh 让连接跟着手机换网络，再配上支持 mosh 的 Android 或 iPhone 客户端。本文给出服务器配置、常见报错和客户端对比。", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "zh-CN", "mainEntityOfPage": "https://roamtty.com/blog/mosh-tmux-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="主导航"><a class="opt" href="/#features">功能</a><a class="opt keep" href="/docs/">文档</a><a class="opt keep" href="/blog/" aria-current="page">博客</a><a class="opt" href="/support/">支持</a><a class="opt" href="/privacy/">隐私</a><a class="lang" href="/en/blog/mosh-tmux-phone/" hreflang="en" lang="en">English</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="目录"><p class="toc-title">目录</p><ol><li><a href="#why">为什么手机上 SSH 总断</a></li><li><a href="#tmux">第一步：用 tmux 保住任务</a></li><li><a href="#mosh">第二步：用 mosh 跟着手机换网络</a></li><li><a href="#errors">常见报错</a></li><li><a href="#clients">Android 和 iPhone 上的 mosh 客户端</a></li><li><a href="#roamtty">Roamtty 怎么做</a></li><li><a href="#faq">常见问题</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/blog/">← 全部文章</a></p>
+<h1>手机 SSH 不断线：mosh 与 tmux 配置指南</h1>
+<p class="meta"><time datetime="2026-10-18">2026 年 10 月 18 日</time></p>
+<p>手机上 SSH 断线，要分两件事解决：<strong>tmux</strong> 让程序在服务器上继续运行，断线后重新附着就能回到原来的界面；<strong>mosh</strong> 用 UDP 代替 TCP 传输终端，手机换 IP、锁屏几分钟回来都不用重新登录。只装 tmux，任务不会丢，但每次断线要重新连一次；两个都装，体验最接近“从没断过”。</p>
+<p>本文按 mosh 1.4.0、tmux 3.x 核对，命令以 Ubuntu / Debian 为例。</p>
+
+<h2 id="why">为什么手机上 SSH 总断</h2>
+<ul>
+<li><strong>换网络</strong>：SSH 跑在 TCP 上，一条连接绑定手机当时的 IP。从 Wi-Fi 走到蜂窝网络，IP 一变，连接就失效了。</li>
+<li><strong>锁屏和后台</strong>：iPhone 会在应用进入后台后很快暂停它的网络；Android 的省电策略也会冻结后台应用。连接空闲太久，中间的 NAT 或防火墙还会悄悄丢掉它。</li>
+<li><strong>程序跟着连接一起结束</strong>：在普通 SSH 里直接运行的程序，是这条连接的子进程。连接断了，服务器发出 SIGHUP，程序通常随之退出。</li>
+</ul>
+<p>前两条是连接的问题，mosh 解决；第三条是进程的问题，tmux 解决。</p>
+
+<h2 id="tmux">第一步：用 tmux 保住任务</h2>
+<pre><code>sudo apt install tmux</code></pre>
+<p>每次登录后都进同一个会话，有就附着，没有就新建：</p>
+<pre><code>tmux new -A -s main</code></pre>
+<p>在里面运行编译、测试或 AI Agent。断线后重新登录，再执行同一条命令，就回到断开前的屏幕。想主动离开、让任务继续跑，按 <code>Ctrl+B</code> 再按 <code>D</code>。</p>
+<h3>适合手机的 tmux 设置</h3>
+<p>写入 <code>~/.tmux.conf</code>，然后运行 <code>tmux source ~/.tmux.conf</code> 生效：</p>
+<pre><code>set -g mouse on              # 手指上下滑动滚动 tmux 的历史
+set -g history-limit 50000   # 多留一些历史，Agent 的输出很长
+set -g status off            # 手机屏幕小，不要状态栏（需要时再打开）
+set -s escape-time 10        # 按 Esc 不延迟，Claude Code 等 TUI 更跟手</code></pre>
+<h3>登录后自动进入 tmux</h3>
+<p>只想从手机登录时自动进入，可以在手机端的 SSH 客户端里把“登录后执行的命令”设成 <code>tmux new -A -s main</code>。不建议在 <code>~/.bashrc</code> 里无条件启动 tmux，会影响 scp、rsync 和电脑上的登录。</p>
+
+<h2 id="mosh">第二步：用 mosh 跟着手机换网络</h2>
+<p>mosh 先用一次普通 SSH 登录，在服务器上启动 <code>mosh-server</code>，之后终端改走加密的 UDP。客户端每隔几秒发一次心跳，服务器总是把数据回给最近一次收到合法数据包的地址，所以手机换了 IP 也能继续，不用重新登录。网速慢时，mosh 会先在本地显示你输入的字符（带下划线），不用等服务器回显。</p>
+<h3>服务器配置</h3>
+<pre><code># Ubuntu / Debian
+sudo apt install mosh
+
+# macOS（Homebrew）
+brew install mosh</code></pre>
+<p>还要放行 UDP 端口。mosh 从 60001 开始找空闲端口，同时连接的会话不多时，放行一小段就够了：</p>
+<pre><code># ufw
+sudo ufw allow 60000:61000/udp</code></pre>
+<p>云服务器还要在安全组里放行同样的 UDP 端口。服务器在家里的路由器后面时，与其在路由器上做端口转发，不如用 Tailscale：手机和服务器在同一个虚拟内网里，UDP 不用暴露到公网。</p>
+<h3>两者一起用</h3>
+<p>mosh 只同步“当前这一屏”，不保留终端自己的滚动历史，回看历史要靠 tmux。命令行客户端可以这样连：</p>
+<pre><code>mosh user@server -- tmux new -A -s main</code></pre>
+<p>这样一来，换网络和锁屏由 mosh 处理；mosh 也断了（比如手机关机一晚），tmux 里的任务还在，重新连上即可。</p>
+<h3>别让 mosh-server 越积越多</h3>
+<p>默认情况下，客户端消失后 <code>mosh-server</code> 会永远等下去，手机上每次“断开”都可能在服务器上留下一个。在服务器的 <code>~/.bashrc</code> 或 <code>/etc/environment</code> 里设置超时：</p>
+<pre><code>export MOSH_SERVER_NETWORK_TMOUT=3600   # 一小时收不到客户端就退出</code></pre>
+<p>任务在 tmux 里，mosh-server 退出不影响任务。已经堆积的可以用 <code>pkill -u "$USER" mosh-server</code> 清掉（会断开你自己当前所有的 mosh 连接）。</p>
+
+<h2 id="errors">常见报错</h2>
+<table>
+<tr><th>现象</th><th>原因与处理</th></tr>
+<tr><td><code>mosh-server needs a UTF-8 native locale to run</code></td><td>服务器缺 UTF-8 语言环境。运行 <code>sudo locale-gen en_US.UTF-8</code>，或在连接时指定 <code>LANG=C.UTF-8</code></td></tr>
+<tr><td>连不上，提示 <code>Please verify that UDP port 60001 is not firewalled and can reach the server.</code></td><td>UDP 不通：检查 ufw、云安全组和路由器；手机上开着代理或 VPN App 时，它可能不转发 UDP</td></tr>
+<tr><td><code>mosh-server: command not found</code></td><td>非登录 shell 找不到它，macOS 上常见。用 <code>mosh --server=/opt/homebrew/bin/mosh-server user@host</code> 指定路径</td></tr>
+<tr><td>macOS 弹窗询问是否允许 mosh-server 接收连接</td><td>在系统设置的防火墙里允许它，否则 UDP 进不来</td></tr>
+<tr><td>手指滑动不能回看历史</td><td>mosh 没有滚动历史。在 tmux 里开启 <code>set -g mouse on</code>，或用 <code>Ctrl+B</code> <code>[</code> 进入复制模式翻页</td></tr>
+<tr><td>端口转发、X11、ssh-agent 转发不起作用</td><td>mosh 不支持这些功能，需要时另开一个普通 SSH 连接</td></tr>
+</table>
+
+<h2 id="clients">Android 和 iPhone 上的 mosh 客户端</h2>
+<p>mosh 要求客户端自己实现 mosh 协议，只支持 SSH 的 App 用不了。截至 2026 年 10 月的情况：</p>
+<table>
+<tr><th>客户端</th><th>平台</th><th>mosh</th><th>说明</th></tr>
+<tr><td>Blink Shell</td><td>iPhone、iPad</td><td>支持</td><td>mosh 官网列出的 iOS 客户端，命令行风格，适合熟悉终端的人</td></tr>
+<tr><td>Termius</td><td>Android、iPhone、桌面</td><td>支持</td><td>图形界面，免费版即可用 mosh；跨设备同步主机需要账号</td></tr>
+<tr><td>Termux</td><td>Android</td><td>支持</td><td>手机上的 Linux 环境，<code>pkg install mosh</code> 后用命令行连接</td></tr>
+<tr><td>JuiceSSH</td><td>Android</td><td>支持</td><td>mosh 官网仍列出它，但 Google Play 上已经找不到，多年没有更新</td></tr>
+<tr><td>Roamtty</td><td>Android、iPhone</td><td>支持</td><td>自动配合 tmux，详见下一节</td></tr>
+</table>
+
+<h2 id="roamtty">Roamtty 怎么做</h2>
+<p>Roamtty 把上面的步骤做成了默认行为，添加主机时会话模式保持 tmux 即可：</p>
+<ul>
+<li><strong>一键安装</strong>：主机菜单的“安装插件”用服务器的包管理器装 tmux 和 mosh（Linux 用 apt、dnf、pacman 等并需要 sudo，macOS 用 Homebrew，Windows 用 winget 装 psmux），也能找到 Homebrew、MacPorts 和 snap 装在非标准路径的 mosh-server。</li>
+<li><strong>mosh 里直接是 tmux</strong>：每个会话是服务器上独立的 tmux 会话，mosh-server 启动时就附着进去，开启 tmux 鼠标模式，上下滑动回看的是 tmux 的历史。</li>
+<li><strong>自动处理语言环境</strong>：依次尝试 <code>en_US.UTF-8</code> 和 <code>C.UTF-8</code>，服务器没生成语言包也能用上 mosh。</li>
+<li><strong>自动回退</strong>：8 秒收不到 UDP 回应就改走 SSH，并提示可能是 UDP 60000–61000 没放行。</li>
+<li><strong>不留残余进程</strong>：tmux 模式下 mosh-server 15 分钟收不到手机的数据就退出；手机睡得更久，回来时自动重新登录并附着 tmux。</li>
+<li><strong>文件仍走 SSH</strong>：终端走 mosh 时，SFTP 文件浏览和上传仍用 SSH，断了会在后台重新登录。</li>
+</ul>
+<p>配置细节见<a href="/docs/#sessions">使用文档</a>；在外面连回家里的服务器，见<a href="/docs/#tailscale">Tailscale 一节</a>和<a href="/blog/self-hosted-derp/">自建 DERP 中继</a>。</p>
+
+<h2 id="faq">常见问题</h2>
+<table>
+<tr><th>问题</th><th>回答</th></tr>
+<tr><td>只用 tmux、不装 mosh 可以吗？</td><td>可以。任务不会丢，只是每次换网络或锁屏回来都要重新登录一次，通常几秒钟。</td></tr>
+<tr><td>只用 mosh、不装 tmux 呢？</td><td>短时间断网没问题，但 mosh-server 一旦退出（超时、服务器重启、手机关机一晚），里面的程序也随之结束，而且没有滚动历史。建议两个都装。</td></tr>
+<tr><td>mosh 安全吗？</td><td>登录仍走 SSH，之后每个 UDP 数据包都用 AES-128 OCB 加密和认证，密钥通过 SSH 交给客户端。</td></tr>
+<tr><td>iPhone 锁屏后 mosh 也会断吗？</td><td>iOS 会暂停后台应用的网络，mosh 期间收不到数据，但 mosh-server 还在等；解锁回到应用后，mosh 接着同步屏幕，不用重新登录。</td></tr>
+<tr><td>mosh 能穿过 Tailscale 吗？</td><td>能。mosh 走的是普通 UDP，连服务器的 <code>100.x.y.z</code> 地址即可，服务器防火墙要允许 tailscale0 网卡上的这些端口。</td></tr>
+</table>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="页脚"><a href="/docs/">使用文档</a><a href="/blog/">博客</a><a href="/support/">支持与联系</a><a href="/privacy/">隐私政策</a><a href="/terms/">使用条款</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code、Codex、Grok 是其各自所有者的商标，Roamtty 与这些公司没有关联。Google Play 是 Google LLC 的商标；App Store、iPhone 是 Apple Inc. 的商标。</p>
+</div></footer>
+</body>
+</html>

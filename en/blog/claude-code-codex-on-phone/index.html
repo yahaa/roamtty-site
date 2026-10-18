@@ -98,7 +98,7 @@ sudo apt install openssh-server tmux mosh
 
 # Sign in to the agent on the server once
 claude        # or codex, gemini</code></pre>
-<p>mosh is optional; with it, the phone can switch between Wi-Fi and mobile data without dropping the connection.</p>
+<p>mosh is optional; with it, the phone can switch between Wi-Fi and mobile data without dropping the connection. See the <a href="/en/blog/mosh-tmux-phone/">mosh and tmux guide</a> for setup and common errors.</p>
 <h3>2. Start the agent inside tmux</h3>
 <pre><code>tmux new -A -s claude              # attach if the session exists, otherwise create it
 cd ~/my-project

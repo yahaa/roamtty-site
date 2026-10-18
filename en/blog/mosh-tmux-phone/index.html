@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSH on your phone without disconnects: a mosh and tmux guide · Roamtty</title>
+<meta name="description" content="SSH drops when your phone locks or switches between Wi-Fi and mobile data. tmux keeps your work on the server, mosh keeps the connection alive across networks, and a mosh-capable Android or iPhone client ties it together. Server setup, common errors and a client comparison.">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/mosh-tmux-phone/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:title" content="SSH on your phone without disconnects: a mosh and tmux guide · Roamtty">
+<meta property="og:description" content="SSH drops when your phone locks or switches between Wi-Fi and mobile data. tmux keeps your work on the server, mosh keeps the connection alive across networks, and a mosh-capable Android or iPhone client ties it together. Server setup, common errors and a client comparison.">
+<meta property="og:url" content="https://roamtty.com/en/blog/mosh-tmux-phone/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "SSH on your phone without disconnects: a mosh and tmux guide", "description": "SSH drops when your phone locks or switches between Wi-Fi and mobile data. tmux keeps your work on the server, mosh keeps the connection alive across networks, and a mosh-capable Android or iPhone client ties it together. Server setup, common errors and a client comparison.", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "en", "mainEntityOfPage": "https://roamtty.com/en/blog/mosh-tmux-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/">Docs</a><a class="opt keep" href="/en/blog/" aria-current="page">Blog</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/blog/mosh-tmux-phone/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li><a href="#why">Why SSH keeps dropping on a phone</a></li><li><a href="#tmux">Step one: keep the work alive with tmux</a></li><li><a href="#mosh">Step two: follow the phone across networks with mosh</a></li><li><a href="#errors">Common errors</a></li><li><a href="#clients">mosh clients for Android and iPhone</a></li><li><a href="#roamtty">How Roamtty handles it</a></li><li><a href="#faq">FAQ</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/en/blog/">← All posts</a></p>
+<h1>SSH on your phone without disconnects: a mosh and tmux guide</h1>
+<p class="meta"><time datetime="2026-10-18">October 18, 2026</time></p>
+<p>Fixing dropped SSH on a phone takes two pieces. <strong>tmux</strong> keeps programs running on the server, so after a drop you reattach and land on the same screen. <strong>mosh</strong> carries the terminal over UDP instead of TCP, so the phone can change IP or sleep for a few minutes without logging in again. tmux alone means you never lose work but have to reconnect after each drop; with both, it feels like the connection never broke.</p>
+<p>Checked against mosh 1.4.0 and tmux 3.x; commands use Ubuntu / Debian as the example.</p>
+
+<h2 id="why">Why SSH keeps dropping on a phone</h2>
+<ul>
+<li><strong>Changing networks</strong>: SSH runs over TCP, and a TCP connection is tied to the phone's IP address at the time. Walk from Wi-Fi onto mobile data, the IP changes, and the connection is dead.</li>
+<li><strong>Locking the screen and backgrounding</strong>: iOS suspends an app's networking soon after it goes to the background, and Android's power saving freezes background apps too. Leave a connection idle long enough and a NAT or firewall along the way silently forgets it.</li>
+<li><strong>Programs die with the connection</strong>: a program started straight from an SSH session is a child of that connection. When the connection goes, the server sends SIGHUP and the program usually exits.</li>
+</ul>
+<p>The first two are connection problems, which mosh solves; the third is a process problem, which tmux solves.</p>
+
+<h2 id="tmux">Step one: keep the work alive with tmux</h2>
+<pre><code>sudo apt install tmux</code></pre>
+<p>After every login, go into the same session, attaching if it exists and creating it otherwise:</p>
+<pre><code>tmux new -A -s main</code></pre>
+<p>Run builds, tests or AI agents inside it. After a drop, log in again and run the same command to get back to the screen you left. To leave on purpose and let the work continue, press <code>Ctrl+B</code> then <code>D</code>.</p>
+<h3>tmux settings for a phone</h3>
+<p>Put these in <code>~/.tmux.conf</code> and run <code>tmux source ~/.tmux.conf</code>:</p>
+<pre><code>set -g mouse on              # finger swipes scroll tmux's history
+set -g history-limit 50000   # keep more history; agent output is long
+set -g status off            # no status bar on a small screen (turn it back on when needed)
+set -s escape-time 10        # no delay after Esc, so TUIs like Claude Code feel responsive</code></pre>
+<h3>Enter tmux automatically on login</h3>
+<p>If you only want this when logging in from the phone, set the phone client's "command to run after login" to <code>tmux new -A -s main</code>. Starting tmux unconditionally from <code>~/.bashrc</code> isn't recommended: it gets in the way of scp, rsync and logins from your computer.</p>
+
+<h2 id="mosh">Step two: follow the phone across networks with mosh</h2>
+<p>mosh logs in once over ordinary SSH, starts <code>mosh-server</code> on the server, and then switches the terminal to encrypted UDP. The client sends a heartbeat every few seconds, and the server always replies to the address of the most recent authentic packet, so the session carries on when the phone's IP changes, without a new login. On a slow link mosh shows your keystrokes locally right away (underlined until confirmed) instead of waiting for the server's echo.</p>
+<h3>Server setup</h3>
+<pre><code># Ubuntu / Debian
+sudo apt install mosh
+
+# macOS (Homebrew)
+brew install mosh</code></pre>
+<p>Then open the UDP ports. mosh takes the first free port from 60001 up, so if you run only a few sessions at once, a small range is enough:</p>
+<pre><code># ufw
+sudo ufw allow 60000:61000/udp</code></pre>
+<p>On a cloud server, open the same UDP ports in the security group as well. For a server behind your home router, Tailscale beats port forwarding: the phone and server share a private network, and no UDP port faces the internet.</p>
+<h3>Using both together</h3>
+<p>mosh only synchronises the current screen and keeps no scrollback of its own, so tmux provides the history. From a command-line client:</p>
+<pre><code>mosh user@server -- tmux new -A -s main</code></pre>
+<p>Now mosh handles network changes and screen locks, and when mosh itself ends (say the phone was off overnight), the work is still in tmux; just connect again.</p>
+<h3>Don't let mosh-server processes pile up</h3>
+<p>By default, <code>mosh-server</code> waits forever for a client that has gone away, so every time the phone "disconnects" it may leave one behind. Set a timeout in the server's <code>~/.bashrc</code> or <code>/etc/environment</code>:</p>
+<pre><code>export MOSH_SERVER_NETWORK_TMOUT=3600   # exit after an hour without hearing from the client</code></pre>
+<p>The work lives in tmux, so mosh-server exiting doesn't affect it. Clear out existing leftovers with <code>pkill -u "$USER" mosh-server</code> (this also ends all of your current mosh connections).</p>
+
+<h2 id="errors">Common errors</h2>
+<table>
+<tr><th>Symptom</th><th>Cause and fix</th></tr>
+<tr><td><code>mosh-server needs a UTF-8 native locale to run</code></td><td>The server lacks a UTF-8 locale. Run <code>sudo locale-gen en_US.UTF-8</code>, or set <code>LANG=C.UTF-8</code> for the connection</td></tr>
+<tr><td>It can't connect and says <code>Please verify that UDP port 60001 is not firewalled and can reach the server.</code></td><td>UDP is blocked: check ufw, the cloud security group and your router. A proxy or VPN app running on the phone may not forward UDP</td></tr>
+<tr><td><code>mosh-server: command not found</code></td><td>A non-login shell can't find it, common on macOS. Pass the path: <code>mosh --server=/opt/homebrew/bin/mosh-server user@host</code></td></tr>
+<tr><td>macOS asks whether mosh-server may accept incoming connections</td><td>Allow it in the firewall settings, otherwise UDP can't get in</td></tr>
+<tr><td>Swiping doesn't scroll back</td><td>mosh has no scrollback. Turn on <code>set -g mouse on</code> in tmux, or press <code>Ctrl+B</code> <code>[</code> for copy mode and page through</td></tr>
+<tr><td>Port forwarding, X11 or ssh-agent forwarding doesn't work</td><td>mosh doesn't support them; open a separate plain SSH connection when you need them</td></tr>
+</table>
+
+<h2 id="clients">mosh clients for Android and iPhone</h2>
+<p>mosh needs the client to implement the mosh protocol itself; an SSH-only app can't use it. As of October 2026:</p>
+<table>
+<tr><th>Client</th><th>Platforms</th><th>mosh</th><th>Notes</th></tr>
+<tr><td>Blink Shell</td><td>iPhone, iPad</td><td>Yes</td><td>The iOS client listed on mosh.org; command-line style, suits people at home in a terminal</td></tr>
+<tr><td>Termius</td><td>Android, iPhone, desktop</td><td>Yes</td><td>Graphical; mosh works on the free plan, syncing hosts across devices needs an account</td></tr>
+<tr><td>Termux</td><td>Android</td><td>Yes</td><td>A Linux environment on the phone; <code>pkg install mosh</code>, then connect from the command line</td></tr>
+<tr><td>JuiceSSH</td><td>Android</td><td>Yes</td><td>Still listed on mosh.org, but no longer on Google Play and not updated for years</td></tr>
+<tr><td>Roamtty</td><td>Android, iPhone</td><td>Yes</td><td>Pairs mosh with tmux automatically; see the next section</td></tr>
+</table>
+
+<h2 id="roamtty">How Roamtty handles it</h2>
+<p>Roamtty does all of the above by default; just leave the session mode on tmux when adding a host:</p>
+<ul>
+<li><strong>One-tap install</strong>: Install plugins in the host menu installs tmux and mosh with the server's package manager (apt, dnf, pacman and others on Linux, with sudo; Homebrew on macOS; psmux through winget on Windows), and finds a mosh-server installed by Homebrew, MacPorts or snap outside the default path.</li>
+<li><strong>tmux inside mosh</strong>: each session is its own tmux session on the server, attached as mosh-server starts, with tmux mouse mode on so swiping scrolls tmux's history.</li>
+<li><strong>Locales handled</strong>: it tries <code>en_US.UTF-8</code> and then <code>C.UTF-8</code>, so mosh works even if the server never generated a locale.</li>
+<li><strong>Automatic fallback</strong>: with no UDP reply within 8 seconds it switches to SSH and points out that UDP 60000–61000 may be blocked.</li>
+<li><strong>No leftovers</strong>: in tmux mode, mosh-server exits after 15 minutes without hearing from the phone; if the phone slept longer, the app logs in again and reattaches tmux when you come back.</li>
+<li><strong>Files still use SSH</strong>: while the terminal runs over mosh, SFTP browsing and uploads use SSH, which logs back in quietly in the background after a drop.</li>
+</ul>
+<p>See the <a href="/en/docs/#sessions">documentation</a> for details; to reach a home server from outside, see the <a href="/en/docs/#tailscale">Tailscale section</a> and <a href="/en/blog/self-hosted-derp/">self-hosting a DERP relay</a>.</p>
+
+<h2 id="faq">FAQ</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Can I use tmux without mosh?</td><td>Yes. You won't lose work; you'll just log in again after each network change or screen lock, which usually takes a few seconds.</td></tr>
+<tr><td>What about mosh without tmux?</td><td>Short outages are fine, but once mosh-server exits (timeout, server reboot, phone off overnight), the programs in it end too, and there's no scrollback. Use both.</td></tr>
+<tr><td>Is mosh secure?</td><td>Login still goes through SSH. After that, every UDP packet is encrypted and authenticated with AES-128 in OCB mode, using a key handed to the client over SSH.</td></tr>
+<tr><td>Does mosh drop when my iPhone locks?</td><td>iOS suspends networking for background apps, so nothing arrives meanwhile, but mosh-server keeps waiting. When you unlock and return to the app, mosh resynchronises the screen without a new login.</td></tr>
+<tr><td>Does mosh work over Tailscale?</td><td>Yes. mosh uses plain UDP; connect to the server's <code>100.x.y.z</code> address and make sure the server's firewall allows those ports on the tailscale0 interface.</td></tr>
+</table>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/blog/">Blog</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
+</div></footer>
+</body>
+</html>

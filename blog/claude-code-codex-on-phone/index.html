@@ -98,7 +98,7 @@ sudo apt install openssh-server tmux mosh
 
 # 先在服务器上登录一次 Agent
 claude        # 或 codex、gemini</code></pre>
-<p>mosh 可选，装上后手机在 Wi-Fi 和蜂窝网络之间切换也不断线。</p>
+<p>mosh 可选，装上后手机在 Wi-Fi 和蜂窝网络之间切换也不断线，配置和常见报错见<a href="/blog/mosh-tmux-phone/">mosh 与 tmux 配置指南</a>。</p>
 <h3>2. 在 tmux 里启动 Agent</h3>
 <pre><code>tmux new -A -s claude              # 有同名会话就附着，没有就新建
 cd ~/my-project

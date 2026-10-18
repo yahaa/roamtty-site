@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How mosh works: the client, the server and the protocols between them · Roamtty</title>
+<meta name="description" content="Why does mosh survive network changes and stay responsive on a slow link? Seven diagrams walk through it: an SSH login hands over a key, then everything moves to encrypted UDP; a datagram layer handles encryption, sequence numbers, RTT and roaming, the State Synchronization Protocol sends only the latest screen, and local echo prediction shows your typing before the server answers.">
+<meta name="theme-color" content="#262728">
+<link rel="canonical" href="https://roamtty.com/en/blog/how-mosh-works/">
+<link rel="alternate" hreflang="en" href="https://roamtty.com/en/blog/how-mosh-works/">
+<link rel="alternate" hreflang="zh-CN" href="https://roamtty.com/blog/how-mosh-works/">
+<link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/blog/how-mosh-works/">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Roamtty">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:title" content="How mosh works: the client, the server and the protocols between them · Roamtty">
+<meta property="og:description" content="Why does mosh survive network changes and stay responsive on a slow link? Seven diagrams walk through it: an SSH login hands over a key, then everything moves to encrypted UDP; a datagram layer handles encryption, sequence numbers, RTT and roaming, the State Synchronization Protocol sends only the latest screen, and local echo prediction shows your typing before the server answers.">
+<meta property="og:url" content="https://roamtty.com/en/blog/how-mosh-works/">
+<meta property="og:image" content="https://roamtty.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "How mosh works: the client, the server and the protocols between them", "description": "Why does mosh survive network changes and stay responsive on a slow link? Seven diagrams walk through it: an SSH login hands over a key, then everything moves to encrypted UDP; a datagram layer handles encryption, sequence numbers, RTT and roaming, the State Synchronization Protocol sends only the latest screen, and local echo prediction shows your typing before the server answers.", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "en", "mainEntityOfPage": "https://roamtty.com/en/blog/how-mosh-works/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+<a class="brand" href="/en/"><img src="/assets/icon-512.png" alt="" width="30" height="30">Roamtty</a>
+<nav class="site-nav" aria-label="Main"><a class="opt" href="/en/#features">Features</a><a class="opt keep" href="/en/docs/">Docs</a><a class="opt keep" href="/en/blog/" aria-current="page">Blog</a><a class="opt" href="/en/support/">Support</a><a class="opt" href="/en/privacy/">Privacy</a><a class="lang" href="/blog/how-mosh-works/" hreflang="zh-CN" lang="zh-CN">中文</a></nav>
+</div></header>
+<main id="main">
+<article class="doc docs post"><div class="wrap docs-layout">
+<nav class="docs-toc" aria-label="Contents"><p class="toc-title">Contents</p><ol><li><a href="#overview">The big picture: two programs, two channels</a></li><li><a href="#bootstrap">Step one: log in over SSH, get a port and a key</a></li><li><a href="#layers">The protocol layers</a></li><li><a href="#datagram">The datagram layer: encryption, sequence numbers, RTT and roaming</a></li><li><a href="#ssp">The State Synchronization Protocol: only chase the latest screen</a></li><li><a href="#predict">Local echo prediction: typing that keeps up on a slow link</a></li><li><a href="#tradeoffs">What this design costs</a></li><li><a href="#roamtty">mosh in Roamtty</a></li><li><a href="#references">References</a></li></ol></nav>
+<div class="docs-body">
+<p class="crumb"><a href="/en/blog/">← All posts</a></p>
+<h1>How mosh works: the client, the server and the protocols between them</h1>
+<p class="meta"><time datetime="2026-10-18">October 18, 2026</time></p>
+<p>mosh (mobile shell) is a remote terminal released in 2012 by Keith Winstein and colleagues at MIT. Its key difference from SSH fits in one sentence: <strong>SSH carries a byte stream, mosh synchronizes screen state</strong>. The server keeps the real screen, the client holds a copy, and the two keep bringing the copy up to date. Switching networks, locking the phone or losing packets only delays that; the connection itself never breaks.</p>
+<p>This post starts with the overall shape, then takes apart the login, the datagram layer, state synchronization and echo prediction in turn. Details were checked against the mosh 1.4.0 source and the paper <a href="https://mosh.org/mosh-paper.pdf">Mosh: An Interactive Remote Shell for Mobile Clients</a>.</p>
+
+<h2 id="overview">The big picture: two programs, two channels</h2>
+<figure class="diagram">
+<svg viewBox="0 0 720 290" role="img" aria-label="mosh overview: mosh-client on the phone and mosh-server on the server exchange keystrokes and screen diffs over encrypted UDP; SSH is used once at the start">
+<defs>
+<marker id="o-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
+<marker id="o-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
+</defs>
+<rect class="group" x="10" y="10" width="230" height="270" rx="14"/>
+<text class="bold" x="125" y="34" text-anchor="middle">Phone / laptop</text>
+<rect class="hl" x="28" y="50" width="194" height="136" rx="10"/>
+<text class="bold" x="125" y="78" text-anchor="middle">mosh-client</text>
+<text class="muted" x="125" y="106" text-anchor="middle">a copy of the screen</text>
+<text class="muted" x="125" y="128" text-anchor="middle">local echo prediction</text>
+<text class="muted" x="125" y="150" text-anchor="middle">heartbeat · resend · roam</text>
+<line class="line" x1="125" y1="190" x2="125" y2="210" marker-start="url(#o-h)" marker-end="url(#o-h)"/>
+<rect class="box" x="28" y="214" width="194" height="50" rx="10"/>
+<text x="125" y="236" text-anchor="middle">Your terminal</text>
+<text class="muted" x="125" y="254" text-anchor="middle">keyboard in · screen out</text>
+<rect class="group" x="480" y="10" width="230" height="270" rx="14"/>
+<text class="bold" x="595" y="34" text-anchor="middle">Server</text>
+<rect class="hl" x="498" y="50" width="194" height="136" rx="10"/>
+<text class="bold" x="595" y="78" text-anchor="middle">mosh-server</text>
+<text class="muted" x="595" y="106" text-anchor="middle">the real screen state</text>
+<text class="muted" x="595" y="128" text-anchor="middle">built-in terminal emulator</text>
+<text class="muted" x="595" y="150" text-anchor="middle">UDP port from 60001</text>
+<line class="line" x1="595" y1="190" x2="595" y2="210" marker-start="url(#o-h)" marker-end="url(#o-h)"/>
+<rect class="box" x="498" y="214" width="194" height="50" rx="10"/>
+<text x="595" y="236" text-anchor="middle">shell / tmux / vim</text>
+<text class="muted" x="595" y="254" text-anchor="middle">running in a pty</text>
+<line class="line-acc" x1="226" y1="100" x2="492" y2="100" marker-end="url(#o-a)"/>
+<text x="360" y="90" text-anchor="middle">keystrokes · window size</text>
+<text class="acc bold" x="360" y="125" text-anchor="middle">encrypted UDP (SSP)</text>
+<line class="line-acc" x1="492" y1="140" x2="226" y2="140" marker-end="url(#o-a)"/>
+<text x="360" y="162" text-anchor="middle">screen diffs</text>
+<line class="line dash" x1="226" y1="239" x2="492" y2="239" marker-end="url(#o-h)"/>
+<text class="muted" x="360" y="230" text-anchor="middle">SSH: one login at the start</text>
+</svg>
+<figcaption>Figure 1: the two ends of mosh. SSH only opens the door; all terminal traffic after that is encrypted UDP.</figcaption>
+</figure>
+<p>mosh is two programs:</p>
+<ul>
+<li><strong>mosh-server</strong> runs on the server. It starts your shell in a pseudo-terminal (pty) and feeds the output into its own terminal emulator, so it always knows what the screen should look like right now.</li>
+<li><strong>mosh-client</strong> runs on your phone or laptop. It sends keystrokes to the server, applies screen changes to its copy, and draws that copy in your terminal.</li>
+</ul>
+<p>The <code>mosh user@server</code> you type is actually a Perl script. It logs in with SSH to start mosh-server, then replaces itself with mosh-client. So the server needs mosh installed, but no root access and no daemon.</p>
+
+<h2 id="bootstrap">Step one: log in over SSH, get a port and a key</h2>
+<figure class="diagram">
+<svg viewBox="0 0 720 400" role="img" aria-label="mosh startup sequence: the client logs in with SSH and runs mosh-server new, the server answers MOSH CONNECT with a port and key, SSH exits and traffic moves to UDP">
+<defs>
+<marker id="b-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
+<marker id="b-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
+</defs>
+<rect class="box" x="40" y="12" width="140" height="38" rx="8"/>
+<text class="bold" x="110" y="36" text-anchor="middle">mosh (client)</text>
+<rect class="box" x="290" y="12" width="140" height="38" rx="8"/>
+<text class="bold" x="360" y="36" text-anchor="middle">sshd</text>
+<rect class="box" x="540" y="12" width="140" height="38" rx="8"/>
+<text class="bold" x="610" y="36" text-anchor="middle">mosh-server</text>
+<line class="line dash" x1="110" y1="50" x2="110" y2="392"/>
+<line class="line dash" x1="360" y1="50" x2="360" y2="262"/>
+<line class="line dash" x1="610" y1="120" x2="610" y2="392"/>
+<line class="line" x1="112" y1="88" x2="356" y2="88" marker-end="url(#b-h)"/>
+<text x="234" y="78" text-anchor="middle">① ssh user@server</text>
+<text class="muted" x="234" y="106" text-anchor="middle">TCP 22, a normal SSH login</text>
+<line class="line" x1="362" y1="132" x2="606" y2="132" marker-end="url(#b-h)"/>
+<text x="484" y="122" text-anchor="middle">② run mosh-server new</text>
+<rect class="hl" x="530" y="148" width="160" height="50" rx="8"/>
+<text class="muted" x="610" y="168" text-anchor="middle">bind a UDP port</text>
+<text class="muted" x="610" y="187" text-anchor="middle">random 128-bit key</text>
+<rect class="knock" x="340" y="201" width="40" height="20"/>
+<rect class="knock" x="340" y="231" width="40" height="18"/>
+<line class="line" x1="606" y1="226" x2="114" y2="226" marker-end="url(#b-h)"/>
+<text class="mono" x="360" y="216" text-anchor="middle">③ MOSH CONNECT 60001 4NeCCgvZFe2RnPgrcU1PQw</text>
+<text class="muted" x="360" y="244" text-anchor="middle">sent back inside the SSH channel</text>
+<path class="line" d="M352,256L368,272M368,256L352,272"/>
+<text class="muted" x="380" y="290" text-anchor="start">④ SSH exits, mosh-server detaches</text>
+<line class="line-acc" x1="112" y1="330" x2="606" y2="330" marker-end="url(#b-a)"/>
+<text class="acc" x="360" y="320" text-anchor="middle">⑤ first encrypted UDP packet (with that key)</text>
+<line class="line-acc" x1="606" y1="372" x2="114" y2="372" marker-end="url(#b-a)"/>
+<text class="acc" x="360" y="362" text-anchor="middle">⑥ screen state… UDP only from here on</text>
+</svg>
+<figcaption>Figure 2: startup. The port and key ride along on SSH, and authentication is entirely SSH's job.</figcaption>
+</figure>
+<p>The script runs roughly:</p>
+<pre><code>ssh -t user@server -- mosh-server new -s -l LANG=en_US.UTF-8</code></pre>
+<p>mosh-server looks for a free UDP port starting at 60001 (range 60000–61000), generates a random AES-128 key, prints this line to standard output and detaches into the background:</p>
+<pre><code>MOSH CONNECT 60001 4NeCCgvZFe2RnPgrcU1PQw
+[mosh-server detached, pid = 12345]</code></pre>
+<p>The 22 characters are the 128-bit key in base64. The client reads the line from SSH's output, SSH exits, and the script runs:</p>
+<pre><code>MOSH_KEY=4NeCCgvZFe2RnPgrcU1PQw mosh-client 203.0.113.5 60001</code></pre>
+<p>The benefit: passwords, public keys and two-factor prompts are all handled by mature SSH, so mosh has no login code of its own; the key travels once, inside the encrypted SSH channel, and is different for every session.</p>
+<p>Note that mosh-server does not know where the client is yet. It just waits on its port for the first UDP packet that was encrypted with this key and passes authentication.</p>
+
+<h2 id="layers">The protocol layers</h2>
+<p>Once SSH has exited, only UDP is left between the two ends. mosh stacks a few layers on top, each with one job:</p>
+<figure class="diagram">
+<svg viewBox="0 0 720 330" role="img" aria-label="mosh protocol stack, top to bottom: user input stream and screen state, SSP transport instructions, zlib compression and fragmentation, encrypted datagram layer, UDP">
+<rect class="box" x="20" y="20" width="150" height="50" rx="8"/>
+<text class="bold" x="95" y="50" text-anchor="middle">What is synced</text>
+<rect class="box" x="180" y="20" width="255" height="50" rx="8"/>
+<text x="307" y="41" text-anchor="middle">User input (client → server)</text>
+<text class="muted" x="307" y="60" text-anchor="middle">every keystroke must arrive</text>
+<rect class="box" x="445" y="20" width="255" height="50" rx="8"/>
+<text x="572" y="41" text-anchor="middle">Screen state (server → client)</text>
+<text class="muted" x="572" y="60" text-anchor="middle">frames in between can be skipped</text>
+<rect class="hl" x="20" y="80" width="150" height="50" rx="8"/>
+<text class="bold" x="95" y="110" text-anchor="middle">Transport: SSP</text>
+<rect class="hl" x="180" y="80" width="520" height="50" rx="8"/>
+<text class="mono" x="440" y="101" text-anchor="middle">Instruction { old_num, new_num, ack_num, throwaway_num, diff }</text>
+<text class="muted" x="440" y="120" text-anchor="middle">"take your state old_num, apply diff, and you have state new_num"</text>
+<rect class="box" x="20" y="140" width="150" height="50" rx="8"/>
+<text class="bold" x="95" y="170" text-anchor="middle">Compress, split</text>
+<rect class="box" x="180" y="140" width="520" height="50" rx="8"/>
+<text x="440" y="170" text-anchor="middle">protobuf → zlib → small fragments that avoid IP fragmentation</text>
+<rect class="box" x="20" y="200" width="150" height="50" rx="8"/>
+<text class="bold" x="95" y="230" text-anchor="middle">Datagram layer</text>
+<rect class="box" x="180" y="200" width="520" height="50" rx="8"/>
+<text x="440" y="221" text-anchor="middle">AES-128-OCB encryption · sequence numbers · timestamps for RTT</text>
+<text class="muted" x="440" y="240" text-anchor="middle">follows the source address of the newest valid packet: roaming</text>
+<rect class="group" x="20" y="260" width="680" height="50" rx="8"/>
+<text class="bold" x="360" y="290" text-anchor="middle">UDP / IP</text>
+</svg>
+<figcaption>Figure 3: the mosh protocol stack. There is no TCP; SSP provides reliability itself.</figcaption>
+</figure>
+<p>From the bottom up: the datagram layer makes sure a packet came from the peer and was not altered, and keeps track of where the peer is; the fragment layer splits large updates; SSP makes the two ends converge; on top are the two things actually being synchronized. One at a time:</p>
+
+<h2 id="datagram">The datagram layer: encryption, sequence numbers, RTT and roaming</h2>
+<h3>What is inside one UDP packet</h3>
+<figure class="diagram">
+<svg viewBox="0 0 720 210" role="img" aria-label="mosh UDP packet: an 8-byte plaintext direction bit and sequence number, then encrypted timestamp, timestamp reply, fragment header and fragment data, then a 16-byte authentication tag">
+<text class="muted" x="70" y="34" text-anchor="middle">plaintext</text>
+<path class="line" d="M12,44V40H128V44"/>
+<text class="acc" x="370" y="34" text-anchor="middle">encrypted (AES-128-OCB)</text>
+<path class="line-acc" d="M132,44V40H608V44"/>
+<text class="muted" x="660" y="34" text-anchor="middle">authentication</text>
+<path class="line" d="M612,44V40H708V44"/>
+<rect class="box" x="10" y="52" width="120" height="50"/>
+<text class="bold" x="70" y="76" text-anchor="middle">nonce</text>
+<text class="muted" x="70" y="94" text-anchor="middle">8 bytes</text>
+<rect class="hl" x="130" y="52" width="80" height="50"/>
+<text class="bold" x="170" y="76" text-anchor="middle">time</text>
+<text class="muted" x="170" y="94" text-anchor="middle">2 bytes</text>
+<rect class="hl" x="210" y="52" width="90" height="50"/>
+<text class="bold" x="255" y="76" text-anchor="middle">reply</text>
+<text class="muted" x="255" y="94" text-anchor="middle">2 bytes</text>
+<rect class="hl" x="300" y="52" width="110" height="50"/>
+<text class="bold" x="355" y="76" text-anchor="middle">frag header</text>
+<text class="muted" x="355" y="94" text-anchor="middle">10 bytes</text>
+<rect class="hl" x="410" y="52" width="200" height="50"/>
+<text class="bold" x="510" y="76" text-anchor="middle">fragment data</text>
+<text class="muted" x="510" y="94" text-anchor="middle">compressed Instruction</text>
+<rect class="box" x="610" y="52" width="100" height="50"/>
+<text class="bold" x="660" y="76" text-anchor="middle">tag</text>
+<text class="muted" x="660" y="94" text-anchor="middle">16 bytes</text>
+<text class="muted" x="70" y="128" text-anchor="middle">top bit: direction</text>
+<text class="muted" x="70" y="146" text-anchor="middle">63 bits: sequence</text>
+<text class="muted" x="170" y="128" text-anchor="middle">send time</text>
+<text class="muted" x="170" y="146" text-anchor="middle">(ms)</text>
+<text class="muted" x="255" y="128" text-anchor="middle">peer's stamp</text>
+<text class="muted" x="255" y="146" text-anchor="middle">+ time held</text>
+<text class="muted" x="355" y="128" text-anchor="middle">instruction id</text>
+<text class="muted" x="355" y="146" text-anchor="middle">index · final bit</text>
+<text class="muted" x="510" y="128" text-anchor="middle">one instruction may</text>
+<text class="muted" x="510" y="146" text-anchor="middle">span several fragments</text>
+<text class="muted" x="660" y="128" text-anchor="middle">flip any bit and</text>
+<text class="muted" x="660" y="146" text-anchor="middle">the check fails</text>
+<text x="360" y="190" text-anchor="middle">The tag is checked first: a packet not sealed with the session key is dropped without reply.</text>
+</svg>
+<figcaption>Figure 4: the mosh datagram. Everything after the first 8 bytes is encrypted.</figcaption>
+</figure>
+<ul>
+<li><strong>Nonce</strong>: OCB needs a nonce that never repeats. mosh uses a direction bit plus an incrementing sequence number: the top bit is 0 for client packets and 1 for server packets, each direction counts from 0, so the two never collide. The sequence number also tells the receiver which packet is newer.</li>
+<li><strong>Timestamps</strong>: like TCP's timestamp option. A writes its millisecond clock into each packet; B echoes it back in the reply field, adding how long it held on to it. A subtracts and gets the round-trip time (RTT), then computes the smoothed RTT and retransmission timeout with TCP's formulas. The send rate and echo prediction below both depend on this number.</li>
+<li><strong>Authentication tag</strong>: OCB encrypts and authenticates in one pass. Port scans, forged packets and modified packets fail the tag check and are dropped.</li>
+</ul>
+<h3>Roaming: the server trusts the newest valid packet</h3>
+<figure class="diagram">
+<svg viewBox="0 0 720 270" role="img" aria-label="Roaming: the phone moves from Wi-Fi to cellular, a valid packet with a higher sequence number arrives from the new address, and the server starts replying there">
+<defs>
+<marker id="r-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
+<marker id="r-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
+</defs>
+<rect class="box" x="20" y="100" width="110" height="70" rx="12"/>
+<text class="bold" x="75" y="130" text-anchor="middle">Phone</text>
+<text class="muted" x="75" y="150" text-anchor="middle">mosh-client</text>
+<rect class="box" x="590" y="100" width="110" height="70" rx="12"/>
+<text class="bold" x="645" y="130" text-anchor="middle">Server</text>
+<text class="muted" x="645" y="150" text-anchor="middle">mosh-server</text>
+<g class="faded">
+<rect class="box" x="270" y="20" width="180" height="54" rx="27"/>
+<text class="bold" x="360" y="43" text-anchor="middle">Wi-Fi</text>
+<text class="muted" x="360" y="62" text-anchor="middle">public IP 203.0.113.7</text>
+<line class="line dash" x1="130" y1="115" x2="268" y2="56"/>
+<line class="line dash" x1="452" y1="56" x2="588" y2="115" marker-end="url(#r-h)"/>
+</g>
+<text class="muted" x="360" y="100" text-anchor="middle">old path: gone once you leave the Wi-Fi</text>
+<rect class="hl" x="270" y="190" width="180" height="54" rx="27"/>
+<text class="bold" x="360" y="213" text-anchor="middle">Cellular</text>
+<text class="muted" x="360" y="232" text-anchor="middle">public IP 198.51.100.24</text>
+<line class="line-acc" x1="132" y1="155" x2="266" y2="210" marker-end="url(#r-a)"/>
+<line class="line-acc" x1="454" y1="210" x2="588" y2="155" marker-end="url(#r-a)"/>
+<text class="acc" x="198" y="214" text-anchor="end">seq 1042</text>
+<text class="acc" x="360" y="160" text-anchor="middle">authentic + highest sequence → reply to the new address</text>
+</svg>
+<figcaption>Figure 5: roaming. The server keeps no connection, only the address of the latest valid new packet.</figcaption>
+</figure>
+<p>A TCP connection is identified by a four-tuple (both IPs and ports); when the phone's IP changes, the connection is dead. mosh-server has no such binding: <strong>whenever it receives a packet that authenticates and has a higher sequence number than any before, it sends its replies to that packet's source address</strong>. Move from Wi-Fi to 4G, and the next packet comes from the new address; the server checks the tag and follows. You notice nothing.</p>
+<p>An attacker without the key cannot forge a packet that authenticates. Replaying a captured packet does not help either: its sequence number is not the newest, so the server does not move, and SSP updates are idempotent, so a duplicate does no harm.</p>
+<p>So that roaming takes effect promptly, the client sends a heartbeat every <strong>3 seconds</strong> even when idle, which also keeps NAT mappings alive. If the client hears nothing from the server for <strong>10 seconds</strong>, it switches to a new local UDP port and keeps sending, in case a router has quietly dropped the NAT mapping and replies to the old port will never arrive.</p>
+
+<h2 id="ssp">The State Synchronization Protocol: only chase the latest screen</h2>
+<h3>Why a TCP byte stream is the wrong fit</h3>
+<figure class="diagram">
+<svg viewBox="0 0 720 330" role="img" aria-label="Comparison: in SSH's TCP byte stream output queues up and must all arrive in order; mosh updates the client's screen 1 straight to the latest screen 5 and skips the frames in between">
+<defs>
+<marker id="s-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head-acc" d="M0,0L10,5L0,10z"/></marker>
+<marker id="s-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0L10,5L0,10z"/></marker>
+</defs>
+<text class="bold" x="20" y="30">SSH over TCP: a byte stream, every byte in order</text>
+<rect class="box" x="20" y="48" width="100" height="60" rx="10"/>
+<text x="70" y="83" text-anchor="middle">Client</text>
+<rect class="box" x="600" y="48" width="100" height="60" rx="10"/>
+<text x="650" y="83" text-anchor="middle">Server</text>
+<rect class="group" x="132" y="60" width="456" height="36" rx="6"/>
+<rect class="hl" x="142" y="66" width="40" height="24" rx="4"/><text class="mono" x="162" y="83" text-anchor="middle">1</text>
+<rect class="hl" x="190" y="66" width="40" height="24" rx="4"/><text class="mono" x="210" y="83" text-anchor="middle">2</text>
+<rect class="hl" x="238" y="66" width="40" height="24" rx="4"/><text class="mono" x="258" y="83" text-anchor="middle">3</text>
+<rect class="hl" x="286" y="66" width="40" height="24" rx="4"/><text class="mono" x="306" y="83" text-anchor="middle">4</text>
+<rect class="hl" x="334" y="66" width="40" height="24" rx="4"/><text class="mono" x="354" y="83" text-anchor="middle">5</text>
+<rect class="hl" x="382" y="66" width="40" height="24" rx="4"/><text class="mono" x="402" y="83" text-anchor="middle">6</text>
+<rect class="hl" x="430" y="66" width="40" height="24" rx="4"/><text class="mono" x="450" y="83" text-anchor="middle">7</text>
+<rect class="hl" x="478" y="66" width="40" height="24" rx="4"/><text class="mono" x="498" y="83" text-anchor="middle">8</text>
+<rect class="hl" x="526" y="66" width="52" height="24" rx="4"/><text class="mono" x="552" y="83" text-anchor="middle">…</text>
+<line class="line" x1="586" y1="112" x2="134" y2="112" marker-end="url(#s-h)"/>
+<text class="muted" x="360" y="134" text-anchor="middle">cat a big log: megabytes are already queued in buffers, so Ctrl-C waits until they all arrive</text>
+<text class="bold" x="20" y="182">mosh: the server moves the client's state straight to the latest</text>
+<rect class="box" x="20" y="200" width="100" height="70" rx="10"/>
+<text x="70" y="230" text-anchor="middle">Client</text>
+<text class="muted" x="70" y="252" text-anchor="middle">holds #1</text>
+<rect class="group" x="370" y="194" width="330" height="116" rx="12"/>
+<text class="muted" x="535" y="300" text-anchor="middle">screens on the server, a new state per output</text>
+<rect class="box" x="385" y="210" width="50" height="40" rx="4"/><text class="mono" x="410" y="235" text-anchor="middle">#1</text>
+<g class="faded">
+<rect class="box" x="447" y="210" width="50" height="40" rx="4"/><text class="mono" x="472" y="235" text-anchor="middle">#2</text>
+<rect class="box" x="509" y="210" width="50" height="40" rx="4"/><text class="mono" x="534" y="235" text-anchor="middle">#3</text>
+<rect class="box" x="571" y="210" width="50" height="40" rx="4"/><text class="mono" x="596" y="235" text-anchor="middle">#4</text>
+</g>
+<rect class="hl" x="633" y="210" width="50" height="40" rx="4"/><text class="mono acc" x="658" y="235" text-anchor="middle">#5</text>
+<text class="muted" x="534" y="272" text-anchor="middle">#2–#4 never sent</text>
+<line class="line-acc" x1="362" y1="230" x2="126" y2="230" marker-end="url(#s-a)"/>
+<text class="acc" x="244" y="220" text-anchor="middle">diff: #1 → #5</text>
+</svg>
+<figcaption>Figure 6: a byte stream must deliver everything in order; state sync only cares which version the peer has and which is newest.</figcaption>
+</figure>
+<p>What a terminal user cares about is what is on the screen now, not every frame in between. TCP cannot know that: it delivers every byte in order, so one lost packet stalls everything behind it, and on a slow link the old output piled up in the send buffer keeps Ctrl-C from taking effect.</p>
+<p>SSP (State Synchronization Protocol) takes another approach: each side numbers its states and only ever sends the diff from the version the peer has to the newest one. On a slow network it sends less often, with bigger jumps; when a packet is lost, the next diff simply includes what was missed, with no need to resend old packets one by one.</p>
+<h3>What an instruction carries</h3>
+<p>SSP passes <code>Instruction</code> messages (protobuf) back and forth:</p>
+<table>
+<tr><th>Field</th><th>Meaning</th></tr>
+<tr><td><code>old_num</code></td><td>The base of the diff: "apply this to your state number …"</td></tr>
+<tr><td><code>new_num</code></td><td>The state number after applying it</td></tr>
+<tr><td><code>diff</code></td><td>The change itself. When empty, the instruction is just a heartbeat or an ack</td></tr>
+<tr><td><code>ack_num</code></td><td>Piggybacked ack: "of your states, I have received up to this number"</td></tr>
+<tr><td><code>throwaway_num</code></td><td>"I will never again use a state older than this as a base; you can drop them"</td></tr>
+<tr><td><code>protocol_version</code></td><td>Protocol version, currently 2; mismatched ends refuse to talk</td></tr>
+<tr><td><code>chaff</code></td><td>Random padding, so packet lengths leak less about what you type</td></tr>
+</table>
+<p>On receiving an instruction, the receiver checks whether it has state <code>old_num</code>. If it does, it applies <code>diff</code> to get <code>new_num</code>; if not (say the packet with that base was lost), it ignores the instruction and waits for a resend. To speed this up, the sender <strong>optimistically</strong> assumes recently sent states have arrived and diffs against them; if it guessed wrong, it falls back to the last acknowledged state after a timeout. <code>throwaway_num</code> lets the receiver delete old states safely, so memory does not grow.</p>
+<h3>Pacing</h3>
+<p>SSP does not send a packet on every change; it sets a "frame rate" to suit the network:</p>
+<ul>
+<li>Sends are at least half an RTT apart, clamped to <strong>20–250 ms</strong>. On a good network that is at most about 50 frames per second; on a bad one it slows down rather than filling the link with stale frames.</li>
+<li>When the screen changes, the server waits a few milliseconds to collect output that follows immediately, so one <code>ls</code> does not become several packets.</li>
+<li>Acks are delayed up to 100 ms and ride on data packets when possible.</li>
+<li>When nothing happens, a heartbeat goes out every 3 seconds so each side knows the other is still there.</li>
+</ul>
+<h3>Two directions, two kinds of state</h3>
+<p>SSP itself is generic; the layer above decides what is synchronized. In mosh the two directions carry different things:</p>
+<table>
+<tr><th>Direction</th><th>What is synced</th><th>What the diff contains</th><th>Can states be skipped?</th></tr>
+<tr><td>Client → server</td><td>The user input stream</td><td>Keystrokes (<code>Keystroke</code>) and window size changes (<code>ResizeMessage</code>) since the base</td><td>No, every keystroke must arrive as typed</td></tr>
+<tr><td>Server → client</td><td>The whole screen: text, colours, cursor, title</td><td>Terminal escape sequences that redraw the old screen into the new one (<code>HostBytes</code>), plus window size (<code>ResizeMessage</code>) and the echo ack (<code>EchoAck</code>)</td><td>Yes, as long as the last version is right</td></tr>
+</table>
+<p>The server-side diff is neat: it compares the client's version of the screen with the newest one and produces a short run of escape sequences, such as "move the cursor to row 3, column 10 and write <code>done</code>". The client feeds that to its own terminal emulator, and its copy matches the server's.</p>
+
+<h2 id="predict">Local echo prediction: typing that keeps up on a slow link</h2>
+<p>In SSH, every character you type appears only after the server echoes it back. With a 300 ms round trip, typing feels like wading through glue. The mosh client <strong>guesses</strong> instead: most of the time, a normal character typed at a prompt appears at the cursor and the cursor moves one cell right. So the client draws it without waiting for the server.</p>
+<figure class="diagram">
+<svg viewBox="0 0 720 222" role="img" aria-label="Three cases of echo prediction: a predicted character is shown underlined; once the server confirms, the underline goes; a wrong guess is withdrawn and the server's screen wins">
+<text class="bold" x="120" y="24" text-anchor="middle">① you type l, s</text>
+<rect class="term" x="10" y="38" width="220" height="90" rx="10"/>
+<text class="term-text" x="26" y="90" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<line class="line-acc" x1="44" y1="96" x2="62" y2="96"/>
+<rect x="64" y="76" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="muted" x="120" y="152" text-anchor="middle">no echo yet, drawn anyway</text>
+<text class="muted" x="120" y="172" text-anchor="middle">underlined on slow links: "a guess"</text>
+<text class="bold" x="360" y="24" text-anchor="middle">② the server confirms</text>
+<rect class="term" x="250" y="38" width="220" height="90" rx="10"/>
+<text class="term-text" x="266" y="90" textLength="36" lengthAdjust="spacingAndGlyphs">$ ls</text>
+<rect x="304" y="76" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="muted" x="360" y="152" text-anchor="middle">ls shows up on the server's screen</text>
+<text class="muted" x="360" y="172" text-anchor="middle">underline removed, guess kept</text>
+<text class="bold" x="600" y="24" text-anchor="middle">③ wrong guess, e.g. a password</text>
+<rect class="term" x="490" y="38" width="220" height="90" rx="10"/>
+<text class="term-text" x="506" y="90" textLength="90" lengthAdjust="spacingAndGlyphs">Password:</text>
+<rect x="605" y="76" width="9" height="18" fill="#e8e6ef" opacity="0.8"/>
+<text class="muted" x="600" y="152" text-anchor="middle">keys acked, but nothing on screen</text>
+<text class="muted" x="600" y="172" text-anchor="middle">guess withdrawn, server wins</text>
+<text x="360" y="212" text-anchor="middle">Decided by EchoAck: about 50 ms after input arrives, its echo should be on the server's screen.</text>
+</svg>
+<figcaption>Figure 7: echo prediction. A right guess makes typing feel local; a wrong one flickers briefly, and the final screen is always the server's.</figcaption>
+</figure>
+<p>How does it know whether it guessed right? Through the server's <code>EchoAck</code>: about 50 ms after receiving a given input state, the server tells the client "everything up to input number N has had its echo reflected on the screen". With that, the client checks the server's screen: if the predicted characters really appeared, the prediction stands; if not (a password prompt does not echo, for instance), it is withdrawn and prediction pauses for that stretch of input.</p>
+<p>A few details keep it from getting in the way:</p>
+<ul>
+<li>The default <code>--predict=adaptive</code> only shows predictions when the RTT is high, so on a LAN you never see them; at a higher RTT predicted characters are underlined. <code>always</code> and <code>never</code> force it on or off.</li>
+<li>Keys whose effect is hard to guess, such as Enter, Esc and Ctrl combinations, start a new epoch. Predictions in a new epoch stay hidden until the server has confirmed one guess, so jumping around in vim's normal mode does not fill the screen with stray letters.</li>
+<li>Predictions are an overlay on top of the copy and are never written into it. The server's screen is always the final answer.</li>
+</ul>
+
+<h2 id="tradeoffs">What this design costs</h2>
+<p>Synchronizing the screen instead of a byte stream makes mosh resistant to disconnects and packet loss, but it also differs from SSH in a few ways:</p>
+<table>
+<tr><th>What you see</th><th>Why</th></tr>
+<tr><td>No scrollback; scrolling up does not show old output</td><td>Only the current screen is synced, and skipped frames never reach the client. Run tmux inside for history</td></tr>
+<tr><td>No port forwarding, X11 forwarding or ssh-agent forwarding</td><td>SSH exits after startup, and the mosh protocol only carries a terminal</td></tr>
+<tr><td>Firewalls must allow UDP 60000–61000</td><td>Terminal traffic is UDP; a server with only TCP 22 open cannot be reached</td></tr>
+<tr><td>mosh-server waits forever by default after the client disappears</td><td>The server cannot tell "client gone" from "phone asleep". Set a limit with <code>MOSH_SERVER_NETWORK_TMOUT</code></td></tr>
+<tr><td>Both ends need a UTF-8 locale</td><td>mosh's terminal emulator decodes UTF-8; without the locale the server says <code>needs a UTF-8 native locale</code></td></tr>
+<tr><td>"mosh: Last contact … ago" at the top after a long silence</td><td>Heartbeats stopped and the client is telling you the network has a problem; it goes away when packets flow again, and <code>Ctrl-^</code> <code>.</code> quits</td></tr>
+</table>
+<p>For server setup, common errors and pairing with tmux, see <a href="/en/blog/mosh-tmux-phone/">SSH on your phone without disconnects: a mosh and tmux guide</a>.</p>
+
+<h2 id="roamtty">mosh in Roamtty</h2>
+<p>Roamtty implements the client side of the mosh protocol (version 2) in Kotlin: it also runs <code>mosh-server new</code> over SSH and reads <code>MOSH CONNECT</code>, uses the same AES-128-OCB datagrams, 3-second heartbeats and 10-second port hops, and hands the <code>HostBytes</code> it receives straight to the app's own terminal emulator. The server runs the official mosh-server, with nothing extra to install.</p>
+<p>Roamtty does not do local echo prediction for now (it ignores <code>EchoAck</code>). In tmux mode mosh-server attaches to the tmux session as soon as it starts, and tmux provides the scrollback. If no UDP reply arrives within 8 seconds it falls back to SSH; see <a href="/en/blog/mosh-tmux-phone/#roamtty">the Roamtty section of the guide</a> for details.</p>
+
+<h2 id="references">References</h2>
+<ul>
+<li>Keith Winstein and Hari Balakrishnan, <a href="https://mosh.org/mosh-paper.pdf">Mosh: An Interactive Remote Shell for Mobile Clients</a>, USENIX ATC 2012</li>
+<li>The <a href="https://mosh.org/">mosh website</a> and <a href="https://github.com/mobile-shell/mosh">source</a>: <code>src/network/</code> holds the datagram layer and SSP, <code>src/protobufs/</code> the messages above, and <code>src/frontend/terminaloverlay.cc</code> the echo prediction</li>
+</ul>
+</div>
+</div></article>
+</main>
+<footer class="site-footer"><div class="wrap">
+<nav aria-label="Footer"><a href="/en/docs/">Documentation</a><a href="/en/blog/">Blog</a><a href="/en/support/">Support & contact</a><a href="/en/privacy/">Privacy policy</a><a href="/en/terms/">Terms of use</a><a href="mailto:support@roamtty.com">support@roamtty.com</a></nav>
+<span>© 2026 Roamtty</span>
+<p class="tm">Claude Code, Codex and Grok are trademarks of their respective owners; Roamtty is not affiliated with them. Google Play is a trademark of Google LLC. App Store and iPhone are trademarks of Apple Inc.</p>
+</div></footer>
+</body>
+</html>

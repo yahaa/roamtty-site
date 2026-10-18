@@ -193,3 +193,25 @@ details p, details ul { margin: 6px 0; }
 .post-card p { margin: 0; color: var(--muted); font-size: 15px; }
 .crumb { margin: 0 0 10px; font-size: 14px; }
 .crumb a { text-decoration: none; }
+
+/* Blog diagrams: inline SVG drawn with the colour tokens above, so they follow dark mode. Phones scroll them sideways. */
+.doc .diagram { margin: 22px 0; overflow-x: auto; }
+.diagram svg { display: block; width: 100%; min-width: 560px; height: auto; font-family: var(--sans); }
+.diagram figcaption { margin-top: 8px; font-size: 13.5px; line-height: 1.5; color: var(--muted); text-align: center; }
+.diagram text { fill: var(--fg); font-size: 14px; }
+.diagram .muted { fill: var(--muted); font-size: 12.5px; }
+.diagram .bold { font-weight: 600; }
+.diagram .mono { font-family: var(--mono); font-size: 13px; }
+.diagram .acc { fill: var(--accent); }
+.diagram .group { fill: var(--surface-2); stroke: var(--rule); }
+.diagram .box { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+.diagram .hl { fill: color-mix(in srgb, var(--accent) 12%, var(--surface)); stroke: var(--accent); stroke-width: 1.5; }
+.diagram .faded { opacity: 0.4; }
+.diagram .knock { fill: var(--bg); }
+.diagram .term { fill: var(--term-bg); }
+.diagram .term-text { fill: var(--term-fg); font-family: var(--mono); font-size: 15px; }
+.diagram .line { stroke: var(--muted); stroke-width: 1.5; fill: none; }
+.diagram .line-acc { stroke: var(--accent); stroke-width: 2; fill: none; }
+.diagram .dash { stroke-dasharray: 5 4; }
+.diagram .head { fill: var(--muted); }
+.diagram .head-acc { fill: var(--accent); }

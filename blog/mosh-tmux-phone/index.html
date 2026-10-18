@@ -63,7 +63,7 @@ set -s escape-time 10        # 按 Esc 不延迟，Claude Code 等 TUI 更跟手
 <p>只想从手机登录时自动进入，可以在手机端的 SSH 客户端里把“登录后执行的命令”设成 <code>tmux new -A -s main</code>。不建议在 <code>~/.bashrc</code> 里无条件启动 tmux，会影响 scp、rsync 和电脑上的登录。</p>
 
 <h2 id="mosh">第二步：用 mosh 跟着手机换网络</h2>
-<p>mosh 先用一次普通 SSH 登录，在服务器上启动 <code>mosh-server</code>，之后终端改走加密的 UDP。客户端每隔几秒发一次心跳，服务器总是把数据回给最近一次收到合法数据包的地址，所以手机换了 IP 也能继续，不用重新登录。网速慢时，mosh 会先在本地显示你输入的字符（带下划线），不用等服务器回显。</p>
+<p>mosh 先用一次普通 SSH 登录，在服务器上启动 <code>mosh-server</code>，之后终端改走加密的 UDP。客户端每隔几秒发一次心跳，服务器总是把数据回给最近一次收到合法数据包的地址，所以手机换了 IP 也能继续，不用重新登录。网速慢时，mosh 会先在本地显示你输入的字符（带下划线），不用等服务器回显。mosh 为什么换网络不断线，原理见<a href="/blog/how-mosh-works/">图解 mosh</a>。</p>
 <h3>服务器配置</h3>
 <pre><code># Ubuntu / Debian
 sudo apt install mosh

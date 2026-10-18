@@ -63,7 +63,7 @@ set -s escape-time 10        # no delay after Esc, so TUIs like Claude Code feel
 <p>If you only want this when logging in from the phone, set the phone client's "command to run after login" to <code>tmux new -A -s main</code>. Starting tmux unconditionally from <code>~/.bashrc</code> isn't recommended: it gets in the way of scp, rsync and logins from your computer.</p>
 
 <h2 id="mosh">Step two: follow the phone across networks with mosh</h2>
-<p>mosh logs in once over ordinary SSH, starts <code>mosh-server</code> on the server, and then switches the terminal to encrypted UDP. The client sends a heartbeat every few seconds, and the server always replies to the address of the most recent authentic packet, so the session carries on when the phone's IP changes, without a new login. On a slow link mosh shows your keystrokes locally right away (underlined until confirmed) instead of waiting for the server's echo.</p>
+<p>mosh logs in once over ordinary SSH, starts <code>mosh-server</code> on the server, and then switches the terminal to encrypted UDP. The client sends a heartbeat every few seconds, and the server always replies to the address of the most recent authentic packet, so the session carries on when the phone's IP changes, without a new login. On a slow link mosh shows your keystrokes locally right away (underlined until confirmed) instead of waiting for the server's echo. For why this works, see <a href="/en/blog/how-mosh-works/">how mosh works</a>.</p>
 <h3>Server setup</h3>
 <pre><code># Ubuntu / Debian
 sudo apt install mosh

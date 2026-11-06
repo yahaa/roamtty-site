@@ -1,12 +1,12 @@
 # Roamtty
 
-> Roamtty is an SSH client for remote AI coding on Android and iPhone, with tmux session persistence, mosh roaming, SFTP and AI agent session status. No accounts, ads or telemetry.
+> Roamtty is an SSH client for remote AI coding on Android and iPhone, with tmux session persistence, mosh roaming, SFTP, remote desktop and AI agent session status. No accounts, ads or telemetry.
 
 Roamtty is an SSH client, not an AI model: Claude Code, Codex, Grok or Gemini CLI run on the user's own server, and Roamtty starts them over SSH and shows their status on the phone. The app has no accounts or backend. Contact: support@roamtty.com
 
 ## English
 
-- [Roamtty: SSH for remote AI coding, in your pocket](https://roamtty.com/en/): Roamtty is an SSH client for remote AI coding on Android and iPhone, with tmux session persistence, mosh roaming, SFTP and AI agent session status. No accounts, ads or telemetry.
+- [Roamtty: SSH for remote AI coding, in your pocket](https://roamtty.com/en/): Roamtty is an SSH client for remote AI coding on Android and iPhone, with tmux session persistence, mosh roaming, SFTP, remote desktop and AI agent session status. No accounts, ads or telemetry.
 - [Documentation · Roamtty](https://roamtty.com/en/docs/): Roamtty documentation: preparing a server, adding hosts, starting AI agents, terminal gestures and the action bar, files and monitoring, settings, and reaching your servers from anywhere with Tailscale or a self-hosted Headscale.
 - [Support & contact · Roamtty](https://roamtty.com/en/support/): Help, frequently asked questions and contact details for Roamtty on Android and iPhone.
 - [Terms of Use · Roamtty](https://roamtty.com/en/terms/): Roamtty terms of use.
@@ -19,7 +19,7 @@ Roamtty is an SSH client, not an AI model: Claude Code, Codex, Grok or Gemini CL
 
 ## 中文 (Simplified Chinese)
 
-- [Roamtty：随身的远程 AI 编程终端](https://roamtty.com/): Roamtty 是面向远程 AI 编程的 SSH 客户端，支持 Android 与 iPhone：tmux 会话保持、mosh 漫游、SFTP 文件管理与 AI Agent 会话状态。无账号、无广告、无遥测。
+- [Roamtty：随身的远程 AI 编程终端](https://roamtty.com/): Roamtty 是面向远程 AI 编程的 SSH 客户端，支持 Android 与 iPhone：tmux 会话保持、mosh 漫游、SFTP 文件管理、远程桌面与 AI Agent 会话状态。无账号、无广告、无遥测。
 - [使用文档 · Roamtty](https://roamtty.com/docs/): Roamtty 使用文档：准备服务器、添加主机、启动 AI Agent、终端手势与操作栏、文件与监控、设置，以及用 Tailscale 或自建 Headscale 从外网连回服务器。
 - [支持与联系 · Roamtty](https://roamtty.com/support/): Roamtty 使用帮助、常见问题与联系方式。
 - [使用条款 · Roamtty](https://roamtty.com/terms/): Roamtty 使用条款。

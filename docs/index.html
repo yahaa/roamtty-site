@@ -12,7 +12,7 @@
 <link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/docs/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=3bca38f3e6">
+<link rel="stylesheet" href="/assets/style.css?v=26efdfb286">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Roamtty">
 <meta property="og:locale" content="zh_CN">
@@ -41,6 +41,7 @@
 <li><a href="#sessions">会话列表</a></li>
 <li><a href="#terminal">终端操作</a></li>
 <li><a href="#files">文件与监控</a></li>
+<li><a href="#desktop">远程桌面</a></li>
 <li><a href="#settings">设置</a></li>
 <li><a href="#background">后台与锁屏</a></li>
 <li><a href="#tailscale">从外网连接</a></li>
@@ -73,7 +74,7 @@
 <p>然后按官方说明安装 <code>claude</code>、<code>codex</code> 或 <code>grok</code>，<strong>先在服务器上登录一次</strong>。Roamtty 不会经手你的账号或 API Key。</p>
 <p>tmux（断线后任务继续运行）和 mosh（换网络不掉线）不用手动装：在主机菜单中选<strong>“安装插件”</strong>，应用会用主机的包管理器安装（Linux 需 sudo，sudo 密码不保存；macOS 用 Homebrew；Windows 用 winget 装 psmux）。</p>
 </div>
-<figure><img src="/assets/screens/hosts-zh.webp" width="720" height="1600" loading="lazy" alt="主机卡片的菜单：打开终端、AI Agent、编辑主机、查看文件、安装插件、删除主机"><figcaption>主机卡片的菜单</figcaption></figure>
+<figure><img src="/assets/screens/hosts-zh.webp" width="720" height="1600" loading="lazy" alt="主机列表：两台主机的卡片上显示实时桌面缩略图，以及在线和已连接状态"><figcaption>主机列表</figcaption></figure>
 </div>
 
 <h2 id="hosts">添加主机</h2>
@@ -116,7 +117,7 @@
 </ul>
 <p>装有 mosh 时终端优先走 mosh（UDP），8 秒无回应自动回退到 SSH。</p>
 </div>
-<figure><img src="/assets/screens/sessions-zh.webp" width="720" height="1600" loading="lazy" alt="会话列表：一个会话等待确认并带“允许”按钮，一个正在运行，一个已完成并显示摘要"><figcaption>会话状态与“允许”按钮</figcaption></figure>
+<figure><img src="/assets/screens/sessions-zh.webp" width="720" height="1600" loading="lazy" alt="会话列表：一个 Claude Code 会话等待确认并带“允许”按钮，一个正在运行，一个已完成并显示摘要"><figcaption>会话状态与“允许”按钮</figcaption></figure>
 </div>
 
 <h2 id="terminal">终端操作</h2>
@@ -141,7 +142,7 @@
 <li><strong>设置</strong>：编辑文本（在大输入框里写好长提示词再发送）、固定或隐藏操作栏、粘贴、调整字号</li>
 </ul>
 <div class="figs">
-<figure><img src="/assets/screens/terminal-zh.webp" width="720" height="1600" loading="lazy" alt="Agent 终端：完整的 Claude Code 输出"><figcaption>Agent 终端</figcaption></figure>
+<figure><img src="/assets/screens/terminal-zh.webp" width="720" height="1600" loading="lazy" alt="Agent 终端：Claude Code 改文件前显示差异并等你确认"><figcaption>Agent 终端</figcaption></figure>
 <figure><img src="/assets/screens/ring-zh.webp" width="720" height="1600" loading="lazy" alt="按住小幽灵弹出的 Claude Code 快捷键环"><figcaption>按住小幽灵：快捷键环</figcaption></figure>
 <figure><img src="/assets/screens/toolbar-zh.webp" width="720" height="1600" loading="lazy" alt="点按小幽灵展开的操作栏：会话菜单、上传文件、下载文件、插入图片、常用命令和设置"><figcaption>点按小幽灵：操作栏</figcaption></figure>
 <figure><img src="/assets/screens/commands-zh.webp" width="720" height="1600" loading="lazy" alt="常用命令：从服务器的 ~/.bash_history 读取的命令列表，可搜索，点按即执行"><figcaption>常用命令</figcaption></figure>
@@ -151,10 +152,39 @@
 <p>主机菜单中的<strong>“查看文件”</strong>通过 SFTP 浏览服务器：预览代码（带语法高亮）、Markdown 和图片并在文件中查找，重命名、删除、新建文件夹、复制路径、单个或批量下载，或在当前文件夹直接打开终端、启动 AI Agent。首次下载时选择手机上的下载目录，之后自动保存到那里。在相册等应用中把图片分享给 Roamtty 即可上传到服务器。</p>
 <p>点主机卡片进入详情页，实时查看 CPU、内存、磁盘、网络、GPU 和占用最高的进程，适合确认构建或测试是否卡住；顶部按钮可直接启动 AI Agent、打开终端或查看文件。</p>
 <div class="figs">
-<figure><img src="/assets/screens/files-zh.webp" width="720" height="1600" loading="lazy" alt="文件浏览：acme-app 文件夹中的 docs、src、package.json 和 README.md"><figcaption>文件浏览</figcaption></figure>
-<figure><img src="/assets/screens/markdown-zh.webp" width="720" height="1600" loading="lazy" alt="Markdown 预览：表格、代码块与任务列表"><figcaption>Markdown 预览</figcaption></figure>
+<figure><img src="/assets/screens/files-zh.webp" width="720" height="1600" loading="lazy" alt="文件浏览：focus-board 文件夹中的 static、tests、app.py、CHANGELOG.md 和 README.md"><figcaption>文件浏览</figcaption></figure>
+<figure><img src="/assets/screens/markdown-zh.webp" width="720" height="1600" loading="lazy" alt="Markdown 预览：标题、列表与代码块"><figcaption>Markdown 预览</figcaption></figure>
 <figure><img src="/assets/screens/monitor-zh.webp" width="720" height="1600" loading="lazy" alt="主机详情：实时 CPU、内存、磁盘与网络"><figcaption>主机监控</figcaption></figure>
 <figure><img src="/assets/screens/plugins-zh.webp" width="720" height="1600" loading="lazy" alt="安装插件：tmux 与 mosh 均显示已安装"><figcaption>主机菜单 → 安装插件</figcaption></figure>
+</div>
+
+<h2 id="desktop">远程桌面</h2>
+<p>能开桌面的主机会在会话卡片右下角显示桌面按钮；没有会话的主机，在主机详情页点<strong>“桌面”</strong>。第一次打开时应用会自动安装桌面插件，不需要填任何配置。退出桌面页后连接在后台保持（默认 10 分钟，可在设置里修改），再点约 1 秒回到画面。</p>
+<p>桌面页的工具栏（竖屏在底部，横屏在右侧）有<strong>“操作”</strong>、<strong>“键盘”</strong>、<strong>“显示桌面”</strong>和<strong>“所有窗口”</strong>。</p>
+<table>
+<tr><th>操作</th><th>效果</th></tr>
+<tr><td>轻点 / 连点两下</td><td>在手指处左键单击 / 双击</td></tr>
+<tr><td>双指轻点，或按住后松手</td><td>右键</td></tr>
+<tr><td>按住再移动</td><td>拖拽</td></tr>
+<tr><td>单指或双指上下滑动</td><td>滚动页面，带惯性</td></tr>
+<tr><td>双指捏合</td><td>缩放画面</td></tr>
+<tr><td>三指上滑 / 下滑</td><td>所有窗口 / 显示桌面</td></tr>
+<tr><td>三指左右滑</td><td>切换桌面</td></tr>
+</table>
+<p>在<strong>“操作”</strong>里可以切换屏幕触控和鼠标指针两种方式，还能传文件、同步剪贴板、打开电脑的声音、调整帧率和画质。键盘支持把打好的中文直接发到电脑。</p>
+<ul>
+<li><strong>Linux</strong>：X11 桌面；Wayland 支持 wlroots 系合成器（sway、Hyprland、labwc、river）。GNOME、KDE 的 Wayland 会话暂不支持，可在登录界面选 X11 会话。</li>
+<li><strong>macOS 13 及以上</strong>：第一次打开时，在 Mac 的“系统设置 › 隐私与安全性”里为 Roamtty Desktop 打开“屏幕与系统音频录制”和“辅助功能”。</li>
+<li><strong>Windows 10 1903 及以上、Windows 11</strong>：需要已在电脑上登录桌面。</li>
+</ul>
+<p>画面可用时走 UDP（端口 60000–61000，和 mosh 相同），被防火墙挡住时自动改走 SSH。同一台电脑同时只能由一台手机控制。没有图形桌面的服务器不显示按钮。</p>
+<div class="figs">
+<figure><img src="/assets/screens/desktop-zh.webp" width="720" height="1600" loading="lazy" alt="竖屏远程桌面：Ubuntu 上的 Firefox，底部是操作、键盘、显示桌面和所有窗口"><figcaption>竖屏桌面</figcaption></figure>
+<figure><img src="/assets/screens/desktop-windows-zh.webp" width="720" height="1600" loading="lazy" alt="所有窗口：终端、编辑器和 Firefox 的缩略图"><figcaption>所有窗口</figcaption></figure>
+</div>
+<div class="figs wide">
+<figure><img src="/assets/screens/desktop-landscape-zh.webp" width="1600" height="720" loading="lazy" alt="横屏远程桌面：Ubuntu 上的 Firefox，右侧是工具栏"><figcaption>横屏桌面</figcaption></figure>
+<figure><img src="/assets/screens/windows-landscape-zh.webp" width="1600" height="720" loading="lazy" alt="横屏显示的 Windows 桌面：Edge 里打开的页面和任务栏"><figcaption>Windows 桌面</figcaption></figure>
 </div>
 
 <h2 id="settings">设置</h2>
@@ -168,14 +198,16 @@
 </ul>
 <p>同一菜单中的<strong>“帮助”</strong>有一份手势与操作的速查。</p>
 </div>
-<figure><img src="/assets/screens/settings-zh.webp" width="720" height="1600" loading="lazy" alt="设置页：外观、终端字体、语言与下载目录"><figcaption>设置</figcaption></figure>
+<figure><img src="/assets/screens/settings-zh.webp" width="720" height="1600" loading="lazy" alt="设置页：外观、终端字体、语言与通知"><figcaption>设置</figcaption></figure>
 </div>
 
 <h2 id="background">后台与锁屏</h2>
+<p>Agent 等你确认或做完一轮时，应用会发通知，点通知直接进入对应会话；可在<strong>设置 → 通知</strong>里选择全部提醒、只在等你确认时提醒或关闭。</p>
 <ul>
 <li><strong>Android</strong>：在设置中打开“允许后台运行”并取消电池优化；小米、华为、OPPO、vivo 等还需允许自启动并在最近任务中锁定；OPPO、一加、realme（ColorOS）还要在 应用详情 → 耗电管理 选“完全允许后台行为”，否则退到后台几秒后网络就被断开，Agent 通知也要等回到应用才到（设置 → 后台连接 里有入口）。有连接时通知栏常驻一条 Roamtty 通知（可在 设置 → 通知 →“隐藏后台连接通知”里关掉，连接不受影响）；Agent 等你确认或做完一轮时另发一条通知，点它直接进入那个会话。</li>
-<li><strong>iPhone</strong>：系统会在后台暂停网络连接。任务在服务器的 tmux 里继续运行，回到应用时自动重连。</li>
+<li><strong>iPhone</strong>：系统会在后台暂停网络连接。任务在服务器的 tmux 里继续运行，回到应用时自动重连。应用离开屏幕约半分钟后，系统不再让它运行，之后的变化会在回到应用时提醒。</li>
 </ul>
+<div class="figs"><figure><img src="/assets/screens/notification-zh.webp" width="720" height="1600" loading="lazy" alt="通知栏里的 Roamtty 通知：Claude 等你确认，以及对应的主机和文件"><figcaption>任务通知</figcaption></figure></div>
 <p class="note">保证任务不中断的是服务器上的 tmux，而不是手机一直在线。</p>
 
 <h2 id="tailscale">从外网连接：Tailscale</h2>

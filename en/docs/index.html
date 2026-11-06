@@ -12,7 +12,7 @@
 <link rel="alternate" hreflang="x-default" href="https://roamtty.com/en/docs/">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/style.css?v=3bca38f3e6">
+<link rel="stylesheet" href="/assets/style.css?v=26efdfb286">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Roamtty">
 <meta property="og:locale" content="en_US">
@@ -41,6 +41,7 @@
 <li><a href="#sessions">Sessions</a></li>
 <li><a href="#terminal">Terminal</a></li>
 <li><a href="#files">Files and monitoring</a></li>
+<li><a href="#desktop">Remote desktop</a></li>
 <li><a href="#settings">Settings</a></li>
 <li><a href="#background">Background and lock screen</a></li>
 <li><a href="#tailscale">Connecting from anywhere</a></li>
@@ -73,7 +74,7 @@
 <p>Install <code>claude</code>, <code>codex</code> or <code>grok</code> following its own instructions and <strong>sign in once on the server</strong>. Roamtty never handles your account or API key.</p>
 <p>No need to install tmux (keeps tasks running when you disconnect) or mosh (survives network changes) by hand: choose <strong>Install plugins</strong> from the host menu and Roamtty installs them with the host's package manager (sudo on Linux, never stored; Homebrew on macOS; psmux via winget on Windows).</p>
 </div>
-<figure><img src="/assets/screens/hosts-en.webp" width="720" height="1600" loading="lazy" alt="Host card menu: Open terminal, AI Agent, Edit host, View files, Install plugins, Delete host"><figcaption>Host card menu</figcaption></figure>
+<figure><img src="/assets/screens/hosts-en.webp" width="720" height="1600" loading="lazy" alt="Host list: two host cards with live desktop thumbnails and their online and connected status"><figcaption>Host list</figcaption></figure>
 </div>
 
 <h2 id="hosts">Add a host</h2>
@@ -116,7 +117,7 @@
 </ul>
 <p>With mosh installed the terminal prefers mosh (UDP) and falls back to SSH after 8 seconds without a reply.</p>
 </div>
-<figure><img src="/assets/screens/sessions-en.webp" width="720" height="1600" loading="lazy" alt="Session list: one session needs approval with an Allow button, one is running, one is done with a summary"><figcaption>Session states and Allow</figcaption></figure>
+<figure><img src="/assets/screens/sessions-en.webp" width="720" height="1600" loading="lazy" alt="Session list: one Claude Code session needs approval with an Allow button, one is running, one is done with a summary"><figcaption>Session states and Allow</figcaption></figure>
 </div>
 
 <h2 id="terminal">Terminal</h2>
@@ -141,7 +142,7 @@
 <li><strong>Settings</strong>: Edit text (write a long prompt in a large editor before sending), pin or hide the controls, paste, and font size</li>
 </ul>
 <div class="figs">
-<figure><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal showing full Claude Code output"><figcaption>Agent terminal</figcaption></figure>
+<figure><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal: Claude Code shows the diff and waits for your approval before it edits a file"><figcaption>Agent terminal</figcaption></figure>
 <figure><img src="/assets/screens/ring-en.webp" width="720" height="1600" loading="lazy" alt="Claude Code shortcut ring shown while holding the ghost"><figcaption>Hold the ghost: shortcut ring</figcaption></figure>
 <figure><img src="/assets/screens/toolbar-en.webp" width="720" height="1600" loading="lazy" alt="The action bar opened by tapping the ghost: session menu, upload file, download file, insert image, common commands and settings"><figcaption>Tap the ghost: action bar</figcaption></figure>
 <figure><img src="/assets/screens/commands-en.webp" width="720" height="1600" loading="lazy" alt="Common commands: a searchable list read from the server's ~/.bash_history; tap one to run it"><figcaption>Common commands</figcaption></figure>
@@ -151,10 +152,39 @@
 <p><strong>View files</strong> in the host menu browses the server over SFTP: preview code (with syntax highlighting), Markdown and images and find text in them; rename, delete, create folders, copy paths and download one file or several; or open a terminal or start an AI agent in the current folder. The first download asks for a download folder on your phone, and later ones are saved there. Share images to Roamtty from your gallery or other apps to upload them.</p>
 <p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, handy for checking whether a build or test run is stuck; the buttons at the top start an AI agent, open a terminal or browse files.</p>
 <div class="figs">
-<figure><img src="/assets/screens/files-en.webp" width="720" height="1600" loading="lazy" alt="File browser showing docs, src, package.json and README.md in acme-app"><figcaption>File browser</figcaption></figure>
-<figure><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview with a table, code block and task list"><figcaption>Markdown preview</figcaption></figure>
+<figure><img src="/assets/screens/files-en.webp" width="720" height="1600" loading="lazy" alt="File browser showing static, tests, app.py, CHANGELOG.md and README.md in focus-board"><figcaption>File browser</figcaption></figure>
+<figure><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview with headings, a list and code blocks"><figcaption>Markdown preview</figcaption></figure>
 <figure><img src="/assets/screens/monitor-en.webp" width="720" height="1600" loading="lazy" alt="Host details with live CPU, memory, disk and network"><figcaption>Host monitor</figcaption></figure>
 <figure><img src="/assets/screens/plugins-en.webp" width="720" height="1600" loading="lazy" alt="Install plugins: tmux and mosh both shown as installed"><figcaption>Host menu → Install plugins</figcaption></figure>
+</div>
+
+<h2 id="desktop">Remote desktop</h2>
+<p>A host that can open a desktop shows a desktop button at the bottom right of its session cards. For a host with no session, tap <strong>Desktop</strong> on its details page. The first time, the app installs the desktop plugin for you, with nothing to configure. After you leave the desktop page the connection stays up in the background (10 minutes by default, adjustable in Settings), and it comes back in about a second.</p>
+<p>The desktop page has a toolbar (at the bottom in portrait, on the right in landscape) with <strong>Actions</strong>, <strong>Keyboard</strong>, <strong>Show desktop</strong> and <strong>All windows</strong>.</p>
+<table>
+<tr><th>Gesture</th><th>Result</th></tr>
+<tr><td>Tap / double tap</td><td>Left click / double click under your finger</td></tr>
+<tr><td>Two-finger tap, or press and release</td><td>Right click</td></tr>
+<tr><td>Press, then move</td><td>Drag</td></tr>
+<tr><td>Swipe up or down with one or two fingers</td><td>Scroll, with inertia</td></tr>
+<tr><td>Pinch</td><td>Zoom the picture</td></tr>
+<tr><td>Three-finger swipe up / down</td><td>All windows / Show desktop</td></tr>
+<tr><td>Three-finger swipe left or right</td><td>Switch desktops</td></tr>
+</table>
+<p>Under <strong>Actions</strong> you can switch between touch and mouse pointer control, transfer files, sync the clipboard, turn on the computer’s sound, and set the frame rate and quality.</p>
+<ul>
+<li><strong>Linux</strong>: X11 desktops. On Wayland, wlroots compositors (sway, Hyprland, labwc, river) work. GNOME and KDE Wayland sessions are not supported yet; choose an X11 session at the login screen.</li>
+<li><strong>macOS 13 or later</strong>: the first time, allow Roamtty Desktop under Screen &amp; System Audio Recording and Accessibility in System Settings › Privacy &amp; Security on the Mac.</li>
+<li><strong>Windows 10 1903 or later, Windows 11</strong>: someone must already be signed in to the desktop.</li>
+</ul>
+<p>The picture uses UDP when it can (ports 60000–61000, the same as mosh) and switches to SSH by itself when a firewall blocks it. Only one phone can control a computer at a time. Servers with no graphical desktop do not show the button.</p>
+<div class="figs">
+<figure><img src="/assets/screens/desktop-en.webp" width="720" height="1600" loading="lazy" alt="Remote desktop in portrait: Firefox on Ubuntu, with Actions, Keyboard, Show desktop and All windows at the bottom"><figcaption>Desktop in portrait</figcaption></figure>
+<figure><img src="/assets/screens/desktop-windows-en.webp" width="720" height="1600" loading="lazy" alt="All windows: thumbnails of a terminal, an editor and Firefox"><figcaption>All windows</figcaption></figure>
+</div>
+<div class="figs wide">
+<figure><img src="/assets/screens/desktop-landscape-en.webp" width="1600" height="720" loading="lazy" alt="Remote desktop in landscape: Firefox on Ubuntu with the toolbar on the right"><figcaption>Desktop in landscape</figcaption></figure>
+<figure><img src="/assets/screens/windows-landscape-en.webp" width="1600" height="720" loading="lazy" alt="A Windows desktop in landscape: a page in Edge and the taskbar"><figcaption>Windows desktop</figcaption></figure>
 </div>
 
 <h2 id="settings">Settings</h2>
@@ -168,14 +198,16 @@
 </ul>
 <p><strong>Help</strong> in the same menu has a quick reference for gestures and controls.</p>
 </div>
-<figure><img src="/assets/screens/settings-en.webp" width="720" height="1600" loading="lazy" alt="Settings: appearance, terminal font, language and download folder"><figcaption>Settings</figcaption></figure>
+<figure><img src="/assets/screens/settings-en.webp" width="720" height="1600" loading="lazy" alt="Settings: appearance, terminal font, language and notifications"><figcaption>Settings</figcaption></figure>
 </div>
 
 <h2 id="background">Background and lock screen</h2>
+<p>When an agent needs you or finishes a turn, the app sends a notification; tap it to open that session. Choose all alerts, only when an agent needs you, or none under <strong>Settings → Notifications</strong>.</p>
 <ul>
 <li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents. On OPPO, OnePlus and realme (ColorOS), also choose “Allow full background activity” in App info → Battery usage; otherwise the system cuts the network a few seconds after you leave and agent notifications wait until you come back (Settings → Background connection links there). While connected, Roamtty keeps a notification in the shade (hide it in Settings → Notifications → <strong>Hide the background connection notification</strong>; connections stay); when an agent needs you or finishes a turn, another notification says so, and tapping it opens that session.</li>
-<li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return.</li>
+<li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return. iOS lets the app run only about half a minute after it leaves the screen; later changes are told once you are back.</li>
 </ul>
+<div class="figs"><figure><img src="/assets/screens/notification-en.webp" width="720" height="1600" loading="lazy" alt="A Roamtty notification in the shade: Claude needs you, with the host and file"><figcaption>Notifications</figcaption></figure></div>
 <p class="note">What keeps a task alive is tmux on the server, not your phone staying online.</p>
 
 <h2 id="tailscale">Connecting from anywhere: Tailscale</h2>

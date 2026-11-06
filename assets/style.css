@@ -72,6 +72,8 @@ code { font-family: var(--mono); background: var(--code); padding: 1px 5px; bord
 .device img, .shot img { display: block; width: 100%; height: auto; aspect-ratio: 9 / 20; border-radius: 32px; background: var(--term-bg); }
 .shots { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(180px, 1fr); gap: 18px; overflow-x: auto;
   scroll-snap-type: x mandatory; padding-bottom: 12px; overscroll-behavior-x: contain; }
+.shots.wide { grid-auto-columns: minmax(420px, 1fr); margin-top: 20px; }
+.shots.wide .shot img { aspect-ratio: 20 / 9; }
 .shot { margin: 0; scroll-snap-align: start; }
 .shot img { border-radius: 22px; border: 6px solid #111214; box-shadow: 0 16px 32px -18px rgba(20, 16, 30, 0.5); }
 .shot figcaption { margin-top: 10px; font-size: 14px; color: var(--muted); line-height: 1.5; }
@@ -107,6 +109,7 @@ section.block.alt { background: var(--surface-2); }
 }
 @media (max-width: 600px) {
   .shots { grid-auto-columns: 62%; }
+  .shots.wide { grid-auto-columns: 88%; }
   .hero { padding-top: 40px; }
   .grid, .platforms, .checks { grid-template-columns: 1fr; }
   .store { flex: 1 1 100%; }
@@ -157,6 +160,8 @@ details p, details ul { margin: 6px 0; }
 .pair figure, .figs figure { margin: 0; }
 .pair figure img, .figs img { display: block; width: 100%; height: auto; aspect-ratio: 9 / 20; border-radius: 18px;
   border: 5px solid #111214; background: var(--term-bg); box-shadow: 0 14px 28px -18px rgba(20, 16, 30, 0.5); }
+.figs.wide { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.figs.wide img { aspect-ratio: 20 / 9; }
 .pair figcaption, .figs figcaption { margin-top: 8px; font-size: 13px; line-height: 1.45; color: var(--muted); text-align: center; }
 @media (max-width: 900px) {
   .docs-layout { grid-template-columns: 1fr; gap: 24px; }

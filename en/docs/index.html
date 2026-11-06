@@ -173,7 +173,7 @@
 
 <h2 id="background">Background and lock screen</h2>
 <ul>
-<li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents. While connected, Roamtty keeps a notification in the shade; tap <strong>Disconnect all</strong> on it to close every connection at once.</li>
+<li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents. On OPPO, OnePlus and realme (ColorOS), also choose “Allow full background activity” in App info → Battery usage; otherwise the system cuts the network a few seconds after you leave and agent notifications wait until you come back (Settings → Background connection links there). While connected, Roamtty keeps a notification in the shade (hide it in Settings → Notifications → <strong>Hide the background connection notification</strong>; connections stay); when an agent needs you or finishes a turn, another notification says so, and tapping it opens that session.</li>
 <li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return.</li>
 </ul>
 <p class="note">What keeps a task alive is tmux on the server, not your phone staying online.</p>

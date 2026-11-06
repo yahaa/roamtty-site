@@ -22,7 +22,7 @@
 <meta property="og:url" content="https://roamtty.com/blog/mosh-tmux-phone/">
 <meta property="og:image" content="https://roamtty.com/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "手机 SSH 不断线：mosh 与 tmux 配置指南", "description": "手机锁屏、切换 Wi-Fi 和蜂窝网络时 SSH 会断开。用 tmux 让任务留在服务器上，用 mosh 让连接跟着手机换网络，再配上支持 mosh 的 Android 或 iPhone 客户端。本文给出服务器配置、常见报错和客户端对比。", "datePublished": "2026-10-18", "dateModified": "2026-10-18", "inLanguage": "zh-CN", "mainEntityOfPage": "https://roamtty.com/blog/mosh-tmux-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BlogPosting", "headline": "手机 SSH 不断线：mosh 与 tmux 配置指南", "description": "手机锁屏、切换 Wi-Fi 和蜂窝网络时 SSH 会断开。用 tmux 让任务留在服务器上，用 mosh 让连接跟着手机换网络，再配上支持 mosh 的 Android 或 iPhone 客户端。本文给出服务器配置、常见报错和客户端对比。", "datePublished": "2026-10-18", "dateModified": "2026-11-06", "inLanguage": "zh-CN", "mainEntityOfPage": "https://roamtty.com/blog/mosh-tmux-phone/", "image": "https://roamtty.com/assets/og.png", "author": {"@type": "Organization", "@id": "https://roamtty.com/#organization", "name": "Roamtty", "url": "https://roamtty.com/", "logo": "https://roamtty.com/assets/icon-512.png", "email": "support@roamtty.com"}, "publisher": {"@id": "https://roamtty.com/#organization"}}</script>
 </head>
 <body>
 <a class="skip" href="#main">跳到正文</a>
@@ -115,7 +115,7 @@ sudo ufw allow 60000:61000/udp</code></pre>
 <li><strong>不留残余进程</strong>：tmux 模式下 mosh-server 15 分钟收不到手机的数据就退出；手机睡得更久，回来时自动重新登录并附着 tmux。</li>
 <li><strong>文件仍走 SSH</strong>：终端走 mosh 时，SFTP 文件浏览和上传仍用 SSH，断了会在后台重新登录。</li>
 </ul>
-<p>Roamtty 即将开源；截至发文，Android 和 iPhone 版尚未在应用商店上架。配置细节见<a href="/docs/#sessions">使用文档</a>；在外面连回家里的服务器，见<a href="/docs/#tailscale">Tailscale 一节</a>和<a href="/blog/self-hosted-derp/">自建 DERP 中继</a>。</p>
+<p>Roamtty 即将开源；iPhone 版已在 <a href="https://apps.apple.com/app/id6826986771">App Store</a> 上架（中国大陆区暂未提供），Android 版即将上架 Google Play。配置细节见<a href="/docs/#sessions">使用文档</a>；在外面连回家里的服务器，见<a href="/docs/#tailscale">Tailscale 一节</a>和<a href="/blog/self-hosted-derp/">自建 DERP 中继</a>。</p>
 
 <h2 id="faq">常见问题</h2>
 <table>

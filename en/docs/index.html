@@ -74,7 +74,7 @@
 <p>Install <code>claude</code>, <code>codex</code> or <code>grok</code> following its own instructions and <strong>sign in once on the server</strong>. Roamtty never handles your account or API key.</p>
 <p>No need to install tmux (keeps tasks running when you disconnect) or mosh (survives network changes) by hand: choose <strong>Install plugins</strong> from the host menu and Roamtty installs them with the host's package manager (sudo on Linux, never stored; Homebrew on macOS; psmux via winget on Windows).</p>
 </div>
-<figure><img src="/assets/screens/hosts-en.webp" width="720" height="1600" loading="lazy" alt="Host list: two host cards with live desktop thumbnails and their online and connected status"><figcaption>Host list</figcaption></figure>
+<figure><img src="/assets/screens/hosts-en.webp?v=6332dbcca7" width="720" height="1600" loading="lazy" alt="Host list: two host cards with live desktop thumbnails and their online and connected status"><figcaption>Host list</figcaption></figure>
 </div>
 
 <h2 id="hosts">Add a host</h2>
@@ -89,7 +89,7 @@
 <p>If the fingerprint later changes, the connection is blocked. Once you've confirmed the server was reinstalled or rekeyed, choose “Verify again…” from the host menu.</p>
 <p>Host cards show the system icon, whether the host is online and how long the connection took. The <strong>⋮</strong> menu on a card opens a terminal or files, starts an AI agent, installs plugins, or edits or deletes the host.</p>
 </div>
-<figure><img src="/assets/screens/add-host-en.webp" width="720" height="1600" loading="lazy" alt="Add host screen: name, address, username, port, authentication method and session mode"><figcaption>Add host</figcaption></figure>
+<figure><img src="/assets/screens/add-host-en.webp?v=d113467a15" width="720" height="1600" loading="lazy" alt="Add host screen: name, address, username, port, authentication method and session mode"><figcaption>Add host</figcaption></figure>
 </div>
 
 <h2 id="agent">Start an AI agent</h2>
@@ -102,7 +102,7 @@
 </ul>
 <p>Your last choices are remembered and recent folders appear at the top. <strong>Open terminal</strong> starts a plain shell instead.</p>
 </div>
-<figure><img src="/assets/screens/agent-en.webp" width="720" height="1600" loading="lazy" alt="Open with AI Agent: choose a folder, Claude and a permission mode (Plan, Standard, YOLO)"><figcaption>Folder and permission mode</figcaption></figure>
+<figure><img src="/assets/screens/agent-en.webp?v=8c9cfb480c" width="720" height="1600" loading="lazy" alt="Open with AI Agent: choose a folder, Claude and a permission mode (Plan, Standard, YOLO)"><figcaption>Folder and permission mode</figcaption></figure>
 </div>
 
 <h2 id="sessions">Sessions</h2>
@@ -117,7 +117,7 @@
 </ul>
 <p>With mosh installed the terminal prefers mosh (UDP) and falls back to SSH after 8 seconds without a reply.</p>
 </div>
-<figure><img src="/assets/screens/sessions-en.webp" width="720" height="1600" loading="lazy" alt="Session list: one Claude Code session needs approval with an Allow button, one is running, one is done with a summary"><figcaption>Session states and Allow</figcaption></figure>
+<figure><img src="/assets/screens/sessions-en.webp?v=4e2f3c71b7" width="720" height="1600" loading="lazy" alt="Session list: one Claude Code session needs approval with an Allow button, one is running, one is done with a summary"><figcaption>Session states and Allow</figcaption></figure>
 </div>
 
 <h2 id="terminal">Terminal</h2>
@@ -142,20 +142,20 @@
 <li><strong>Settings</strong>: Edit text (write a long prompt in a large editor before sending), pin or hide the controls, paste, and font size</li>
 </ul>
 <div class="figs">
-<figure><img src="/assets/screens/terminal-en.webp" width="720" height="1600" loading="lazy" alt="Agent terminal: Claude Code shows the diff and waits for your approval before it edits a file"><figcaption>Agent terminal</figcaption></figure>
-<figure><img src="/assets/screens/ring-en.webp" width="720" height="1600" loading="lazy" alt="Claude Code shortcut ring shown while holding the ghost"><figcaption>Hold the ghost: shortcut ring</figcaption></figure>
-<figure><img src="/assets/screens/toolbar-en.webp" width="720" height="1600" loading="lazy" alt="The action bar opened by tapping the ghost: session menu, upload file, download file, insert image, common commands and settings"><figcaption>Tap the ghost: action bar</figcaption></figure>
-<figure><img src="/assets/screens/commands-en.webp" width="720" height="1600" loading="lazy" alt="Common commands: a searchable list read from the server's ~/.bash_history; tap one to run it"><figcaption>Common commands</figcaption></figure>
+<figure><img src="/assets/screens/terminal-en.webp?v=7136e949b1" width="720" height="1600" loading="lazy" alt="Agent terminal: Claude Code shows the diff and waits for your approval before it edits a file"><figcaption>Agent terminal</figcaption></figure>
+<figure><img src="/assets/screens/ring-en.webp?v=00cb919d54" width="720" height="1600" loading="lazy" alt="Claude Code shortcut ring shown while holding the ghost"><figcaption>Hold the ghost: shortcut ring</figcaption></figure>
+<figure><img src="/assets/screens/toolbar-en.webp?v=e86a38d103" width="720" height="1600" loading="lazy" alt="The action bar opened by tapping the ghost: session menu, upload file, download file, insert image, common commands and settings"><figcaption>Tap the ghost: action bar</figcaption></figure>
+<figure><img src="/assets/screens/commands-en.webp?v=9fb2446a4f" width="720" height="1600" loading="lazy" alt="Common commands: a searchable list read from the server's ~/.bash_history; tap one to run it"><figcaption>Common commands</figcaption></figure>
 </div>
 
 <h2 id="files">Files and monitoring</h2>
 <p><strong>View files</strong> in the host menu browses the server over SFTP: preview code (with syntax highlighting), Markdown and images and find text in them; rename, delete, create folders, copy paths and download one file or several; or open a terminal or start an AI agent in the current folder. The first download asks for a download folder on your phone, and later ones are saved there. Share images to Roamtty from your gallery or other apps to upload them.</p>
 <p>Tap a host card for live CPU, memory, disk, network, GPU and top processes, handy for checking whether a build or test run is stuck; the buttons at the top start an AI agent, open a terminal or browse files.</p>
 <div class="figs">
-<figure><img src="/assets/screens/files-en.webp" width="720" height="1600" loading="lazy" alt="File browser showing static, tests, app.py, CHANGELOG.md and README.md in focus-board"><figcaption>File browser</figcaption></figure>
-<figure><img src="/assets/screens/markdown-en.webp" width="720" height="1600" loading="lazy" alt="Markdown preview with headings, a list and code blocks"><figcaption>Markdown preview</figcaption></figure>
-<figure><img src="/assets/screens/monitor-en.webp" width="720" height="1600" loading="lazy" alt="Host details with live CPU, memory, disk and network"><figcaption>Host monitor</figcaption></figure>
-<figure><img src="/assets/screens/plugins-en.webp" width="720" height="1600" loading="lazy" alt="Install plugins: tmux and mosh both shown as installed"><figcaption>Host menu → Install plugins</figcaption></figure>
+<figure><img src="/assets/screens/files-en.webp?v=42c94d7ae2" width="720" height="1600" loading="lazy" alt="File browser showing static, tests, app.py, CHANGELOG.md and README.md in focus-board"><figcaption>File browser</figcaption></figure>
+<figure><img src="/assets/screens/markdown-en.webp?v=61fcb1dc9a" width="720" height="1600" loading="lazy" alt="Markdown preview with headings, a list and code blocks"><figcaption>Markdown preview</figcaption></figure>
+<figure><img src="/assets/screens/monitor-en.webp?v=587a5c0d12" width="720" height="1600" loading="lazy" alt="Host details with live CPU, memory, disk and network"><figcaption>Host monitor</figcaption></figure>
+<figure><img src="/assets/screens/plugins-en.webp?v=dd6562ec0d" width="720" height="1600" loading="lazy" alt="Install plugins: tmux and mosh both shown as installed"><figcaption>Host menu → Install plugins</figcaption></figure>
 </div>
 
 <h2 id="desktop">Remote desktop</h2>
@@ -179,12 +179,12 @@
 </ul>
 <p>The picture uses UDP when it can (ports 60000–61000, the same as mosh) and switches to SSH by itself when a firewall blocks it. Only one phone can control a computer at a time. Servers with no graphical desktop do not show the button.</p>
 <div class="figs">
-<figure><img src="/assets/screens/desktop-en.webp" width="720" height="1600" loading="lazy" alt="Remote desktop in portrait: Firefox on Ubuntu, with Actions, Keyboard, Show desktop and All windows at the bottom"><figcaption>Desktop in portrait</figcaption></figure>
-<figure><img src="/assets/screens/desktop-windows-en.webp" width="720" height="1600" loading="lazy" alt="All windows: thumbnails of a terminal, an editor and Firefox"><figcaption>All windows</figcaption></figure>
+<figure><img src="/assets/screens/desktop-en.webp?v=772d73b727" width="720" height="1600" loading="lazy" alt="Remote desktop in portrait: Firefox on Ubuntu, with Actions, Keyboard, Show desktop and All windows at the bottom"><figcaption>Desktop in portrait</figcaption></figure>
+<figure><img src="/assets/screens/desktop-windows-en.webp?v=efb854572f" width="720" height="1600" loading="lazy" alt="All windows: thumbnails of a terminal, an editor and Firefox"><figcaption>All windows</figcaption></figure>
 </div>
 <div class="figs wide">
-<figure><img src="/assets/screens/desktop-landscape-en.webp" width="1600" height="720" loading="lazy" alt="Remote desktop in landscape: Firefox on Ubuntu with the toolbar on the right"><figcaption>Desktop in landscape</figcaption></figure>
-<figure><img src="/assets/screens/windows-landscape-en.webp" width="1600" height="720" loading="lazy" alt="A Windows desktop in landscape: a page in Edge and the taskbar"><figcaption>Windows desktop</figcaption></figure>
+<figure><img src="/assets/screens/desktop-landscape-en.webp?v=0ec1d11569" width="1600" height="720" loading="lazy" alt="Remote desktop in landscape: Firefox on Ubuntu with the toolbar on the right"><figcaption>Desktop in landscape</figcaption></figure>
+<figure><img src="/assets/screens/windows-landscape-en.webp?v=1b2287820f" width="1600" height="720" loading="lazy" alt="A Windows desktop in landscape: a page in Edge and the taskbar"><figcaption>Windows desktop</figcaption></figure>
 </div>
 
 <h2 id="settings">Settings</h2>
@@ -198,7 +198,7 @@
 </ul>
 <p><strong>Help</strong> in the same menu has a quick reference for gestures and controls.</p>
 </div>
-<figure><img src="/assets/screens/settings-en.webp" width="720" height="1600" loading="lazy" alt="Settings: appearance, terminal font, language and notifications"><figcaption>Settings</figcaption></figure>
+<figure><img src="/assets/screens/settings-en.webp?v=7d6e6bc268" width="720" height="1600" loading="lazy" alt="Settings: appearance, terminal font, language and notifications"><figcaption>Settings</figcaption></figure>
 </div>
 
 <h2 id="background">Background and lock screen</h2>
@@ -207,7 +207,7 @@
 <li><strong>Android</strong>: turn on “Allow background activity” in Settings and exempt Roamtty from battery optimization. On Xiaomi, Huawei, OPPO, vivo and similar phones, also allow auto-start and lock the app in Recents. On OPPO, OnePlus and realme (ColorOS), also choose “Allow full background activity” in App info → Battery usage; otherwise the system cuts the network a few seconds after you leave and agent notifications wait until you come back (Settings → Background connection links there). While connected, Roamtty keeps a notification in the shade (hide it in Settings → Notifications → <strong>Hide the background connection notification</strong>; connections stay); when an agent needs you or finishes a turn, another notification says so, and tapping it opens that session.</li>
 <li><strong>iPhone</strong>: iOS pauses network connections in the background. The task keeps running in tmux on the server and Roamtty reconnects when you return. iOS lets the app run only about half a minute after it leaves the screen; later changes are told once you are back.</li>
 </ul>
-<div class="figs"><figure><img src="/assets/screens/notification-en.webp" width="720" height="1600" loading="lazy" alt="A Roamtty notification in the shade: Claude needs you, with the host and file"><figcaption>Notifications</figcaption></figure></div>
+<div class="figs"><figure><img src="/assets/screens/notification-en.webp?v=52550e79cf" width="720" height="1600" loading="lazy" alt="A Roamtty notification in the shade: Claude needs you, with the host and file"><figcaption>Notifications</figcaption></figure></div>
 <p class="note">What keeps a task alive is tmux on the server, not your phone staying online.</p>
 
 <h2 id="tailscale">Connecting from anywhere: Tailscale</h2>
